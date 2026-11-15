@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <title>Knight Briefing Room — Evol Knight Media</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Orbitron:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+      --violet: #4B0077;
+      --magenta: #EA33F7;
+      --gold: #C9A24A;
+      --bg: #000000;
+      --panel: #111111;
+      --panel-2: #17171C;
+      --border: #27272A;
+      --text: #F4F4F5;
+      --paper: #FFFFFF;
+      --muted: #A1A1AA;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: radial-gradient(circle at 80% 0%, rgba(75, 0, 119, 0.35), transparent 50%), var(--bg);
+      color: var(--text);
+      font-family: 'Lato', sans-serif;
+      min-height: 100vh;
+      line-height: 1.55;
+    }
+    h1, h2, h3, h4 {
+      font-family: 'Orbitron', sans-serif;
+      letter-spacing: 0.06em;
+      text-wrap: balance;
+      color: var(--paper);
+    }
+    p, li { text-wrap: pretty; }
+    header {
+      padding: 1rem 2rem;
+      background: rgba(17, 17, 17, 0.94);
+      border-bottom: 2px solid var(--gold);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .brand { display: flex; align-items: center; gap: 0.85rem; }
+    .brand img { width: 36px; height: 36px; object-fit: contain; }
+    .badge {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      border: 1px solid var(--magenta);
+      color: var(--magenta);
+      background: rgba(234, 51, 247, 0.1);
+      text-transform: uppercase;
+    }
+    .layout {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem 3rem;
+      display: grid;
+      grid-template-columns: 330px 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 980px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+    .sidebar, .stage {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+    }
+    .dossier-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      margin: 1rem 0;
+    }
+    .dossier-item {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--violet);
+      border-radius: 6px;
+      padding: 0.75rem 0.9rem;
+      text-align: left;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+    .dossier-item:hover {
+      border-color: var(--gold);
+    }
+    .dossier-item.active {
+      border-left-color: var(--magenta);
+      background: linear-gradient(90deg, rgba(75, 0, 119, 0.45), rgba(23, 23, 28, 0.95));
+    }
+    .dossier-type {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.68rem;
+      color: var(--gold);
+      text-transform: uppercase;
+    }
+    .dossier-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--paper);
+      margin-top: 0.15rem;
+    }
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 1rem 0 1.25rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.75rem;
+    }
+    .tab-btn {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.74rem;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      padding: 0.55rem 0.95rem;
+      border-radius: 6px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      background: var(--violet);
+      border-color: var(--magenta);
+      color: var(--paper);
+    }
+    .btn {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.55rem 0.9rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+      color: var(--paper);
+      cursor: pointer;
+    }
+    .btn:hover { border-color: var(--gold); color: var(--gold); }
+    .btn-primary {
+      background: var(--violet);
+      border-color: var(--magenta);
+    }
+    .section-card {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.15rem;
+      margin-bottom: 1rem;
+    }
+    .char-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 0.85rem;
+      margin-top: 0.75rem;
+    }
+    .char-card {
+      background: #0B0B0E;
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--gold);
+      border-radius: 6px;
+      padding: 0.9rem;
+    }
+    .timeline-step {
+      border-left: 2px solid var(--violet);
+      padding-left: 1rem;
+      margin-bottom: 0.9rem;
+      position: relative;
+    }
+    .timeline-step::before {
+      content: "◆";
+      position: absolute;
+      left: -0.45rem;
+      top: 0;
+      color: var(--gold);
+      font-size: 0.8rem;
+    }
+    input, textarea, select {
+      width: 100%;
+      background: #09090C;
+      border: 1px solid var(--border);
+      color: var(--paper);
+      padding: 0.55rem 0.75rem;
+      border-radius: 6px;
+      font-family: inherit;
+      margin-top: 0.25rem;
+      margin-bottom: 0.65rem;
+    }
+    .back-link {
+      color: var(--gold);
+      text-decoration: none;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <img src="../assets/knight-helmet-violett.png" alt="Evol Knight Media">
+      <div>
+        <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;">
+          <h1 style="font-size:1.15rem;">KNIGHT BRIEFING ROOM // LCARS DOSSIER</h1>
+          <span class="badge">◆ New and Improved</span>
+        </div>
+        <p style="font-size:0.8rem;color:var(--muted);">Spoiler-Shielded Intelligence Dossiers for Books, Series &amp; Films (Offline + Persistent Archive)</p>
+      </div>
+    </div>
+    <div style="display:flex;gap:0.75rem;align-items:center;">
+      <button class="btn" id="exportArchiveBtn" type="button">Export Archive JSON</button>
+      <a class="back-link" href="../index.html">◀ RETURN TO TOOL HUB</a>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" aria-label="Dossier Library">
+      <h2 style="font-size:0.9rem;">SAVED DOSSIERS</h2>
+      <div class="dossier-list" id="dossierList"></div>
+
+      <hr style="border:none;border-top:1px solid var(--border);margin:1rem 0;">
+      <h3 style="font-size:0.82rem;margin-bottom:0.5rem;">CREATE NEW BRIEFING</h3>
+      <form id="newDossierForm">
+        <label style="font-size:0.72rem;color:var(--muted);">TITLE</label>
+        <input type="text" id="newTitle" required placeholder="e.g., Foundation — Season 3">
+        <label style="font-size:0.72rem;color:var(--muted);">MEDIUM &amp; PROGRESS GUARD</label>
+        <input type="text" id="newMedium" required placeholder="e.g., Sci-Fi Series · Up to S2 Finale">
+        <label style="font-size:0.72rem;color:var(--muted);">EXECUTIVE PREMISE (SPOILER-FREE)</label>
+        <textarea id="newPremise" rows="3" required placeholder="High-level setup and central conflict..."></textarea>
+        <label style="font-size:0.72rem;color:var(--muted);">KEY OPERATIVES (COMMA-SEPARATED)</label>
+        <input type="text" id="newCast" placeholder="Hari Seldon: Psychohistorian, Gaal Dornick: Mathematician">
+        <button type="submit" class="btn btn-primary" style="width:100%;">Add Dossier to Archive</button>
+      </form>
+    </aside>
+
+    <main class="stage" aria-live="polite">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;">
+        <div>
+          <div class="dossier-type" id="activeMedium"></div>
+          <h2 style="font-size:1.45rem;margin-top:0.2rem;" id="activeTitle"></h2>
+        </div>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+          <button class="btn btn-primary" id="narrateBtn" type="button">▶ Narrate Trailer Briefing</button>
+          <button class="btn" id="stopNarrateBtn" type="button">■ Stop Audio</button>
+        </div>
+      </div>
+
+      <div class="tabs" role="tablist">
+        <button class="tab-btn active" data-tab="overview" type="button">01 // Executive Briefing</button>
+        <button class="tab-btn" data-tab="operatives" type="button">02 // Key Operatives &amp; Factions</button>
+        <button class="tab-btn" data-tab="chronology" type="button">03 // Prior Chronology &amp; Lore</button>
+        <button class="tab-btn" data-tab="watch" type="button">04 // Thematic Signals</button>
+      </div>
+
+      <div id="tabContent"></div>
+    </main>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'ekm_knight_briefing_archive_v2';
+
+    const DEFAULT_DOSSIERS = [
+      {
+        id: 'picard-last-best-hope',
+        title: 'Star Trek: Picard — The Last Best Hope',
+        medium: 'Novel (Una McCormack) · Pre-Series Canon',
+        spoilerShield: 'Zero Ending Spoilers — Covers 2381–2385 Romulan Evacuation Setup Only',
+        premise: 'Fourteen years before Star Trek: Picard Season 1, Starfleet Intelligence confirms the Romulan sun is destined to go supernova. Admiral Jean-Luc Picard spearheads an unprecedented armada rescue effort across the Neutral Zone while political fractures inside both the Federation Council and the Romulan Star Empire threaten to derail the mission.',
+        trailerScript: 'Stardate 2381. A dying star threatens billions of lives across the Romulan Empire. Admiral Jean-Luc Picard puts his legendary command on the line to build a rescue armada at Utopia Planitia, unaware that synthetic labor and deep-state Romulan secrecy are converging toward catastrophe.',
+        operatives: [
+          { name: 'Admiral Jean-Luc Picard', role: 'Fleet Commander, Romulan Relocation Effort', note: 'Leaves the Enterprise-E to lead the largest humanitarian mission in Federation history.' },
+          { name: 'Raffi Musiker', role: 'Starfleet Intelligence Lieutenant Commander', note: 'Picard’s right-hand logistics and Romulan intelligence analyst.' },
+          { name: 'Bruce Maddox', role: 'Chair of Cybernetics, Daystrom Institute', note: 'Tasked with creating A500 synthetic рабоч units for Utopia Planitia shipyards.' },
+          { name: 'Commander Worf', role: 'Captain of the USS Enterprise-E', note: 'Promoted to command the flagship as Picard transitions to the Admiralty.' }
+        ],
+        chronology: [
+          { era: '2379 — Post-Shinzon', detail: 'Following the Battle of the Bassen Rift (Star Trek: Nemesis), Romulan internal politics remain volatile.' },
+          { era: '2381 — Discovery of the Supernova', detail: 'Federation astrophysicists confirm an unnatural cascade inside the Romulan primary star.' },
+          { era: '2382–2384 — The Ten Thousand Ship Mandate', detail: 'Utopia Planitia Fleet Yards turn to Daystrom cyberneticists to meet impossible construction schedules.' }
+        ],
+        signals: [
+          'Watch how fourteen border worlds threaten secession if Starfleet diverts resources to a historic adversary.',
+          'Pay attention to the origin of Raffi Musiker’s distrust of Romulan diplomatic channels.',
+          'Note the operational birth of the A500 synth workforce on Mars.'
+        ]
+      },
+      {
+        id: 'strange-new-worlds-s2',
+        title: 'Star Trek: Strange New Worlds — Tactical Primer',
+        medium: 'Series Dossier · Enterprise NCC-1701 (2259)',
+        spoilerShield: 'Safe through Season 2 Midpoint',
+        premise: 'Captain Christopher Pike commands the USS Enterprise on a five-year exploration mandate prior to Captain Kirk’s tenure, balancing classic episodic frontier diplomacy with the looming shadow of the Gorn Hegemony and his own foreknowledge of a future cadet training accident.',
+        trailerScript: 'Aboard the flagship Enterprise NCC-1701, Captain Christopher Pike, Number One, and Science Officer Spock chart the unknown reaches of the Alpha Quadrant while holding the line against the Gorn Hegemony.',
+        operatives: [
+          { name: 'Captain Christopher Pike', role: 'Commanding Officer, USS Enterprise', note: 'Leads with collaborative bridge empathy despite knowing his personal fate on Talos IV.' },
+          { name: 'Commander Una Chin-Riley', role: 'First Officer (Number One)', note: 'Illyrian officer whose genetic heritage challenges Federation statutes.' },
+          { name: 'Lt. Spock', role: 'Science Officer', note: 'Navigating the dual discipline of Vulcan logic and human emotional resonance.' },
+          { name: 'Lt. La’an Noonien-Singh', role: 'Chief of Security', note: 'Sole survivor of a Gorn breeding ship; descendant of Khan Noonien-Singh.' }
+        ],
+        chronology: [
+          { era: '2254 — Talos IV Mission', detail: 'Initial Enterprise survey mission under Pike (The Cage).' },
+          { era: '2257 — Control Crisis', detail: 'Pike temporarily commands USS Discovery and glimpses his future via Boreth time crystal.' },
+          { era: '2259 — Five-Year Mission Relaunch', detail: 'Enterprise returns to deep-space exploration along the Gorn demarcation line.' }
+        ],
+        signals: [
+          'Gorn communication relies on light-spectrum pulses that scramble standard Starfleet sensors.',
+          'Tracks the early camaraderie between Spock, Nurse Chapel, and Lieutenant Uhura.'
+        ]
+      },
+      {
+        id: 'silo-wool-dossier',
+        title: 'Silo (Wool Trilogy) — Mechanical & Judicial Primer',
+        medium: 'Sci-Fi Mystery Series & Novel · Silo 18',
+        spoilerShield: 'Safe for Season 1 / Book 1 Part 1',
+        premise: 'Ten thousand survivors live inside a 144-level subterranean cylinder governed by the Pact. No one knows who built the Silo or why the outside world appears toxic, and anyone who expresses a desire to go outside is sent to clean the external camera sensors.',
+        trailerScript: 'One hundred and forty-four levels beneath a scorched Earth, ten thousand souls obey the Pact. When Chief Engineer Juliette Nichols inherits the sheriff badge, a hidden hard drive threatens to crack the deepest taboo in Silo 18.',
+        operatives: [
+          { name: 'Juliette Nichols', role: 'Generator Engineer → Sheriff of Silo 18', note: 'Master of the Down Deep steam turbine who trusts physical mechanics over political doctrine.' },
+          { name: 'Bernard Holland', role: 'Head of IT (Level 19)', note: 'Controls server redundancy, communications, and camera distribution.' },
+          { name: 'Robert Sims', role: 'Judicial Security Enforcer', note: 'Monitors relics from before the Rebellion and operates the Watchers.' }
+        ],
+        chronology: [
+          { era: '140 Years Ago — The Rebellion', detail: 'All historical records and pre-Silo books were allegedly destroyed during an uprising.' },
+          { era: 'Present Day — Holston’s Investigation', detail: 'Sheriff Holston and Deputy Marnes uncover anomalies linked to a red-level hard drive.' }
+        ],
+        signals: [
+          'Notice the architectural separation between Top Levels, Mid-Silo, IT (Level 19), and the Down Deep (Levels 120–144).',
+          'Watch how "Relics" (pre-rebellion artifacts) are classified by numeric threat tier.'
+        ]
+      },
+      {
+        id: 'dune-messiah-primer',
+        title: 'Dune: Messiah (Part Three) — Imperial Intelligence',
+        medium: 'Book & Cinema Dossier · Arrakis Imperial Seat',
+        spoilerShield: 'Safe Pre-Reading Primer (Post-Dune Part Two)',
+        premise: 'Twelve years after Paul Muad’Dib Atreides ascends the Golden Lion Throne, his Fremen Jihad has swept across sixty-one billion lives. Now a covert quartet of conspirators—Bene Gesserit, Spacing Guild, Tleilaxu, and deposed House Corrino—plot a psychological trap that exploits prescience itself.',
+        trailerScript: 'Twelve years into the Muad’Dib Regency, Arrakis is the capital of the Known Universe. Surrounded by religious fanaticism and a four-faction conspiracy armed with a Stone Burner and a Tleilaxu ghola, Paul Atreides faces the terrible cost of absolute foresight.',
+        operatives: [
+          { name: 'Emperor Paul Muad’Dib', role: 'Padishah Emperor & Kwisatz Haderach', note: 'Trapped inside the narrow corridor of prescient visions while seeking to protect Chani.' },
+          { name: 'Chani', role: 'Fremen Sayyadina & Royal Consort', note: 'Anchors Paul to desert reality while navigating imperial court intrigue.' },
+          { name: 'Hayt (Duncan Idaho)', role: 'Bene Tleilax Ghola Gift', note: 'Resurrected swordmaster trained as a Zensunni mentat philosopher.' },
+          { name: 'Edric', role: 'Spacing Guild Navigator Ambassador', note: 'Provides a prescience-shield bubble that hides conspirators from Paul’s sight.' }
+        ],
+        chronology: [
+          { era: '10,191 AG — Battle of Arrakeen', detail: 'Paul defeats Feyd-Rautha and forces Emperor Shaddam IV into exile on Salusa Secundus.' },
+          { era: '10,191–10,203 AG — Muad’Dib’s Jihad', detail: 'Fremen legions conquer eighty-one planets in the name of the Mahdi.' },
+          { era: '10,205 AG — The Wallach IX Compact', detail: 'Guild Navigator Edric, Reverend Mother Mohiam, Scytale, and Irulan form the conspiracy.' }
+        ],
+        signals: [
+          'Guild Navigators generate a "prescience blindspot" whenever they gather in person.',
+          'The Tleilaxu gift of Hayt is designed as an emotional lever rather than an assassin.'
+        ]
+      }
+    ];
+
+    function loadArchive() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch (e) {}
+      return DEFAULT_DOSSIERS;
+    }
+
+    let archive = loadArchive();
+    let activeId = archive[0].id;
+    let activeTab = 'overview';
+
+    function saveArchive() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(archive));
+      } catch (e) {}
+    }
+
+    function renderSidebar() {
+      const list = document.getElementById('dossierList');
+      list.innerHTML = '';
+      archive.forEach(item => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'dossier-item' + (item.id === activeId ? ' active' : '');
+        btn.innerHTML = `
+          <div class="dossier-type">${item.medium}</div>
+          <div class="dossier-title">${item.title}</div>
+        `;
+        btn.addEventListener('click', () => {
+          activeId = item.id;
+          renderSidebar();
+          renderStage();
+        });
+        list.appendChild(btn);
+      });
+    }
+
+    function renderStage() {
+      const current = archive.find(d => d.id === activeId) || archive[0];
+      document.getElementById('activeMedium').textContent = `${current.medium} // ${current.spoilerShield}`;
+      document.getElementById('activeTitle').textContent = current.title;
+
+      const container = document.getElementById('tabContent');
+      if (activeTab === 'overview') {
+        container.innerHTML = `
+          <div class="section-card">
+            <h3 style="font-size:0.88rem;color:var(--gold);margin-bottom:0.5rem;">EXECUTIVE PREMISE</h3>
+            <p style="font-size:1rem;">${current.premise}</p>
+          </div>
+          <div class="section-card" style="border-left:3px solid var(--magenta);">
+            <h3 style="font-size:0.88rem;color:var(--magenta);margin-bottom:0.5rem;">VOICEOVER TRAILER BRIEFING SCRIPT</h3>
+            <p style="font-style:italic;color:var(--paper);">"${current.trailerScript}"</p>
+          </div>
+        `;
+      } else if (activeTab === 'operatives') {
+        container.innerHTML = `
+          <div class="char-grid">
+            ${current.operatives.map(op => `
+              <div class="char-card">
+                <div style="font-family:'Orbitron',sans-serif;font-size:0.85rem;color:var(--paper);font-weight:700;">${op.name}</div>
+                <div style="font-size:0.75rem;color:var(--gold);margin:0.2rem 0 0.5rem;">${op.role}</div>
+                <p style="font-size:0.85rem;color:var(--muted);">${op.note}</p>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else if (activeTab === 'chronology') {
+        container.innerHTML = `
+          <div class="section-card">
+            ${current.chronology.map(step => `
+              <div class="timeline-step">
+                <div style="font-family:'Orbitron',sans-serif;font-size:0.8rem;color:var(--gold);">${step.era}</div>
+                <p style="font-size:0.9rem;margin-top:0.2rem;">${step.detail}</p>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <div class="section-card">
+            <h3 style="font-size:0.88rem;color:var(--gold);margin-bottom:0.65rem;">WHAT TO WATCH FOR (NON-SPOILER SIGNALS)</h3>
+            <ul style="padding-left:1.2rem;display:grid;gap:0.55rem;">
+              ${current.signals.map(s => `<li>${s}</li>`).join('')}
+            </ul>
+          </div>
+        `;
+      }
+    }
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeTab = btn.dataset.tab;
+        renderStage();
+      });
+    });
+
+    document.getElementById('newDossierForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const title = document.getElementById('newTitle').value.trim();
+      const medium = document.getElementById('newMedium').value.trim();
+      const premise = document.getElementById('newPremise').value.trim();
+      const rawCast = document.getElementById('newCast').value.trim();
+      if (!title || !premise) return;
+
+      const operatives = rawCast
+        ? rawCast.split(',').map(pair => {
+            const parts = pair.split(':');
+            return {
+              name: (parts[0] || 'Operative').trim(),
+              role: (parts[1] || 'Key Figure').trim(),
+              note: 'Logged in custom Evol Knight Briefing archive.'
+            };
+          })
+        : [{ name: 'Primary Protagonist', role: 'Lead Operative', note: 'Custom user-created briefing entry.' }];
+
+      const item = {
+        id: 'custom-' + Date.now(),
+        title,
+        medium,
+        spoilerShield: 'User-Defined Spoiler Shield Active',
+        premise,
+        trailerScript: premise,
+        operatives,
+        chronology: [{ era: 'Initial Setup', detail: premise }],
+        signals: ['Custom briefing entry persisted in local browser storage.']
+      };
+      archive.unshift(item);
+      saveArchive();
+      activeId = item.id;
+      e.target.reset();
+      renderSidebar();
+      renderStage();
+    });
+
+    document.getElementById('narrateBtn').addEventListener('click', () => {
+      const current = archive.find(d => d.id === activeId) || archive[0];
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(`${current.title}. ${current.trailerScript}`);
+        utter.rate = 0.96;
+        utter.pitch = 0.9;
+        window.speechSynthesis.speak(utter);
+      }
+    });
+
+    document.getElementById('stopNarrateBtn').addEventListener('click', () => {
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    });
+
+    document.getElementById('exportArchiveBtn').addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(archive, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'knight-briefing-room-archive.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    renderSidebar();
+    renderStage();
+  </script>
+</body>
+</html>

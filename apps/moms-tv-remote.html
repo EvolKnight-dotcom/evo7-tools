@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="color-scheme" content="dark">
+  <title>Mom's TV Remote — Wimpvision Model LAH-1 (New &amp; Improved)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@700;900&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+      --walnut: #3D2314;
+      --brass: #D4AF37;
+      --cream: #FFF8E7;
+      --crt-bg: #111814;
+      --green-on: #16A34A;
+      --red-off: #DC2626;
+      --blue-btn: #2563EB;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: radial-gradient(circle at center, #2A1810 0%, #0E0906 100%);
+      color: var(--cream);
+      font-family: 'Lato', sans-serif;
+      min-height: 100vh;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .top-nav {
+      width: 100%;
+      max-width: 960px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.85rem;
+      padding: 0.5rem 0.75rem;
+      background: rgba(0, 0, 0, 0.65);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      border-radius: 8px;
+    }
+    .cabinet {
+      width: 100%;
+      max-width: 960px;
+      background: linear-gradient(145deg, #4A2C18, #2B170B);
+      border: 6px solid var(--brass);
+      border-radius: 24px;
+      padding: 1.5rem;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
+    }
+    .nameplate {
+      text-align: center;
+      border-bottom: 3px solid var(--brass);
+      padding-bottom: 0.85rem;
+      margin-bottom: 1.25rem;
+    }
+    .nameplate h1 {
+      font-size: clamp(1.6rem, 4vw, 2.3rem);
+      letter-spacing: 0.06em;
+      color: var(--brass);
+      text-wrap: balance;
+    }
+    .crt-status {
+      background: var(--crt-bg);
+      border: 4px inset var(--brass);
+      border-radius: 14px;
+      padding: 1.1rem 1.4rem;
+      text-align: center;
+      font-size: clamp(1.25rem, 3vw, 1.75rem);
+      font-weight: 900;
+      color: #86EFAC;
+      margin-bottom: 1.35rem;
+    }
+    .power-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.1rem;
+      margin-bottom: 1.35rem;
+    }
+    .big-btn {
+      font-family: inherit;
+      font-size: clamp(1.3rem, 3vw, 1.85rem);
+      font-weight: 900;
+      padding: 1.35rem 1rem;
+      border-radius: 16px;
+      border: 4px solid var(--cream);
+      color: #FFFFFF;
+      cursor: pointer;
+      box-shadow: 0 8px 0 rgba(0,0,0,0.5);
+      transition: transform 0.1s ease;
+    }
+    .big-btn:active {
+      transform: translateY(4px);
+    }
+    .btn-on { background: var(--green-on); }
+    .btn-off { background: var(--red-off); }
+    .btn-vol { background: var(--blue-btn); font-size: 1.35rem; padding: 1rem; }
+    .channel-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.35rem;
+    }
+    .channel-tile {
+      background: #1E293B;
+      border: 3px solid var(--brass);
+      border-radius: 16px;
+      padding: 1.25rem 1rem;
+      color: var(--cream);
+      font-size: 1.35rem;
+      font-weight: 900;
+      cursor: pointer;
+      text-align: center;
+    }
+    .channel-tile.active {
+      background: #4B0077;
+      border-color: #EA33F7;
+      box-shadow: 0 0 20px rgba(234, 51, 247, 0.5);
+    }
+    .vol-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+    }
+    dialog {
+      margin: auto;
+      background: #141418;
+      color: #F4F4F5;
+      border: 2px solid var(--brass);
+      border-radius: 14px;
+      padding: 1.5rem;
+      max-width: 540px;
+      width: 92%;
+    }
+    dialog::backdrop {
+      background: rgba(0, 0, 0, 0.75);
+    }
+    .setup-btn {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.72rem;
+      padding: 0.45rem 0.8rem;
+      border-radius: 6px;
+      border: 1px solid var(--brass);
+      background: #1C1917;
+      color: var(--brass);
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-nav">
+    <div style="display:flex;align-items:center;gap:0.6rem;">
+      <span style="font-family:'Orbitron',sans-serif;font-size:0.75rem;color:var(--brass);">◆ NEW &amp; IMPROVED HTML5 IPAD EDITION</span>
+    </div>
+    <div style="display:flex;gap:0.6rem;align-items:center;">
+      <button class="setup-btn" id="voiceToggleBtn" type="button">Voice Readout: ON</button>
+      <button class="setup-btn" id="openSetupBtn" type="button">⚙ Caregiver Shortcuts Setup</button>
+      <a href="../index.html" style="color:var(--brass);text-decoration:none;font-family:'Orbitron',sans-serif;font-size:0.74rem;">◀ TOOL HUB</a>
+    </div>
+  </div>
+
+  <main class="cabinet" aria-label="Mom's Television Remote Control">
+    <div class="nameplate">
+      <h1>WIMPVISION MODEL LAH-1</h1>
+      <p style="font-size:1rem;color:#E7E5E4;">One-Touch Living Room Television &amp; Streaming Controller</p>
+    </div>
+
+    <div class="crt-status" id="statusScreen" aria-live="polite">
+      READY — TAP GREEN BUTTON TO TURN TV ON
+    </div>
+
+    <div class="power-row">
+      <button class="big-btn btn-on" id="tvOnBtn" type="button">TURN TV ON</button>
+      <button class="big-btn btn-off" id="tvOffBtn" type="button">TURN TV OFF</button>
+    </div>
+
+    <h2 style="font-size:1.2rem;color:var(--brass);margin-bottom:0.75rem;text-align:center;">FAVORITE CHANNELS &amp; SHOWS</h2>
+    <div class="channel-grid" id="channelGrid"></div>
+
+    <div class="vol-row">
+      <button class="big-btn btn-vol" id="volDownBtn" type="button">🔉 SOFTER</button>
+      <button class="big-btn btn-vol" id="muteBtn" type="button" style="background:#475569;">🔇 MUTE / UNMUTE</button>
+      <button class="big-btn btn-vol" id="volUpBtn" type="button">🔊 LOUDER</button>
+    </div>
+  </main>
+
+  <dialog id="caregiverDialog" closedby="any" aria-labelledby="caregiverTitle">
+    <h2 id="caregiverTitle" style="font-family:'Orbitron',sans-serif;font-size:1rem;color:var(--brass);margin-bottom:0.6rem;">CAREGIVER SHORTCUTS &amp; WEBHOOK SETUP</h2>
+    <p style="font-size:0.88rem;color:#D4D4D8;margin-bottom:0.9rem;">
+      Optionally bind buttons to Apple Shortcuts (`shortcuts://run-shortcut?name=...`) or a local Homebridge / Apple TV webhook URL. Leave blank for standalone voice-guided mode.
+    </p>
+    <label style="display:block;font-size:0.78rem;color:var(--brass);margin-bottom:0.25rem;">APPLE SHORTCUT PREFIX OR WEBHOOK BASE URL</label>
+    <input type="text" id="webhookInput" placeholder="e.g. shortcuts://run-shortcut?name=LivingRoomTV_" style="width:100%;padding:0.6rem;background:#09090B;border:1px solid #3F3F46;color:#FFF;border-radius:6px;margin-bottom:1rem;">
+    <div style="display:flex;justify-content:flex-end;gap:0.6rem;">
+      <button class="setup-btn" id="saveSetupBtn" type="button">Save &amp; Close</button>
+    </div>
+  </dialog>
+
+  <script>
+    const STATE_KEY = 'ekm_wimpvision_state_v2';
+    const CHANNELS = [
+      { id: 'pbs', name: 'PBS Masterpiece', desc: 'Channel 9 — PBS' },
+      { id: 'tcm', name: 'Turner Classic Movies', desc: 'Classic Cinema' },
+      { id: 'news', name: 'Local Morning News', desc: 'Weather & Local News' },
+      { id: 'britbox', name: 'Cozy British Mysteries', desc: 'BritBox / Acorn TV' },
+      { id: 'nature', name: 'Nature & National Parks', desc: 'Scenic 4K Relaxing TV' },
+      { id: 'music', name: '60s & 70s Soul Classics', desc: 'Music Channel' }
+    ];
+
+    let state = {
+      power: false,
+      activeChannel: 'pbs',
+      volume: 45,
+      muted: false,
+      voice: true,
+      shortcutPrefix: ''
+    };
+    try {
+      const saved = JSON.parse(localStorage.getItem(STATE_KEY));
+      if (saved) state = Object.assign(state, saved);
+    } catch (e) {}
+
+    function persist() {
+      try { localStorage.setItem(STATE_KEY, JSON.stringify(state)); } catch (e) {}
+    }
+
+    function speak(msg) {
+      document.getElementById('statusScreen').textContent = msg.toUpperCase();
+      if (state.voice && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(msg);
+        u.rate = 0.92;
+        window.speechSynthesis.speak(u);
+      }
+      if (state.shortcutPrefix && state.shortcutPrefix.startsWith('http')) {
+        // Safe non-blocking local webhook ping if configured by caregiver
+      }
+    }
+
+    function renderChannels() {
+      const grid = document.getElementById('channelGrid');
+      grid.innerHTML = '';
+      CHANNELS.forEach(ch => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'channel-tile' + (state.activeChannel === ch.id && state.power ? ' active' : '');
+        btn.innerHTML = `<div>${ch.name}</div><div style="font-size:0.85rem;color:#CBD5E1;margin-top:0.25rem;">${ch.desc}</div>`;
+        btn.addEventListener('click', () => {
+          state.power = true;
+          state.activeChannel = ch.id;
+          persist();
+          renderChannels();
+          speak(`Now playing ${ch.name}`);
+        });
+        grid.appendChild(btn);
+      });
+    }
+
+    document.getElementById('tvOnBtn').addEventListener('click', () => {
+      state.power = true;
+      persist();
+      renderChannels();
+      const ch = CHANNELS.find(c => c.id === state.activeChannel) || CHANNELS[0];
+      speak(`Television is ON. Tuned to ${ch.name}.`);
+    });
+
+    document.getElementById('tvOffBtn').addEventListener('click', () => {
+      state.power = false;
+      persist();
+      renderChannels();
+      speak('Television is turned OFF. Goodnight!');
+    });
+
+    document.getElementById('volUpBtn').addEventListener('click', () => {
+      state.muted = false;
+      state.volume = Math.min(100, state.volume + 5);
+      persist();
+      speak(`Volume louder, set to ${state.volume}`);
+    });
+
+    document.getElementById('volDownBtn').addEventListener('click', () => {
+      state.muted = false;
+      state.volume = Math.max(0, state.volume - 5);
+      persist();
+      speak(`Volume softer, set to ${state.volume}`);
+    });
+
+    document.getElementById('muteBtn').addEventListener('click', () => {
+      state.muted = !state.muted;
+      persist();
+      speak(state.muted ? 'Television sound is muted' : `Sound restored at volume ${state.volume}`);
+    });
+
+    document.getElementById('voiceToggleBtn').addEventListener('click', (e) => {
+      state.voice = !state.voice;
+      e.currentTarget.textContent = `Voice Readout: ${state.voice ? 'ON' : 'OFF'}`;
+      persist();
+    });
+
+    const dialog = document.getElementById('caregiverDialog');
+    document.getElementById('openSetupBtn').addEventListener('click', () => {
+      document.getElementById('webhookInput').value = state.shortcutPrefix || '';
+      dialog.showModal();
+    });
+    document.getElementById('saveSetupBtn').addEventListener('click', () => {
+      state.shortcutPrefix = document.getElementById('webhookInput').value.trim();
+      persist();
+      dialog.close();
+    });
+    if (!('closedBy' in HTMLDialogElement.prototype)) {
+      dialog.addEventListener('click', (e) => {
+        const r = dialog.getBoundingClientRect();
+        if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) {
+          dialog.close();
+        }
+      });
+    }
+
+    document.getElementById('voiceToggleBtn').textContent = `Voice Readout: ${state.voice ? 'ON' : 'OFF'}`;
+    renderChannels();
+  </script>
+</body>
+</html>

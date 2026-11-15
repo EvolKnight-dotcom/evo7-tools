@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Part 107 — METAR/SPECI Decoder & Study Tool</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F1E8D0;
+    --paper-light: #F8F1DC;
+    --paper-dark: #E5D8B5;
+    --ink: #1A1812;
+    --ink-soft: #4A4338;
+    --magenta: #C73E8A;
+    --magenta-soft: #E8B8D5;
+    --blue: #1E5BC6;
+    --blue-soft: #B8C9E8;
+    --green: #4A7C3A;
+    --amber: #D4691A;
+    --red: #B8312A;
+    --terrain: #B8956A;
+    --grid: rgba(26, 24, 18, 0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Manrope', sans-serif;
+    font-weight: 400;
+    line-height: 1.5;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(184, 149, 106, 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(199, 62, 138, 0.04) 0%, transparent 50%),
+      linear-gradient(var(--paper), var(--paper));
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.4;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.4 0 0 0 0 0.35 0 0 0 0 0.25 0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    z-index: 1;
+  }
+
+  .wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 4rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Header */
+  header {
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 2rem;
+    margin-bottom: 2.5rem;
+    position: relative;
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .eyebrow::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--ink);
+  }
+
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2.25rem, 5vw, 3.75rem);
+    line-height: 1.05;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+  }
+
+  h1 em {
+    color: var(--magenta);
+    font-style: italic;
+  }
+
+  .subtitle {
+    font-size: 1.05rem;
+    color: var(--ink-soft);
+    max-width: 60ch;
+  }
+
+  .meta-row {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--ink-soft);
+    flex-wrap: wrap;
+  }
+
+  .meta-row span strong {
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  /* Mode tabs */
+  nav.tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 2.5rem;
+    border-bottom: 1px solid var(--ink);
+    overflow-x: auto;
+  }
+
+  .tab {
+    background: none;
+    border: none;
+    padding: 1rem 1.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    cursor: pointer;
+    position: relative;
+    white-space: nowrap;
+    transition: color 0.15s ease;
+    font-weight: 500;
+  }
+
+  .tab:hover { color: var(--ink); }
+
+  .tab.active {
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--magenta);
+  }
+
+  .tab-num {
+    color: var(--magenta);
+    font-weight: 700;
+    margin-right: 0.5rem;
+  }
+
+  .section {
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+  .section.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Section intro */
+  .section-intro {
+    margin-bottom: 2rem;
+    padding: 1.25rem 1.5rem;
+    background: var(--paper-light);
+    border-left: 3px solid var(--magenta);
+  }
+
+  .section-intro h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+  }
+
+  .section-intro p {
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+  }
+
+  /* === ANATOMY === */
+  .anatomy-banner {
+    background: var(--paper-light);
+    border: 1px solid var(--ink);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    overflow-x: auto;
+    border-radius: 4px;
+  }
+
+  .anatomy-banner code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.95rem;
+    line-height: 2;
+    white-space: nowrap;
+    display: block;
+  }
+
+  .tk { padding: 0.15em 0.4em; border-radius: 3px; cursor: pointer; transition: all 0.15s; }
+  .tk:hover { transform: translateY(-1px); }
+  .tk.active { box-shadow: 0 0 0 2px var(--ink); }
+  .tk-type { background: rgba(199, 62, 138, 0.18); color: var(--magenta); font-weight: 700; }
+  .tk-stn  { background: rgba(30, 91, 198, 0.15); color: var(--blue); font-weight: 700; }
+  .tk-time { background: rgba(74, 124, 58, 0.15); color: var(--green); font-weight: 700; }
+  .tk-mod  { background: rgba(212, 105, 26, 0.15); color: var(--amber); font-weight: 700; }
+  .tk-wind { background: rgba(199, 62, 138, 0.15); color: var(--magenta); }
+  .tk-vis  { background: rgba(30, 91, 198, 0.12); color: var(--blue); }
+  .tk-wx   { background: rgba(184, 49, 42, 0.15); color: var(--red); }
+  .tk-sky  { background: rgba(74, 124, 58, 0.15); color: var(--green); }
+  .tk-temp { background: rgba(212, 105, 26, 0.18); color: var(--amber); }
+  .tk-alt  { background: rgba(74, 67, 56, 0.15); color: var(--ink); }
+  .tk-rmk  { background: rgba(74, 67, 56, 0.1); color: var(--ink-soft); font-style: italic; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  .card {
+    background: var(--paper-light);
+    border: 1px solid rgba(26, 24, 18, 0.15);
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .card:hover {
+    border-color: var(--ink);
+    transform: translateY(-2px);
+    box-shadow: 4px 4px 0 var(--ink);
+  }
+
+  .card.expanded {
+    grid-column: 1 / -1;
+    border-color: var(--magenta);
+    box-shadow: 4px 4px 0 var(--magenta);
+  }
+
+  .card-head {
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .card-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.15rem;
+    line-height: 1.2;
+    margin-bottom: 0.25rem;
+  }
+
+  .card-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .card-icon {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    background: var(--paper-dark);
+    padding: 0.4rem 0.6rem;
+    border-radius: 3px;
+    font-weight: 700;
+  }
+
+  .card-detail {
+    display: none;
+    padding: 0 1.25rem 1.5rem;
+    border-top: 1px dashed rgba(26, 24, 18, 0.2);
+    background: var(--paper);
+    margin-top: 0;
+  }
+
+  .card.expanded .card-detail { display: block; padding-top: 1.25rem; }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  @media (max-width: 600px) {
+    .detail-grid { grid-template-columns: 1fr; }
+  }
+
+  .detail-block h4 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--magenta);
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+  }
+
+  .detail-block p, .detail-block ul {
+    font-size: 0.93rem;
+    color: var(--ink);
+    line-height: 1.6;
+  }
+
+  .detail-block ul {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .detail-block ul li {
+    padding: 0.35rem 0;
+    border-bottom: 1px solid rgba(26, 24, 18, 0.07);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+  }
+
+  .detail-block ul li:last-child { border-bottom: 0; }
+
+  .detail-block ul li b {
+    color: var(--magenta);
+    margin-right: 0.5rem;
+  }
+
+  /* === DECODER === */
+  .decoder-input {
+    background: var(--paper-light);
+    border: 2px solid var(--ink);
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    border-radius: 4px;
+  }
+
+  .decoder-input textarea {
+    width: 100%;
+    border: none;
+    background: transparent;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1rem;
+    line-height: 1.5;
+    resize: vertical;
+    min-height: 70px;
+    color: var(--ink);
+    outline: none;
+  }
+
+  .decoder-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px dashed rgba(26, 24, 18, 0.2);
+  }
+
+  .btn {
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    padding: 0.65rem 1.25rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-weight: 600;
+    border-radius: 3px;
+    transition: all 0.15s ease;
+  }
+
+  .btn:hover { background: var(--magenta); transform: translateY(-1px); }
+
+  .btn.ghost {
+    background: transparent;
+    color: var(--ink-soft);
+    border: 1px solid rgba(26, 24, 18, 0.3);
+  }
+
+  .btn.ghost:hover { background: var(--paper-dark); color: var(--ink); transform: none; }
+
+  .examples-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .ex-chip {
+    background: var(--paper-light);
+    border: 1px solid rgba(26, 24, 18, 0.2);
+    padding: 0.4rem 0.85rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    cursor: pointer;
+    border-radius: 12px;
+    transition: all 0.15s;
+  }
+
+  .ex-chip:hover { background: var(--magenta); color: white; border-color: var(--magenta); }
+
+  .decoder-output {
+    background: var(--paper-light);
+    border: 1px solid var(--ink);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .decoder-output:empty { display: none; }
+
+  .summary-bar {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .summary-bar .cat {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    padding: 0.35rem 0.75rem;
+    border-radius: 3px;
+  }
+
+  .cat-VFR { background: var(--green); color: white; }
+  .cat-MVFR { background: var(--blue); color: white; }
+  .cat-IFR { background: var(--red); color: white; }
+  .cat-LIFR { background: var(--magenta); color: white; }
+
+  .summary-text {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    line-height: 1.4;
+  }
+
+  .decoded-list {
+    padding: 0.5rem 0;
+  }
+
+  .decoded-row {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 1rem;
+    padding: 0.875rem 1.5rem;
+    border-bottom: 1px dashed rgba(26, 24, 18, 0.12);
+  }
+
+  .decoded-row:last-child { border-bottom: 0; }
+
+  @media (max-width: 600px) {
+    .decoded-row { grid-template-columns: 1fr; gap: 0.25rem; }
+  }
+
+  .decoded-row .raw {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--magenta);
+  }
+
+  .decoded-row .meaning {
+    font-size: 0.93rem;
+  }
+
+  .decoded-row .meaning small {
+    display: block;
+    color: var(--ink-soft);
+    font-size: 0.8rem;
+    margin-top: 0.15rem;
+  }
+
+  .error-box {
+    background: rgba(184, 49, 42, 0.1);
+    border-left: 3px solid var(--red);
+    padding: 1rem 1.25rem;
+    color: var(--red);
+    font-size: 0.9rem;
+    border-radius: 3px;
+  }
+
+  /* === QUIZ === */
+  .quiz-stage {
+    background: var(--paper-light);
+    border: 2px solid var(--ink);
+    border-radius: 4px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .quiz-metar {
+    background: var(--paper);
+    border: 1px solid rgba(26, 24, 18, 0.2);
+    padding: 1.25rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    border-radius: 3px;
+    word-break: break-word;
+  }
+
+  .quiz-question {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    line-height: 1.3;
+    margin-bottom: 1.25rem;
+  }
+
+  .quiz-options {
+    display: grid;
+    gap: 0.65rem;
+    margin-bottom: 1rem;
+  }
+
+  .opt {
+    background: var(--paper);
+    border: 1px solid rgba(26, 24, 18, 0.2);
+    padding: 0.875rem 1.25rem;
+    cursor: pointer;
+    text-align: left;
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.95rem;
+    color: var(--ink);
+    border-radius: 3px;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .opt:hover:not(:disabled) {
+    border-color: var(--ink);
+    background: var(--paper-light);
+  }
+
+  .opt:disabled { cursor: default; }
+
+  .opt-letter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--magenta);
+    width: 1.25rem;
+  }
+
+  .opt.correct {
+    background: rgba(74, 124, 58, 0.15);
+    border-color: var(--green);
+  }
+
+  .opt.correct .opt-letter { color: var(--green); }
+
+  .opt.wrong {
+    background: rgba(184, 49, 42, 0.1);
+    border-color: var(--red);
+  }
+
+  .opt.wrong .opt-letter { color: var(--red); }
+
+  .quiz-feedback {
+    margin-top: 1rem;
+    padding: 1rem 1.25rem;
+    background: var(--paper);
+    border-left: 3px solid var(--magenta);
+    border-radius: 3px;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    display: none;
+  }
+
+  .quiz-feedback.show { display: block; }
+
+  .quiz-feedback strong {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.4rem;
+    color: var(--magenta);
+  }
+
+  .quiz-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .quiz-score {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+  }
+
+  .quiz-score strong { color: var(--magenta); font-weight: 700; }
+
+  /* Footer */
+  footer {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(26, 24, 18, 0.2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .compass {
+    position: absolute;
+    top: 1rem;
+    right: 0;
+    width: 80px;
+    height: 80px;
+    opacity: 0.3;
+  }
+
+  @media (max-width: 600px) {
+    .compass { display: none; }
+    .wrap { padding: 2rem 1rem 3rem; }
+    .quiz-stage { padding: 1.25rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <svg class="compass" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="45" fill="none" stroke="#1A1812" stroke-width="0.5"/>
+      <circle cx="50" cy="50" r="35" fill="none" stroke="#1A1812" stroke-width="0.5"/>
+      <g stroke="#1A1812" stroke-width="0.5">
+        <line x1="50" y1="5" x2="50" y2="95"/>
+        <line x1="5" y1="50" x2="95" y2="50"/>
+      </g>
+      <polygon points="50,8 45,50 50,45 55,50" fill="#C73E8A"/>
+      <text x="50" y="14" text-anchor="middle" font-family="DM Serif Display, serif" font-size="8" fill="#1A1812">N</text>
+    </svg>
+    <div class="eyebrow">FAA-H-8083-28 · STUDY REFERENCE</div>
+    <h1>METAR &amp; SPECI<br><em>Decoder &amp; Trainer</em></h1>
+    <p class="subtitle">Read aviation weather like a pilot. Click the anatomy to learn each field, paste any real METAR into the decoder, then drill yourself with quiz mode until flight categories are reflexive.</p>
+    <div class="meta-row">
+      <span><strong>3</strong> modes</span>
+      <span><strong>12</strong> field types</span>
+      <span>Aligned to <strong>ACS UA.I.D</strong></span>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-target="anatomy"><span class="tab-num">01</span>Anatomy</button>
+    <button class="tab" data-target="decoder"><span class="tab-num">02</span>Live Decoder</button>
+    <button class="tab" data-target="quiz"><span class="tab-num">03</span>Quiz Mode</button>
+  </nav>
+
+  <main>
+    <!-- ANATOMY -->
+    <section class="section active" id="sec-anatomy">
+      <div class="section-intro">
+        <h2>The anatomy of a METAR</h2>
+        <p>Every METAR follows the same field order. Tap the colored chips below to highlight, then read the cards for what each field means and the Part 107 angle.</p>
+      </div>
+
+      <div class="anatomy-banner">
+        <code id="anatomy-code">
+          <span class="tk tk-type" data-key="type">METAR</span>
+          <span class="tk tk-stn" data-key="station">KSFO</span>
+          <span class="tk tk-time" data-key="time">091856Z</span>
+          <span class="tk tk-mod" data-key="modifier">AUTO</span>
+          <span class="tk tk-wind" data-key="wind">27015G22KT</span>
+          <span class="tk tk-vis" data-key="visibility">10SM</span>
+          <span class="tk tk-wx" data-key="weather">-RA</span>
+          <span class="tk tk-sky" data-key="sky">FEW015 BKN025 OVC040</span>
+          <span class="tk tk-temp" data-key="temp">18/12</span>
+          <span class="tk tk-alt" data-key="alt">A2992</span>
+          <span class="tk tk-rmk" data-key="rmk">RMK AO2 SLP132</span>
+        </code>
+      </div>
+
+      <div class="grid" id="anatomy-grid"></div>
+    </section>
+
+    <!-- DECODER -->
+    <section class="section" id="sec-decoder">
+      <div class="section-intro">
+        <h2>Paste any METAR or SPECI</h2>
+        <p>Get every field decoded with the Part 107 flight category determined automatically. Pull live METARs from aviationweather.gov.</p>
+      </div>
+
+      <div class="decoder-input">
+        <textarea id="metar-input" placeholder="METAR KSFO 091856Z 27015G22KT 10SM -RA FEW015 BKN025 OVC040 18/12 A2992 RMK AO2"></textarea>
+        <div class="decoder-actions">
+          <button class="btn" id="decode-btn">Decode</button>
+          <button class="btn ghost" id="clear-btn">Clear</button>
+        </div>
+      </div>
+
+      <div class="examples-row">
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); align-self: center; margin-right: 0.5rem;">Examples →</span>
+        <button class="ex-chip" data-ex="vfr">VFR · clear</button>
+        <button class="ex-chip" data-ex="mvfr">MVFR · marginal</button>
+        <button class="ex-chip" data-ex="ifr">IFR · low ceiling</button>
+        <button class="ex-chip" data-ex="lifr">LIFR · fog</button>
+        <button class="ex-chip" data-ex="ts">Thunderstorm</button>
+        <button class="ex-chip" data-ex="snow">Heavy snow</button>
+        <button class="ex-chip" data-ex="speci">SPECI report</button>
+      </div>
+
+      <div class="decoder-output" id="decoder-output"></div>
+    </section>
+
+    <!-- QUIZ -->
+    <section class="section" id="sec-quiz">
+      <div class="section-intro">
+        <h2>Drill the patterns</h2>
+        <p>Random METARs, Part 107-style questions. Answer, get an explanation, move on. Keep going until flight category becomes reflexive.</p>
+      </div>
+
+      <div class="quiz-stage" id="quiz-stage">
+        <div class="quiz-metar" id="quiz-metar"></div>
+        <div class="quiz-question" id="quiz-question"></div>
+        <div class="quiz-options" id="quiz-options"></div>
+        <div class="quiz-feedback" id="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz-controls">
+        <div class="quiz-score">
+          Score: <strong id="quiz-correct">0</strong> / <span id="quiz-total">0</span>
+          &nbsp;·&nbsp;
+          Streak: <strong id="quiz-streak">0</strong>
+        </div>
+        <button class="btn" id="next-q-btn">Next question →</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>Knight Castle Studio · Study Reference</span>
+    <span>Live wx: aviationweather.gov</span>
+  </footer>
+</div>
+
+<script>
+/* ============================================================
+   PART 1 — REFERENCE DATA (Anatomy cards)
+   ============================================================ */
+const anatomyCards = [
+  { key: 'type', name: 'Report Type', tag: 'METAR or SPECI', icon: 'METAR',
+    meaning: 'METAR is the routine hourly observation, issued near the top of every hour. SPECI is a special report issued between hourly observations when conditions change significantly (visibility crosses a threshold, ceiling changes, thunderstorm begins, etc.).',
+    detail: 'A SPECI for the same station you saw an hour ago is a flag that something changed enough to warrant an unscheduled report. When studying or planning a flight, pay attention.',
+    examples: ['METAR — routine', 'SPECI — special'] },
+  { key: 'station', name: 'Station Identifier', tag: 'ICAO 4-letter code', icon: 'KSFO',
+    meaning: 'Four-letter ICAO code. In the contiguous US, the first letter is always K (KSFO, KOAK, KLAX). Alaska starts with PA, Hawaii with PH.',
+    detail: 'Memorize the FAA airport identifier first (3 letters: SFO), then add the K. KSFO = Class B major. The chart figure on your test will tell you what airspace surrounds the station.',
+    examples: ['KSFO — San Francisco Intl', 'PHNL — Honolulu', 'PANC — Anchorage'] },
+  { key: 'time', name: 'Date/Time Group', tag: 'DDHHMMZ — Zulu time', icon: '091856Z',
+    meaning: 'Six digits + Z. First two digits are the day of the month, next four are the time in UTC (Zulu). Always Zulu — never local time.',
+    detail: '091856Z means the 9th of the month at 18:56 UTC. To convert to Pacific: subtract 7 hours (PDT) or 8 hours (PST). 1856Z = 11:56 AM PDT or 10:56 AM PST.',
+    examples: ['Pacific Daylight: Z − 7', 'Pacific Standard: Z − 8', 'Eastern Daylight: Z − 4'] },
+  { key: 'modifier', name: 'Modifier', tag: 'AUTO or COR (optional)', icon: 'AUTO',
+    meaning: 'AUTO = report generated automatically, no human observer. COR = correction to a previously transmitted report. If neither appears, a human observer made the report.',
+    detail: 'AUTO reports may include "AO1" or "AO2" in remarks. AO2 stations have a precipitation discriminator (can tell rain from snow). AO1 cannot.',
+    examples: ['AUTO — automated', 'COR — corrected', '(blank) — human observer'] },
+  { key: 'wind', name: 'Wind', tag: 'dddff(Gff)KT', icon: '27015KT',
+    meaning: 'Three digits = direction in degrees TRUE (where the wind is coming FROM), next two/three digits = speed in knots, optional G + speed = gust. VRB means variable when wind is light.',
+    detail: '27015G22KT: wind from 270° (west) at 15 knots, gusting to 22. Wind directions on METAR are TRUE. Wind directions from ATC are MAGNETIC. The chart\'s magnetic variation explains the difference.',
+    examples: ['00000KT — calm', 'VRB03KT — variable, light', '27015G25KT — west, 15 gust 25'] },
+  { key: 'visibility', name: 'Prevailing Visibility', tag: 'NSM — statute miles', icon: '10SM',
+    meaning: 'Visibility in statute miles. 10SM is the maximum reportable. Less than 1 mile uses fractions like 1/2SM, 3/4SM. Less than 1/4 mile is M1/4SM (M = "minus" or "less than").',
+    detail: 'Part 107 minimum: 3 SM from the control station. Anything below 3SM and you cannot legally fly under standard Part 107 rules — you\'d need a waiver.',
+    examples: ['10SM — clear', '3SM — Part 107 minimum', '1 1/2SM — IFR territory', 'M1/4SM — IFR/LIFR'] },
+  { key: 'weather', name: 'Weather Phenomena', tag: '−/+ + descriptor + type', icon: '-RA',
+    meaning: 'Optional. Format: intensity (−light, blank=moderate, +heavy, VC=vicinity 5–10SM), descriptor (TS, SH, FZ, BL, etc.), then the phenomenon (RA, SN, FG, BR, etc.). Can chain multiple groups.',
+    detail: 'TSRA = thunderstorm with rain. +SN = heavy snow. FZRA = freezing rain (deadly for aircraft). BR = mist (vis ≥ 5/8 SM). FG = fog (vis < 5/8 SM). VCTS = thunderstorm in vicinity.',
+    examples: ['−RA — light rain', '+TSRA — heavy thunderstorm rain', 'FG — fog', 'BR — mist', 'BLSN — blowing snow'] },
+  { key: 'sky', name: 'Sky Condition', tag: 'amount + height ×100ft', icon: 'BKN025',
+    meaning: 'Layers reported lowest to highest. Amount: SKC/CLR (clear), FEW (1–2/8), SCT (3–4/8), BKN (5–7/8), OVC (8/8). Height = 3 digits × 100 ft AGL. CB or TCU appended for cumulonimbus or towering cumulus.',
+    detail: 'CEILING = lowest BKN or OVC layer (or VV — vertical visibility when sky is obscured). BKN025 means the ceiling is 2,500 feet AGL. FEW and SCT do NOT count as a ceiling.',
+    examples: ['SKC — clear (manual)', 'CLR — clear below 12,000 (auto)', 'FEW015 — few at 1,500 ft', 'BKN025 — ceiling 2,500 ft', 'OVC008CB — overcast 800 ft, cumulonimbus'] },
+  { key: 'temp', name: 'Temperature / Dewpoint', tag: 'TT/DD in Celsius', icon: '18/12',
+    meaning: 'Temperature / dewpoint, both in Celsius. M prefix = minus (below zero). M02/M04 = −2°C / −4°C. Spread between the two predicts fog risk.',
+    detail: 'Tight spread (within 2–3°C) means fog or low clouds are likely as the temperature drops toward the dewpoint overnight. 18/17 is a fog warning. 18/02 is dry, low fog risk.',
+    examples: ['25/15 — warm and dry', '18/17 — fog likely soon', 'M02/M04 — sub-freezing'] },
+  { key: 'alt', name: 'Altimeter Setting', tag: 'A####', icon: 'A2992',
+    meaning: 'Atmospheric pressure in inches of mercury. A2992 = 29.92 inHg (standard sea-level pressure). Pilots set this on their altimeter so it reads correct elevation.',
+    detail: 'For drone work, less critical than for crewed aviation, but the FAA tests it. Lower numbers = lower pressure = potentially worse weather coming. Above 30.00 = high pressure / fair weather.',
+    examples: ['A2992 — standard', 'A3015 — high pressure', 'A2965 — low pressure'] },
+  { key: 'rmk', name: 'Remarks (RMK)', tag: 'Free-form additions', icon: 'RMK',
+    meaning: 'Everything after RMK is supplementary information. Common items: AO1/AO2 (sensor type), SLPxxx (sea level pressure), TSB (thunderstorm began), tornado/funnel reports.',
+    detail: 'For Part 107, RMK is rarely tested in detail, but recognize the common ones. AO2 = automated with precip discriminator. SLP132 = sea level pressure 1013.2 mb. TSB25 = thunderstorm began at :25 past the hour.',
+    examples: ['AO2 — auto w/ precip discrim', 'SLP132 — sea level press 1013.2', 'TSB25 — TS began :25'] },
+  { key: 'category', name: 'Flight Categories', tag: 'VFR / MVFR / IFR / LIFR', icon: 'VFR',
+    meaning: 'Computed from ceiling AND visibility (the WORSE of the two determines the category). This is the single most-tested Part 107 weather concept.',
+    detail: 'VFR: ceiling >3,000 ft AND vis >5 SM. MVFR: ceiling 1,000–3,000 ft OR vis 3–5 SM. IFR: ceiling 500–<1,000 ft OR vis 1–<3 SM. LIFR: ceiling <500 ft OR vis <1 SM. Part 107 minimums (3 SM, 500 ft below clouds) effectively require MVFR or better.',
+    examples: ['VFR — ceiling >3,000 AND vis >5', 'MVFR — 1,000–3,000 OR 3–5', 'IFR — 500–<1,000 OR 1–<3', 'LIFR — <500 OR <1'] }
+];
+
+/* Render anatomy cards */
+const anatomyGrid = document.getElementById('anatomy-grid');
+anatomyCards.forEach((c, idx) => {
+  const el = document.createElement('article');
+  el.className = 'card';
+  el.dataset.key = c.key;
+  el.innerHTML = `
+    <div class="card-head">
+      <div>
+        <div class="card-name">${c.name}</div>
+        <div class="card-tag">${c.tag}</div>
+      </div>
+      <div class="card-icon">${c.icon}</div>
+    </div>
+    <div class="card-detail">
+      <div class="detail-grid">
+        <div class="detail-block">
+          <h4>What it means</h4>
+          <p>${c.meaning}</p>
+          <p style="margin-top: 0.5rem; color: var(--ink-soft); font-size: 0.88rem;">${c.detail}</p>
+        </div>
+        <div class="detail-block">
+          <h4>Examples</h4>
+          <ul>${c.examples.map(x => {
+            const parts = x.split('—').map(p => p.trim());
+            return `<li><b>${parts[0]}</b>${parts[1] ? '— ' + parts[1] : ''}</li>`;
+          }).join('')}</ul>
+        </div>
+      </div>
+    </div>
+  `;
+  anatomyGrid.appendChild(el);
+});
+
+/* Card expand */
+anatomyGrid.addEventListener('click', e => {
+  const c = e.target.closest('.card');
+  if (!c) return;
+  const wasOpen = c.classList.contains('expanded');
+  document.querySelectorAll('#anatomy-grid .card.expanded').forEach(x => x.classList.remove('expanded'));
+  if (!wasOpen) c.classList.add('expanded');
+});
+
+/* Anatomy banner click — highlight + scroll to matching card */
+document.getElementById('anatomy-code').addEventListener('click', e => {
+  const tk = e.target.closest('.tk');
+  if (!tk) return;
+  document.querySelectorAll('.tk.active').forEach(x => x.classList.remove('active'));
+  tk.classList.add('active');
+  const key = tk.dataset.key === 'rmk' ? 'rmk' : (tk.dataset.key === 'alt' ? 'alt' : tk.dataset.key);
+  const card = document.querySelector(`.card[data-key="${key}"]`);
+  if (card) {
+    document.querySelectorAll('#anatomy-grid .card.expanded').forEach(x => x.classList.remove('expanded'));
+    card.classList.add('expanded');
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+});
+
+/* Tab switching */
+document.getElementById('tabs').addEventListener('click', e => {
+  const t = e.target.closest('.tab');
+  if (!t) return;
+  document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(x => x.classList.remove('active'));
+  t.classList.add('active');
+  document.getElementById('sec-' + t.dataset.target).classList.add('active');
+});
+
+/* ============================================================
+   PART 2 — METAR PARSER
+   ============================================================ */
+const wxCodes = {
+  // Intensity
+  '-': 'light', '+': 'heavy', 'VC': 'in vicinity (5-10 SM)',
+  // Descriptors
+  MI: 'shallow', PR: 'partial', BC: 'patches', DR: 'low drifting',
+  BL: 'blowing', SH: 'showers', TS: 'thunderstorm', FZ: 'freezing',
+  // Precipitation
+  DZ: 'drizzle', RA: 'rain', SN: 'snow', SG: 'snow grains',
+  IC: 'ice crystals', PL: 'ice pellets', GR: 'hail', GS: 'small hail/snow pellets', UP: 'unknown precip',
+  // Obscuration
+  BR: 'mist', FG: 'fog', FU: 'smoke', DU: 'dust', SA: 'sand', HZ: 'haze', VA: 'volcanic ash',
+  // Other
+  PO: 'dust devils', SQ: 'squall', FC: 'funnel cloud/tornado', SS: 'sandstorm', DS: 'duststorm',
+  // Sky
+  SKC: 'clear (no clouds)', CLR: 'clear below 12,000 ft (automated)',
+  FEW: 'few (1-2/8 sky cover)', SCT: 'scattered (3-4/8)',
+  BKN: 'broken (5-7/8 — ceiling)', OVC: 'overcast (8/8 — ceiling)',
+  VV: 'vertical visibility (sky obscured)',
+  CB: 'cumulonimbus', TCU: 'towering cumulus'
+};
+
+function decodeWx(token) {
+  let t = token, parts = [];
+  // Intensity
+  if (t.startsWith('-')) { parts.push('light'); t = t.slice(1); }
+  else if (t.startsWith('+')) { parts.push('heavy'); t = t.slice(1); }
+  else if (t.startsWith('VC')) { parts.push('in vicinity'); t = t.slice(2); }
+  // Walk 2-letter codes
+  while (t.length >= 2) {
+    const code = t.slice(0, 2);
+    if (wxCodes[code]) {
+      parts.push(wxCodes[code]);
+      t = t.slice(2);
+    } else break;
+  }
+  return parts.join(' ');
+}
+
+function decodeSky(token) {
+  const m = token.match(/^(SKC|CLR|FEW|SCT|BKN|OVC|VV|NSC)(\d{3})?(CB|TCU)?$/);
+  if (!m) return token;
+  const cover = wxCodes[m[1]] || m[1];
+  const height = m[2] ? `${parseInt(m[2]) * 100} ft AGL` : '';
+  const type = m[3] ? ` (${wxCodes[m[3]]})` : '';
+  return [cover, height && `at ${height}`, type].filter(Boolean).join(' ');
+}
+
+function parseMETAR(raw) {
+  const tokens = raw.trim().toUpperCase().split(/\s+/);
+  let i = 0;
+  const out = { raw, type: 'METAR', station: '', time: '', modifier: '', wind: null, windVar: '',
+                visibility: '', visMiles: null, weather: [], sky: [], temp: '', dewpoint: '',
+                altimeter: '', remarks: '', _err: '' };
+
+  if (tokens[i] === 'METAR' || tokens[i] === 'SPECI') out.type = tokens[i++];
+  if (/^[A-Z]{4}$/.test(tokens[i])) out.station = tokens[i++];
+  else { out._err = 'Could not find station identifier'; return out; }
+
+  if (/^\d{6}Z$/.test(tokens[i])) out.time = tokens[i++];
+  if (tokens[i] === 'AUTO' || tokens[i] === 'COR') out.modifier = tokens[i++];
+
+  // Wind
+  let m = tokens[i] && tokens[i].match(/^(VRB|\d{3})(\d{2,3})(G(\d{2,3}))?KT$/);
+  if (m) {
+    out.wind = { direction: m[1], speed: parseInt(m[2]), gust: m[4] ? parseInt(m[4]) : null };
+    i++;
+  }
+  if (tokens[i] && /^\d{3}V\d{3}$/.test(tokens[i])) out.windVar = tokens[i++];
+
+  // Visibility (handle "1 1/2SM" two-token form)
+  if (tokens[i] && /^\d+$/.test(tokens[i]) && tokens[i+1] && /^\d+\/\d+SM$/.test(tokens[i+1])) {
+    out.visibility = tokens[i] + ' ' + tokens[i+1];
+    out.visMiles = parseInt(tokens[i]) + evalFraction(tokens[i+1].replace('SM', ''));
+    i += 2;
+  } else if (tokens[i] && /^M?\d+(\/\d+)?SM$/.test(tokens[i])) {
+    out.visibility = tokens[i];
+    out.visMiles = visToMiles(tokens[i]);
+    i++;
+  }
+
+  // Weather phenomena (multiple)
+  while (i < tokens.length) {
+    if (/^(SKC|CLR|FEW|SCT|BKN|OVC|VV|NSC)/.test(tokens[i])) break;
+    if (/^M?\d{2}\/M?\d{2}$/.test(tokens[i])) break;
+    if (/^A\d{4}$/.test(tokens[i])) break;
+    if (tokens[i] === 'RMK') break;
+    if (/^[+-]?(VC)?(MI|PR|BC|DR|BL|SH|TS|FZ)?(DZ|RA|SN|SG|IC|PL|GR|GS|UP|BR|FG|FU|DU|SA|HZ|VA|PO|SQ|FC|SS|DS)+$/.test(tokens[i])) {
+      out.weather.push(tokens[i++]);
+    } else break;
+  }
+
+  // Sky
+  while (i < tokens.length && /^(SKC|CLR|FEW|SCT|BKN|OVC|VV|NSC)\d{0,3}(CB|TCU)?$/.test(tokens[i])) {
+    out.sky.push(tokens[i++]);
+  }
+
+  // Temp/dewpoint
+  if (tokens[i] && (m = tokens[i].match(/^(M?\d{2})\/(M?\d{2})$/))) {
+    out.temp = m[1]; out.dewpoint = m[2]; i++;
+  }
+
+  // Altimeter
+  if (tokens[i] && /^A\d{4}$/.test(tokens[i])) out.altimeter = tokens[i++];
+
+  // Remarks
+  if (tokens[i] === 'RMK') out.remarks = tokens.slice(i + 1).join(' ');
+
+  return out;
+}
+
+function evalFraction(s) {
+  if (s.includes('/')) {
+    const [n, d] = s.split('/').map(Number);
+    return n / d;
+  }
+  return parseFloat(s);
+}
+
+function visToMiles(s) {
+  s = s.replace('SM', '');
+  if (s.startsWith('M')) return 0.1; // less than the value, treat as small
+  return evalFraction(s);
+}
+
+function tempC(s) {
+  if (!s) return null;
+  return s.startsWith('M') ? -parseInt(s.slice(1)) : parseInt(s);
+}
+
+function getCeiling(skyArr) {
+  // Ceiling = lowest BKN or OVC (or VV)
+  for (const layer of skyArr) {
+    const m = layer.match(/^(BKN|OVC|VV)(\d{3})?/);
+    if (m && m[2]) return parseInt(m[2]) * 100;
+  }
+  return null; // no ceiling
+}
+
+function flightCategory(visMiles, ceilingFt) {
+  const v = visMiles == null ? 99 : visMiles;
+  const c = ceilingFt == null ? 99999 : ceilingFt;
+  if (c < 500 || v < 1) return 'LIFR';
+  if (c < 1000 || v < 3) return 'IFR';
+  if (c <= 3000 || v <= 5) return 'MVFR';
+  return 'VFR';
+}
+
+function categoryDescription(cat) {
+  return {
+    VFR: 'Visual Flight Rules — clear and >5 SM, ceilings >3,000 ft. Good Part 107 conditions.',
+    MVFR: 'Marginal VFR — ceilings 1,000–3,000 ft or visibility 3–5 SM. Part 107 legal but watch cloud clearances.',
+    IFR: 'Instrument Flight Rules — ceilings 500 to <1,000 ft or visibility 1 to <3 SM. Below Part 107 visibility minimum.',
+    LIFR: 'Low IFR — ceilings <500 ft or visibility <1 SM. Do not fly Part 107.'
+  }[cat];
+}
+
+function part107Verdict(visMiles, ceilingFt) {
+  if (visMiles != null && visMiles < 3) return { ok: false, reason: 'Visibility below the 3 SM Part 107 minimum.' };
+  if (ceilingFt != null && ceilingFt < 500) return { ok: false, reason: 'Ceiling too low to maintain 500 ft below clouds at any altitude.' };
+  if (ceilingFt != null && ceilingFt < 900) return { ok: 'caution', reason: 'Low ceiling — you must stay 500 ft below clouds, leaving very little maneuvering altitude.' };
+  return { ok: true, reason: 'Visibility and ceiling meet Part 107 minimums (verify cloud clearances at your operating altitude).' };
+}
+
+/* ============================================================
+   PART 3 — DECODER UI
+   ============================================================ */
+const examples = {
+  vfr: 'METAR KSFO 091856Z 27012KT 10SM FEW015 18/12 A2998',
+  mvfr: 'METAR KOAK 091856Z 24008KT 4SM BR BKN015 OVC025 14/13 A2995',
+  ifr: 'METAR KSFO 091856Z 18006KT 2SM -RA BR OVC008 12/11 A2980',
+  lifr: 'METAR KOAK 091856Z 00000KT 1/2SM FG VV002 10/10 A2978 RMK AO2',
+  ts: 'METAR KOKC 091856Z 24025G35KT 3SM TSRA BKN008CB OVC020 22/19 A2978 RMK AO2 TSB25',
+  snow: 'METAR KMSP 091856Z 36012KT 1/2SM +SN BLSN OVC005 M02/M03 A2998',
+  speci: 'SPECI KSAN 091903Z VRB03KT 5SM HZ FEW020 SCT060 24/15 A3001'
+};
+
+document.querySelectorAll('.ex-chip').forEach(b => {
+  b.addEventListener('click', () => {
+    document.getElementById('metar-input').value = examples[b.dataset.ex];
+    decodeAndRender();
+  });
+});
+
+document.getElementById('decode-btn').addEventListener('click', decodeAndRender);
+document.getElementById('clear-btn').addEventListener('click', () => {
+  document.getElementById('metar-input').value = '';
+  document.getElementById('decoder-output').innerHTML = '';
+});
+
+function decodeAndRender() {
+  const raw = document.getElementById('metar-input').value.trim();
+  const out = document.getElementById('decoder-output');
+  if (!raw) { out.innerHTML = ''; return; }
+
+  const p = parseMETAR(raw);
+  if (p._err) {
+    out.innerHTML = `<div class="error-box">Parser error: ${p._err}. Make sure you've pasted a complete METAR starting with the report type and station.</div>`;
+    return;
+  }
+
+  const ceiling = getCeiling(p.sky);
+  const cat = flightCategory(p.visMiles, ceiling);
+  const verdict = part107Verdict(p.visMiles, ceiling);
+
+  let html = `
+    <div class="summary-bar">
+      <div class="cat cat-${cat}">${cat}</div>
+      <div class="summary-text">${categoryDescription(cat)}</div>
+    </div>
+    <div class="decoded-list">
+  `;
+
+  const rows = [];
+  rows.push(['Type', p.type, p.type === 'METAR' ? 'Routine hourly observation' : 'Special — issued because conditions changed significantly']);
+  rows.push(['Station', p.station, '']);
+  if (p.time) rows.push(['Time', p.time, decodeTime(p.time)]);
+  if (p.modifier) rows.push(['Modifier', p.modifier, p.modifier === 'AUTO' ? 'Automated, no human observer' : 'Correction to a previous report']);
+  if (p.wind) {
+    const dir = p.wind.direction === 'VRB' ? 'variable direction' : `from ${parseInt(p.wind.direction)}° (true)`;
+    const speed = p.wind.speed === 0 ? 'calm' : `${p.wind.speed} kt`;
+    const gust = p.wind.gust ? `, gusting to ${p.wind.gust} kt` : '';
+    rows.push(['Wind', formatWindRaw(p.wind), p.wind.speed === 0 ? 'Calm' : `Wind ${dir} at ${speed}${gust}`]);
+  }
+  if (p.windVar) rows.push(['Wind variable', p.windVar, `Direction varying from ${p.windVar.split('V')[0]}° to ${p.windVar.split('V')[1]}°`]);
+  if (p.visibility) rows.push(['Visibility', p.visibility, p.visMiles >= 3 ? `${p.visibility.replace('SM', '')} statute miles · ✓ Part 107 minimum` : `${p.visibility.replace('SM', '')} statute miles · ✗ below Part 107 minimum (3 SM)`]);
+  if (p.weather.length) rows.push(['Weather', p.weather.join(' '), p.weather.map(decodeWx).join(', ')]);
+  if (p.sky.length) {
+    p.sky.forEach((s, idx) => rows.push([idx === 0 ? 'Sky' : '', s, decodeSky(s)]));
+  }
+  if (ceiling != null) rows.push(['Ceiling', `${ceiling} ft AGL`, `Lowest broken or overcast layer — this drives flight category`]);
+  else if (p.sky.length) rows.push(['Ceiling', 'none', 'No BKN, OVC, or VV layers — unlimited ceiling']);
+  if (p.temp) rows.push(['Temperature', p.temp, `${tempC(p.temp)}°C / ${Math.round(tempC(p.temp) * 9 / 5 + 32)}°F`]);
+  if (p.dewpoint) {
+    const spread = tempC(p.temp) - tempC(p.dewpoint);
+    const fogRisk = spread <= 3 ? ' — small spread, fog risk' : '';
+    rows.push(['Dewpoint', p.dewpoint, `${tempC(p.dewpoint)}°C / ${Math.round(tempC(p.dewpoint) * 9 / 5 + 32)}°F · spread ${spread}°C${fogRisk}`]);
+  }
+  if (p.altimeter) {
+    const inHg = p.altimeter.slice(1, 3) + '.' + p.altimeter.slice(3);
+    rows.push(['Altimeter', p.altimeter, `${inHg} inHg`]);
+  }
+  if (p.remarks) rows.push(['Remarks', p.remarks, decodeRemarks(p.remarks)]);
+
+  // Part 107 verdict row
+  const verdictColor = verdict.ok === true ? 'var(--green)' : verdict.ok === 'caution' ? 'var(--amber)' : 'var(--red)';
+  const verdictLabel = verdict.ok === true ? '✓ OK' : verdict.ok === 'caution' ? '⚠ CAUTION' : '✗ NO-GO';
+
+  rows.forEach(r => {
+    html += `<div class="decoded-row"><div class="raw">${r[0] ? r[0].toUpperCase() : ''} ${r[1] ? `· ${r[1]}` : ''}</div><div class="meaning">${r[2]}</div></div>`;
+  });
+
+  html += `</div>
+    <div style="background: ${verdictColor}; color: white; padding: 1rem 1.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;">
+      <strong>Part 107 ${verdictLabel}</strong> — ${verdict.reason}
+    </div>
+  `;
+
+  out.innerHTML = html;
+}
+
+function formatWindRaw(w) {
+  if (w.direction === 'VRB' && w.speed <= 6) return `VRB${String(w.speed).padStart(2, '0')}KT`;
+  return `${w.direction === 'VRB' ? 'VRB' : w.direction}${String(w.speed).padStart(2, '0')}${w.gust ? 'G' + w.gust : ''}KT`;
+}
+
+function decodeTime(t) {
+  const day = t.slice(0, 2);
+  const hh = t.slice(2, 4);
+  const mm = t.slice(4, 6);
+  return `Day ${parseInt(day)} of the month, ${hh}:${mm} UTC (Zulu)`;
+}
+
+function decodeRemarks(r) {
+  const parts = [];
+  if (/AO2/.test(r)) parts.push('AO2 = automated station with precipitation discriminator');
+  else if (/AO1/.test(r)) parts.push('AO1 = automated station, no precip discriminator');
+  const slp = r.match(/SLP(\d{3})/);
+  if (slp) {
+    const v = parseInt(slp[1]);
+    const mb = v >= 500 ? 900 + v / 10 : 1000 + v / 10;
+    parts.push(`SLP${slp[1]} = sea level pressure ${mb.toFixed(1)} mb`);
+  }
+  const tsb = r.match(/TSB(\d{2})/);
+  if (tsb) parts.push(`TSB${tsb[1]} = thunderstorm began at :${tsb[1]} past the hour`);
+  return parts.length ? parts.join(' · ') : 'Supplementary information';
+}
+
+/* ============================================================
+   PART 4 — QUIZ ENGINE
+   ============================================================ */
+const quizStations = ['KSFO', 'KOAK', 'KSJC', 'KLAX', 'KSAN', 'KLAS', 'KPHX', 'KDEN', 'KORD', 'KJFK', 'KDFW', 'KATL', 'KSEA', 'KBOS', 'KMIA'];
+
+function rnd(n) { return Math.floor(Math.random() * n); }
+function pick(arr) { return arr[rnd(arr.length)]; }
+
+function generateMETAR() {
+  const station = pick(quizStations);
+  const day = String(rnd(28) + 1).padStart(2, '0');
+  const hour = String(rnd(24)).padStart(2, '0');
+  const min = String(Math.floor(rnd(60) / 5) * 5).padStart(2, '0');
+  const time = `${day}${hour}${min}Z`;
+
+  // Wind
+  let wind;
+  const windRoll = Math.random();
+  if (windRoll < 0.1) wind = '00000KT';
+  else if (windRoll < 0.2) wind = `VRB0${rnd(5) + 1}KT`;
+  else {
+    const dir = String(Math.floor(rnd(36)) * 10).padStart(3, '0');
+    const speed = rnd(25) + 3;
+    const gust = speed > 12 && Math.random() < 0.4 ? `G${speed + rnd(10) + 5}` : '';
+    wind = `${dir}${String(speed).padStart(2, '0')}${gust}KT`;
+  }
+
+  // Decide flight category target then build vis + sky to match
+  const targetCat = pick(['VFR', 'VFR', 'VFR', 'MVFR', 'MVFR', 'IFR', 'LIFR']);
+  let vis, visMiles, sky, ceiling;
+  if (targetCat === 'VFR') {
+    visMiles = pick([10, 10, 10, 7, 8]);
+    vis = `${visMiles}SM`;
+    const layerH = 4000 + rnd(50) * 100;
+    if (Math.random() < 0.3) sky = ['SKC'];
+    else if (Math.random() < 0.5) sky = [`FEW${String(rnd(50) + 30).padStart(3, '0')}`];
+    else sky = [`SCT${String(rnd(50) + 30).padStart(3, '0')}`, `BKN${String(Math.floor(layerH/100)).padStart(3, '0')}`];
+    ceiling = sky.find(s => s.startsWith('BKN') || s.startsWith('OVC')) ? layerH : null;
+  } else if (targetCat === 'MVFR') {
+    if (Math.random() < 0.5) {
+      visMiles = pick([3, 4, 5]);
+      vis = `${visMiles}SM`;
+      sky = [`SCT${String(rnd(30) + 20).padStart(3, '0')}`, `BKN${String(rnd(20) + 40).padStart(3, '0')}`];
+      ceiling = parseInt(sky[1].slice(3)) * 100;
+    } else {
+      visMiles = pick([6, 7, 10]);
+      vis = `${visMiles}SM`;
+      const c = rnd(20) + 10; // 1000-3000
+      sky = [`BKN${String(c).padStart(3, '0')}`];
+      ceiling = c * 100;
+    }
+  } else if (targetCat === 'IFR') {
+    if (Math.random() < 0.5) {
+      visMiles = pick([1, 1.5, 2, 2.5]);
+      vis = visMiles === 1 ? '1SM' : (visMiles === 1.5 ? '1 1/2SM' : (visMiles === 2 ? '2SM' : '2 1/2SM'));
+      sky = [`OVC${String(rnd(8) + 7).padStart(3, '0')}`];
+      ceiling = parseInt(sky[0].slice(3)) * 100;
+    } else {
+      visMiles = pick([3, 4, 5]);
+      vis = `${visMiles}SM`;
+      const c = rnd(5) + 5; // 500-1000
+      sky = [`OVC${String(c).padStart(3, '0')}`];
+      ceiling = c * 100;
+    }
+  } else { // LIFR
+    visMiles = pick([0.25, 0.5, 0.75]);
+    vis = visMiles === 0.25 ? '1/4SM' : (visMiles === 0.5 ? '1/2SM' : '3/4SM');
+    sky = [`OVC00${rnd(3) + 1}`];
+    ceiling = parseInt(sky[0].slice(3)) * 100;
+  }
+
+  // Weather phenomena (sometimes)
+  const weather = [];
+  if (visMiles < 3 && Math.random() < 0.6) {
+    if (visMiles < 1) weather.push('FG');
+    else weather.push(pick(['BR', '-RA', 'HZ']));
+  }
+  if (targetCat === 'IFR' && Math.random() < 0.3) weather.push(pick(['-RA', 'BR']));
+
+  // Temp/dewpoint
+  const t = rnd(35) - 5; // -5 to 30
+  const dpSpread = visMiles < 3 ? rnd(2) : rnd(8) + 1;
+  const dp = t - dpSpread;
+  const tStr = (t < 0 ? 'M' + String(Math.abs(t)).padStart(2, '0') : String(t).padStart(2, '0'));
+  const dpStr = (dp < 0 ? 'M' + String(Math.abs(dp)).padStart(2, '0') : String(dp).padStart(2, '0'));
+
+  // Altimeter
+  const alt = `A${String(2950 + rnd(80)).padStart(4, '0')}`;
+
+  const reportType = Math.random() < 0.85 ? 'METAR' : 'SPECI';
+  const raw = [reportType, station, time, wind, vis, ...weather, ...sky, `${tStr}/${dpStr}`, alt].join(' ');
+
+  return { raw, station, wind, visMiles, vis, weather, sky, ceiling, cat: targetCat, temp: tStr, dewpoint: dpStr };
+}
+
+function generateQuestion() {
+  const m = generateMETAR();
+  const types = ['flightCategory', 'visibility', 'ceiling', 'wind', 'part107', 'phenomenon'];
+  let type = pick(types);
+
+  // Skip phenomenon question if no weather
+  if (type === 'phenomenon' && !m.weather.length) type = 'flightCategory';
+
+  const q = { metar: m, question: '', options: [], correctIdx: 0, explanation: '' };
+
+  if (type === 'flightCategory') {
+    q.question = 'What flight category does this report?';
+    const opts = ['VFR', 'MVFR', 'IFR', 'LIFR'];
+    q.options = opts;
+    q.correctIdx = opts.indexOf(m.cat);
+    q.explanation = `Visibility ${m.vis} ${m.visMiles >= 5 ? '(>5 SM, VFR-OK)' : m.visMiles >= 3 ? '(3–5 SM, MVFR)' : m.visMiles >= 1 ? '(1–<3 SM, IFR)' : '(<1 SM, LIFR)'}; ` +
+      `ceiling ${m.ceiling ? m.ceiling + ' ft' : 'unlimited'} ${m.ceiling == null || m.ceiling > 3000 ? '(>3,000 ft, VFR-OK)' : m.ceiling >= 1000 ? '(1,000–3,000 ft, MVFR)' : m.ceiling >= 500 ? '(500–<1,000 ft, IFR)' : '(<500 ft, LIFR)'}. ` +
+      `Worse of the two = ${m.cat}.`;
+  } else if (type === 'visibility') {
+    q.question = 'What is the prevailing visibility?';
+    const correct = m.visMiles >= 1 ? `${m.visMiles} statute miles` : `${m.vis.replace('SM', '')} statute miles`;
+    const distractors = ['10 nautical miles', `${m.visMiles} nautical miles`, `${Math.max(0.25, m.visMiles - 2)} statute miles`, `${m.visMiles + 3} statute miles`];
+    q.options = shuffle([correct, ...distractors.slice(0, 3)]);
+    q.correctIdx = q.options.indexOf(correct);
+    q.explanation = `Visibility in METARs is ALWAYS in statute miles (SM), never nautical miles. The "SM" suffix is the giveaway: ${m.vis}.`;
+  } else if (type === 'ceiling') {
+    q.question = 'What is the ceiling?';
+    const correct = m.ceiling ? `${m.ceiling} ft AGL` : 'No ceiling reported';
+    let opts;
+    if (m.ceiling) {
+      opts = [correct, `${m.ceiling} ft MSL`, `${m.ceiling / 10} ft AGL`, 'No ceiling reported'];
+    } else {
+      opts = ['No ceiling reported', 'Cannot be determined', '12,000 ft AGL', '3,000 ft AGL'];
+    }
+    q.options = shuffle(opts);
+    q.correctIdx = q.options.indexOf(correct);
+    q.explanation = `Ceiling = lowest BKN or OVC layer (or VV). ` +
+      (m.ceiling
+        ? `Sky condition shows ${m.sky.join(', ')}. The lowest broken/overcast is ${m.ceiling} ft AGL. Heights in METARs are AGL, not MSL.`
+        : `No layer in this report is BKN or OVC, so there is no ceiling.`);
+  } else if (type === 'wind') {
+    const w = parseMETAR(m.raw).wind;
+    if (!w || w.speed === 0) { return generateQuestion(); }
+    q.question = 'What is the wind direction and speed?';
+    const dir = w.direction === 'VRB' ? 'variable' : `${parseInt(w.direction)}° true`;
+    const speed = `${w.speed} kt${w.gust ? ', gusting ' + w.gust + ' kt' : ''}`;
+    const correct = `From ${dir} at ${speed}`;
+    const wrongDir = w.direction === 'VRB' ? '270° true' : `${(parseInt(w.direction) + 180) % 360}° true`;
+    const distractors = [
+      `From ${wrongDir} at ${speed}`,
+      `Toward ${dir} at ${speed}`,
+      `From ${dir} at ${w.speed} mph${w.gust ? ', gusting ' + w.gust + ' mph' : ''}`
+    ];
+    q.options = shuffle([correct, ...distractors]);
+    q.correctIdx = q.options.indexOf(correct);
+    q.explanation = `Wind in a METAR is direction FROM (where the wind is coming from) at speed in KNOTS, not mph. Direction is in degrees TRUE. ${m.wind} parses to: from ${dir} at ${speed}.`;
+  } else if (type === 'part107') {
+    q.question = 'Are these conditions legal for standard Part 107 operations?';
+    const verdict = part107Verdict(m.visMiles, m.ceiling);
+    let correct;
+    if (verdict.ok === false) correct = 'No — visibility or ceiling below minimums';
+    else if (verdict.ok === 'caution') correct = 'Yes, but tight — low ceiling restricts operating altitude';
+    else correct = 'Yes — visibility and ceiling meet minimums';
+    const opts = [
+      'Yes — visibility and ceiling meet minimums',
+      'Yes, but tight — low ceiling restricts operating altitude',
+      'No — visibility or ceiling below minimums',
+      'Only with a Part 107 waiver'
+    ];
+    q.options = opts;
+    q.correctIdx = opts.indexOf(correct);
+    q.explanation = `Part 107 requires ≥3 SM visibility from the control station and that you stay 500 ft below clouds, 2,000 ft horizontal. Vis ${m.vis} ${m.visMiles >= 3 ? '✓' : '✗'} · ceiling ${m.ceiling ? m.ceiling + ' ft' : 'unlimited'}. ${verdict.reason}`;
+  } else if (type === 'phenomenon') {
+    const wx = pick(m.weather);
+    q.question = `What does "${wx}" mean?`;
+    const correct = decodeWx(wx);
+    const allWx = ['light rain', 'heavy snow', 'mist', 'fog', 'thunderstorm with rain', 'haze', 'blowing snow', 'freezing drizzle'];
+    const distractors = allWx.filter(x => x !== correct).sort(() => Math.random() - 0.5).slice(0, 3);
+    q.options = shuffle([correct, ...distractors]);
+    q.correctIdx = q.options.indexOf(correct);
+    q.explanation = `Weather codes parse left to right: intensity (− light, blank moderate, + heavy), descriptor (TS, SH, FZ...), then phenomenon (RA, SN, FG...). "${wx}" = ${correct}.`;
+  }
+
+  return q;
+}
+
+function shuffle(a) { return a.slice().sort(() => Math.random() - 0.5); }
+
+/* Quiz state */
+let quiz = { current: null, total: 0, correct: 0, streak: 0, answered: false };
+
+function renderQuiz() {
+  quiz.current = generateQuestion();
+  quiz.answered = false;
+  document.getElementById('quiz-metar').textContent = quiz.current.metar.raw;
+  document.getElementById('quiz-question').textContent = quiz.current.question;
+  document.getElementById('quiz-feedback').classList.remove('show');
+  document.getElementById('quiz-feedback').innerHTML = '';
+  const optsEl = document.getElementById('quiz-options');
+  optsEl.innerHTML = '';
+  quiz.current.options.forEach((o, i) => {
+    const b = document.createElement('button');
+    b.className = 'opt';
+    b.innerHTML = `<span class="opt-letter">${String.fromCharCode(65 + i)}</span><span>${o}</span>`;
+    b.addEventListener('click', () => answerQuiz(i, b));
+    optsEl.appendChild(b);
+  });
+  document.getElementById('next-q-btn').textContent = 'Skip →';
+}
+
+function answerQuiz(idx, btn) {
+  if (quiz.answered) return;
+  quiz.answered = true;
+  quiz.total++;
+  const allBtns = document.querySelectorAll('#quiz-options .opt');
+  allBtns.forEach((b, i) => {
+    b.disabled = true;
+    if (i === quiz.current.correctIdx) b.classList.add('correct');
+    if (i === idx && i !== quiz.current.correctIdx) b.classList.add('wrong');
+  });
+  if (idx === quiz.current.correctIdx) {
+    quiz.correct++;
+    quiz.streak++;
+  } else {
+    quiz.streak = 0;
+  }
+  const fb = document.getElementById('quiz-feedback');
+  fb.innerHTML = `<strong>${idx === quiz.current.correctIdx ? '✓ Correct' : '✗ Not quite'}</strong>${quiz.current.explanation}`;
+  fb.classList.add('show');
+  document.getElementById('quiz-correct').textContent = quiz.correct;
+  document.getElementById('quiz-total').textContent = quiz.total;
+  document.getElementById('quiz-streak').textContent = quiz.streak;
+  document.getElementById('next-q-btn').textContent = 'Next question →';
+}
+
+document.getElementById('next-q-btn').addEventListener('click', renderQuiz);
+renderQuiz();
+</script>
+</body>
+</html>

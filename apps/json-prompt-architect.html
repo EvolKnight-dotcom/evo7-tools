@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <title>JSON Prompt Architect Studio v2026.07 — Evol Knight Media</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Orbitron:wght@600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+      --violet: #4B0077;
+      --violet-glow: #7A1FA2;
+      --magenta: #EA33F7;
+      --gold: #C9A24A;
+      --bg: #000000;
+      --panel: #111111;
+      --panel-alt: #18181B;
+      --border: #27272A;
+      --text: #F4F4F5;
+      --paper: #FFFFFF;
+      --muted: #A1A1AA;
+      --emerald: #10B981;
+      --danger: #EF4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: radial-gradient(circle at 15% 0%, rgba(75, 0, 119, 0.35), transparent 45%), var(--bg);
+      color: var(--text);
+      font-family: 'Lato', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+    h1, h2, h3, h4 {
+      font-family: 'Orbitron', sans-serif;
+      letter-spacing: 0.06em;
+      text-wrap: balance;
+      color: var(--paper);
+    }
+    p, li { text-wrap: pretty; }
+    header {
+      border-bottom: 1px solid rgba(201, 162, 74, 0.3);
+      background: rgba(17, 17, 17, 0.92);
+      backdrop-filter: blur(12px);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+    }
+    .brand img {
+      width: 38px;
+      height: 38px;
+      object-fit: contain;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 0.25rem 0.65rem;
+      border-radius: 4px;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      background: rgba(201, 162, 74, 0.1);
+    }
+    .badge-magenta {
+      border-color: var(--magenta);
+      color: var(--magenta);
+      background: rgba(234, 51, 247, 0.1);
+    }
+    main {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem 3rem;
+      display: grid;
+      grid-template-columns: 440px 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 1080px) {
+      main { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.65rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .mode-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+      margin-bottom: 1.15rem;
+    }
+    .mode-btn {
+      background: var(--panel-alt);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.7rem 0.9rem;
+      border-radius: 6px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .mode-btn:hover {
+      border-color: var(--violet-glow);
+      background: rgba(75, 0, 119, 0.2);
+    }
+    .mode-btn.active {
+      background: linear-gradient(135deg, rgba(75, 0, 119, 0.65), rgba(17, 17, 17, 0.95));
+      border-color: var(--magenta);
+      box-shadow: 0 0 16px rgba(234, 51, 247, 0.2);
+    }
+    .mode-code {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.78rem;
+      color: var(--gold);
+      font-weight: 700;
+    }
+    .mode-title {
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: var(--paper);
+    }
+    .mode-sub {
+      font-size: 0.76rem;
+      color: var(--muted);
+    }
+    .field {
+      margin-bottom: 0.9rem;
+    }
+    label {
+      display: block;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+      font-weight: 700;
+    }
+    input, select, textarea {
+      width: 100%;
+      background: #08080A;
+      border: 1px solid var(--border);
+      color: var(--paper);
+      padding: 0.6rem 0.75rem;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--magenta);
+    }
+    textarea {
+      min-height: 76px;
+      resize: vertical;
+    }
+    .row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-top: 1rem;
+    }
+    .btn {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.65rem 1rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--panel-alt);
+      color: var(--paper);
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+    .btn:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+    .btn-primary {
+      background: var(--violet);
+      border-color: var(--magenta);
+      color: var(--paper);
+    }
+    .btn-primary:hover {
+      background: #62009B;
+      box-shadow: 0 0 14px rgba(234, 51, 247, 0.35);
+      color: var(--paper);
+    }
+    .summary-box {
+      background: rgba(75, 0, 119, 0.16);
+      border-left: 3px solid var(--gold);
+      padding: 0.9rem 1rem;
+      border-radius: 0 6px 6px 0;
+      margin-bottom: 1rem;
+      font-size: 0.92rem;
+    }
+    .code-area {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      line-height: 1.55;
+      background: #050507;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      color: #E4E4E7;
+      min-height: 520px;
+      white-space: pre;
+      overflow-x: auto;
+    }
+    .pill-row {
+      display: flex;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+      margin-top: 0.4rem;
+    }
+    .pill {
+      font-size: 0.73rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      background: #1E1E24;
+      border: 1px solid #32323C;
+      color: var(--text);
+      cursor: pointer;
+    }
+    .pill:hover {
+      border-color: var(--magenta);
+    }
+    .status-ok { color: var(--emerald); font-size: 0.8rem; font-weight: 700; }
+    .back-link {
+      color: var(--gold);
+      text-decoration: none;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+    }
+    .back-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <img src="../assets/knight-helmet-violett.png" alt="Evol Knight Media Helmet">
+      <div>
+        <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;">
+          <h1 style="font-size:1.15rem;">JSON PROMPT ARCHITECT STUDIO</h1>
+          <span class="badge">v2026.07</span>
+          <span class="badge badge-magenta">◆ New and Improved</span>
+        </div>
+        <p style="font-size:0.82rem;color:var(--muted);">Interactive 5-Mode Router &amp; Strict Schema Compiler (Modes A–E)</p>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <a class="back-link" href="../index.html">◀ RETURN TO TOOL HUB</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="card" aria-label="Mode Router and Controls">
+      <div class="card-header">
+        <h2 style="font-size:0.95rem;">00_ROUTER // SELECT MODE</h2>
+        <button class="btn" id="autoDetectBtn" type="button" title="Detect mode from natural brief">Auto-Route</button>
+      </div>
+
+      <div class="field">
+        <label for="naturalBrief">Natural Language Brief / Request</label>
+        <textarea id="naturalBrief" placeholder="Describe the shot, edit, wardrobe transfer, turnaround sheet, or environment plate..."></textarea>
+        <div class="pill-row">
+          <button type="button" class="pill" data-preset="modeA">Preset: Mode A Retouch</button>
+          <button type="button" class="pill" data-preset="modeB">Preset: Mode B Portrait</button>
+          <button type="button" class="pill" data-preset="modeC">Preset: Mode C XIRIX Fit</button>
+          <button type="button" class="pill" data-preset="modeD">Preset: Mode D Turnaround</button>
+          <button type="button" class="pill" data-preset="modeE">Preset: Mode E Plate</button>
+        </div>
+      </div>
+
+      <div class="mode-grid" role="radiogroup" aria-label="Prompt Architect Modes">
+        <button type="button" class="mode-btn active" data-mode="MODE_A">
+          <div>
+            <div class="mode-code">MODE A // EDIT SCRIPT</div>
+            <div class="mode-title">Image Retouch &amp; Inpainting</div>
+            <div class="mode-sub">Single uploaded photo; locks face, pose, camera &amp; background</div>
+          </div>
+          <span>●</span>
+        </button>
+        <button type="button" class="mode-btn" data-mode="MODE_B">
+          <div>
+            <div class="mode-code">MODE B // GENERATE</div>
+            <div class="mode-title">New Image or Identity-Locked Scene</div>
+            <div class="mode-sub">Text-to-image or reference face placed in a brand new scene</div>
+          </div>
+          <span>●</span>
+        </button>
+        <button type="button" class="mode-btn" data-mode="MODE_C">
+          <div>
+            <div class="mode-code">MODE_C // WARDROBE TRANSFER</div>
+            <div class="mode-title">2-Image Composite (Body + Outfit)</div>
+            <div class="mode-sub">Image 1 = Identity/Pose lock · Image 2 = Garment donor</div>
+          </div>
+          <span>●</span>
+        </button>
+        <button type="button" class="mode-btn" data-mode="MODE_D">
+          <div>
+            <div class="mode-code">MODE D // TURNAROUND / NOVEL VIEW</div>
+            <div class="mode-title">Multi-Angle Sheet or Camera Re-Angle</div>
+            <div class="mode-sub">Front / 3/4 / Profile / Back character sheet or single new angle</div>
+          </div>
+          <span>●</span>
+        </button>
+        <button type="button" class="mode-btn" data-mode="MODE_E">
+          <div>
+            <div class="mode-code">MODE E // BACKGROUND PLATE</div>
+            <div class="mode-title">Clean Environment / Stage Plate</div>
+            <div class="mode-sub">Zero characters; architectural or atmospheric backdrop</div>
+          </div>
+          <span>●</span>
+        </button>
+      </div>
+
+      <div class="row-2">
+        <div class="field">
+          <label for="aspectRatio">Aspect Ratio</label>
+          <select id="aspectRatio">
+            <option value="4:5">4:5 (Editorial Portrait Default)</option>
+            <option value="16:9">16:9 (Cinematic / Turnaround Sheet)</option>
+            <option value="9:16">9:16 (Vertical Reel / Full Body)</option>
+            <option value="1:1">1:1 (Square Study)</option>
+            <option value="21:9">21:9 (Anamorphic Widescreen)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="lensChoice">Camera &amp; Lens</label>
+          <select id="lensChoice">
+            <option value="85mm f/2.0 prime, ISO 100">85mm f/2.0 Prime (Portrait Default)</option>
+            <option value="50mm f/2.8 prime, ISO 100">50mm f/2.8 Prime (Full Body / Mid)</option>
+            <option value="35mm f/4.0 prime, ISO 100">35mm f/4.0 Wide (Environmental)</option>
+            <option value="24mm f/5.6 architectural, ISO 100">24mm f/5.6 Architectural (Plate)</option>
+            <option value="LOCKED_TO_SOURCE">Locked to Source Camera (Mode A/C)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="primaryAction">Primary Change / Subject Directive</label>
+        <input type="text" id="primaryAction" value="Sculpted matte obsidian streetwear jacket with subtle gold trim; natural skin texture preserved.">
+      </div>
+
+      <div class="row-2">
+        <div class="field">
+          <label for="brandGuard">Brand Text Guardrail</label>
+          <select id="brandGuard">
+            <option value="NONE">No Text / No Logos</option>
+            <option value="EVO7">EVO7 Exact Spelling Guard</option>
+            <option value="XIRIX">XIRIX Exact Spelling Guard</option>
+            <option value="EKM">EVOL KNIGHT MEDIA Guard</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="lightingRig">Lighting Profile</label>
+          <select id="lightingRig">
+            <option value="Soft key at 45 deg left, subtle cool rim light, natural shadow falloff">45° Key + Cool Rim (Cinematic)</option>
+            <option value="Match original source image lighting direction, color temperature, and shadow density">Match Source Image Lighting</option>
+            <option value="Neutral even studio cross-polarization, zero harsh specular hotspots">Neutral Studio Turnaround</option>
+            <option value="Golden hour directional sunlight with warm bounce fill">Golden Hour Directional</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button type="button" class="btn btn-primary" id="compileBtn">Compile JSON Schema</button>
+        <button type="button" class="btn" id="copyJsonBtn">Copy JSON</button>
+        <button type="button" class="btn" id="downloadJsonBtn">Export .json</button>
+      </div>
+    </section>
+
+    <section class="card" aria-label="Compiled JSON Output">
+      <div class="card-header">
+        <div>
+          <h2 style="font-size:0.95rem;" id="activeSchemaTitle">COMPILED SCHEMA // MODE_A_EDIT_SCRIPT</h2>
+          <p style="font-size:0.78rem;color:var(--muted);">One JSON code block + max 4-sentence Architect Summary</p>
+        </div>
+        <span class="status-ok" id="validationStatus">◆ VALID JSON SCHEMA</span>
+      </div>
+
+      <div class="summary-box" id="architectSummary"></div>
+      <pre class="code-area" id="jsonOutput" tabindex="0"></pre>
+    </section>
+  </main>
+
+  <script>
+    const state = {
+      mode: 'MODE_A'
+    };
+
+    const presets = {
+      modeA: {
+        mode: 'MODE_A',
+        brief: 'Retouch uploaded portrait: replace wrinkled tee with a tailored charcoal merino crewneck, clean stray flyaway hairs, and keep face, glasses, and lighting 100% locked.',
+        aspect: '4:5',
+        lens: 'LOCKED_TO_SOURCE',
+        action: 'Replace shirt with tailored charcoal merino wool crewneck sweater; clean stray flyaways along top hairline.',
+        guard: 'NONE',
+        lighting: 'Match original source image lighting direction, color temperature, and shadow density'
+      },
+      modeB: {
+        mode: 'MODE_B',
+        brief: 'Create a dramatic editorial portrait of an athletic futuristic creative director standing inside a dark obsidian control room with subtle violet and warm gold edge lighting.',
+        aspect: '4:5',
+        lens: '85mm f/2.0 prime, ISO 100',
+        action: 'Confident creative director in structured matte black outerwear standing in an onyx control room with restrained violet and gold console reflections.',
+        guard: 'EVO7',
+        lighting: 'Soft key at 45 deg left, subtle cool rim light, natural shadow falloff'
+      },
+      modeC: {
+        mode: 'MODE_C',
+        brief: 'Transfer the garment from Image 2 onto the person in Image 1 while locking Image 1 identity, body proportions, hands, and background.',
+        aspect: '4:5',
+        lens: 'LOCKED_TO_SOURCE',
+        action: 'Transfer sculpted XIRIX heavyweight bomber and technical cargo trousers from Image 2 onto Subject in Image 1 with natural drape and seam tension.',
+        guard: 'XIRIX',
+        lighting: 'Match original source image lighting direction, color temperature, and shadow density'
+      },
+      modeD: {
+        mode: 'MODE_D',
+        brief: 'Generate a 4-view character turnaround sheet (Front, 3/4 Left, Side Profile, Back) in neutral A-pose with consistent footwear and proportions.',
+        aspect: '16:9',
+        lens: '85mm f/2.0 prime, ISO 100',
+        action: 'Four-panel orthographic turnaround sheet (Front, 3/4, Side, Back) in relaxed A-pose on a seamless dark neutral studio floor.',
+        guard: 'EVO7',
+        lighting: 'Neutral even studio cross-polarization, zero harsh specular hotspots'
+      },
+      modeE: {
+        mode: 'MODE_E',
+        brief: 'Empty architectural background plate of a brutalist basalt gallery hallway with wet terrazzo floor reflections and distant violet skylight.',
+        aspect: '21:9',
+        lens: '24mm f/5.6 architectural, ISO 100',
+        action: 'Unpopulated brutalist basalt gallery corridor with honed dark stone walls, subtle gold brass floor inlays, and soft top-down diffused skylight.',
+        guard: 'NONE',
+        lighting: 'Soft key at 45 deg left, subtle cool rim light, natural shadow falloff'
+      }
+    };
+
+    function getGuardDisallowed(guard) {
+      const base = [
+        'plastic skin', 'airbrushed pores', 'extra fingers', 'warped pupils',
+        'melted seams', 'Random gibberish text', 'fake brand logos', 'watermark'
+      ];
+      if (guard === 'EVO7') {
+        return base.concat(['EV07', 'EVOT', 'EVO 7', 'E7O7', 'misspelled EVO7 emblem']);
+      }
+      if (guard === 'XIRIX') {
+        return base.concat(['XIRX', 'X1RIX', 'XIRIXX', 'ZIRIX', 'XYRIX', 'misspelled XIRIX chest logo']);
+      }
+      if (guard === 'EKM') {
+        return base.concat(['EVOL NIGHT', 'EVOL KNGHT', 'garbled typography']);
+      }
+      return base;
+    }
+
+    function buildSchema() {
+      const mode = state.mode;
+      const brief = document.getElementById('naturalBrief').value.trim();
+      const aspect = document.getElementById('aspectRatio').value;
+      const lens = document.getElementById('lensChoice').value;
+      const action = document.getElementById('primaryAction').value.trim() || brief || 'Execute precision visual directive with photorealistic material fidelity.';
+      const guard = document.getElementById('brandGuard').value;
+      const lighting = document.getElementById('lightingRig').value;
+      const disallowed = getGuardDisallowed(guard);
+
+      let payload = {};
+      let summarySentences = [];
+
+      if (mode === 'MODE_A') {
+        payload = {
+          prompt_type: 'image_edit_script',
+          version: '2026-07',
+          source_image_lock: {
+            preserve_identity: true,
+            preserve_pose_and_framing: true,
+            preserve_camera_geometry: true,
+            preserve_unmentioned_background: true
+          },
+          requested_modifications: {
+            primary_edit: action,
+            material_and_skin_realism: 'Retain natural skin micro-texture, realistic fabric weave, and physically accurate contact shadows.',
+            lighting_integration: lighting
+          },
+          output_constraints: {
+            aspect_ratio: aspect,
+            camera_lock: lens,
+            brand_text_guard: guard
+          },
+          disallowed: disallowed
+        };
+        summarySentences = [
+          'Routed to MODE A (Edit Script) to modify an existing source photograph without breaking identity or scene geometry.',
+          'Face, expression, body proportions, and unmentioned background regions remain strictly locked to the input image.',
+          'Lighting direction and shadow density are matched to the source capture to prevent pasted-on artifacts.',
+          guard !== 'NONE' ? `Applied ${guard} exact-spelling typo rejection rules inside the disallowed array.` : 'Enforced anti-plastic skin and zero-gibberish text guardrails.'
+        ];
+      } else if (mode === 'MODE_B') {
+        payload = {
+          prompt_type: 'generate_scene',
+          version: '2026-07',
+          scene_overview: {
+            concept: action,
+            environment: brief || 'High-contrast architectural studio environment with disciplined material depth.',
+            mood: 'Cinematic, high-contrast, disciplined, human-centered realism'
+          },
+          subject_specification: {
+            identity_mode: 'reference_locked_or_bespoke',
+            skin_and_grooming: 'Natural epidermal pores, realistic catchlights, zero over-smoothed beauty filter',
+            wardrobe_and_materials: action
+          },
+          camera_and_lighting: {
+            aspect_ratio: aspect,
+            lens_and_exposure: lens === 'LOCKED_TO_SOURCE' ? '85mm f/2.0 prime, ISO 100' : lens,
+            lighting_rig: lighting
+          },
+          brand_typography_guard: guard,
+          disallowed: disallowed
+        };
+        summarySentences = [
+          'Routed to MODE B (Generate) for synthesizing a complete scene with full camera, lighting, and material control.',
+          `Configured optical framing at ${aspect} using ${lens === 'LOCKED_TO_SOURCE' ? '85mm f/2.0 prime, ISO 100' : lens} for zero wide-angle facial distortion.`,
+          'Skin realism locks prevent waxy AI smoothing while preserving crisp textile weave and specular fidelity.',
+          guard !== 'NONE' ? `Included strict ${guard} orthographic lock and typo rejection tokens.` : 'Added negative constraints against watermarks, extra digits, and hallucinated signage.'
+        ];
+      } else if (mode === 'MODE_C') {
+        payload = {
+          prompt_type: 'wardrobe_transfer_composite',
+          version: '2026-07',
+          input_roles: {
+            image_1_target_subject: 'Lock face identity, head angle, body proportions, hand placement, and scene background from Image 1.',
+            image_2_garment_donor: 'Extract only garment silhouette, textile weave, seams, hardware, and colorway from Image 2; ignore Image 2 face and body.'
+          },
+          transfer_directives: {
+            garment_specification: action,
+            drape_and_fit: 'Conform garment naturally to Image 1 posture with accurate collar lay, shoulder seam alignment, and ambient occlusion.',
+            lighting_reconciliation: lighting
+          },
+          output_constraints: {
+            aspect_ratio: aspect,
+            brand_text_guard: guard
+          },
+          disallowed: disallowed.concat(['blending Image 2 face onto Image 1', 'changing Image 1 background', 'floating collar'])
+        };
+        summarySentences = [
+          'Routed to MODE C (Wardrobe Transfer) for a two-image composite separating subject identity (Image 1) from garment donor (Image 2).',
+          'Image 1 locks the subject face, pose, hands, and environment while Image 2 donates only the clothing construction and fabric texture.',
+          'Garment drape, collar tension, and contact shadows are reconciled against Image 1 lighting.',
+          guard !== 'NONE' ? `Protected ${guard} garment branding against common AI glyph corruption.` : 'Blocked donor-identity bleed and background contamination.'
+        ];
+      } else if (mode === 'MODE_D') {
+        payload = {
+          prompt_type: 'turnaround_or_novel_view',
+          version: '2026-07',
+          sheet_layout: {
+            mode: 'multi_angle_character_sheet',
+            views: ['Front (0 deg)', 'Three-Quarter Left (45 deg)', 'Side Profile (90 deg)', 'Back (180 deg)'],
+            pose: 'Relaxed symmetrical A-pose, full head-to-toe framing including footwear on a shared ground line',
+            aspect_ratio: aspect
+          },
+          consistency_locks: {
+            subject_and_wardrobe: action,
+            optical_focal_length: '85mm telephoto compression across all panels for uniform head-to-body scale',
+            lighting_rig: lighting
+          },
+          brand_typography_guard: guard,
+          disallowed: disallowed.concat(['cropped feet', 'inconsistent height between panels', 'changing garment details across angles'])
+        };
+        summarySentences = [
+          'Routed to MODE D (Turnaround / Novel View) to enforce cross-angle identity and wardrobe consistency.',
+          'Locked all panels to a shared ground plane, uniform 85mm optical perspective, and full head-to-toe framing.',
+          'Neutral cross-polarized lighting eliminates directional shadow confusion across Front, 3/4, Profile, and Back views.',
+          'Prevented cropped footwear, scale drift, and garment mutation between orthographic angles.'
+        ];
+      } else {
+        payload = {
+          prompt_type: 'environment_background_plate',
+          version: '2026-07',
+          plate_specification: {
+            architecture_and_materials: action,
+            atmosphere_and_depth: brief || 'Clean architectural depth with physically plausible reflections and clear subject staging zone in midground.',
+            human_presence: 'STRICTLY_ZERO_PEOPLE'
+          },
+          camera_and_lighting: {
+            aspect_ratio: aspect,
+            lens_and_horizon: lens === 'LOCKED_TO_SOURCE' ? '24mm f/5.6 architectural, ISO 100' : lens,
+            lighting_rig: lighting
+          },
+          disallowed: disallowed.concat(['people', 'pedestrians', 'silhouettes', 'mannequins', 'reflections of people', 'cluttered foreground props'])
+        };
+        summarySentences = [
+          'Routed to MODE E (Background Plate) for an unpopulated environment ready for composite staging.',
+          'Enforced strict zero-character constraints including reflections, silhouettes, and background crowds.',
+          `Set camera geometry to ${aspect} with clean perspective lines and a clear midground floor plane.`,
+          'Preserved realistic surface roughness on stone, metal, and glass without oversaturated neon clutter.'
+        ];
+      }
+
+      document.getElementById('activeSchemaTitle').textContent = `COMPILED SCHEMA // ${mode}`;
+      document.getElementById('architectSummary').textContent = summarySentences.join(' ');
+      const formatted = JSON.stringify(payload, null, 2);
+      document.getElementById('jsonOutput').textContent = formatted;
+
+      try {
+        JSON.parse(formatted);
+        document.getElementById('validationStatus').textContent = '◆ VALID JSON SCHEMA';
+      } catch (e) {
+        document.getElementById('validationStatus').textContent = '▲ JSON ERROR';
+      }
+    }
+
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.mode = btn.dataset.mode;
+        buildSchema();
+      });
+    });
+
+    document.querySelectorAll('.pill[data-preset]').forEach(pill => {
+      pill.addEventListener('click', () => {
+        const p = presets[pill.dataset.preset];
+        if (!p) return;
+        state.mode = p.mode;
+        document.querySelectorAll('.mode-btn').forEach(b => {
+          b.classList.toggle('active', b.dataset.mode === p.mode);
+        });
+        document.getElementById('naturalBrief').value = p.brief;
+        document.getElementById('aspectRatio').value = p.aspect;
+        document.getElementById('lensChoice').value = p.lens;
+        document.getElementById('primaryAction').value = p.action;
+        document.getElementById('brandGuard').value = p.guard;
+        document.getElementById('lightingRig').value = p.lighting;
+        buildSchema();
+      });
+    });
+
+    document.getElementById('autoDetectBtn').addEventListener('click', () => {
+      const text = (document.getElementById('naturalBrief').value + ' ' + document.getElementById('primaryAction').value).toLowerCase();
+      let detected = 'MODE_B';
+      if (text.includes('image 2') || text.includes('transfer') || text.includes('donor') || text.includes('outfit from')) {
+        detected = 'MODE_C';
+      } else if (text.includes('turnaround') || text.includes('orthographic') || text.includes('4-view') || text.includes('character sheet') || text.includes('back view')) {
+        detected = 'MODE_D';
+      } else if (text.includes('empty') || text.includes('background plate') || text.includes('no people') || text.includes('unpopulated')) {
+        detected = 'MODE_E';
+      } else if (text.includes('retouch') || text.includes('replace') || text.includes('inpaint') || text.includes('uploaded') || text.includes('keep face')) {
+        detected = 'MODE_A';
+      }
+      state.mode = detected;
+      document.querySelectorAll('.mode-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.mode === detected);
+      });
+      buildSchema();
+    });
+
+    ['naturalBrief', 'aspectRatio', 'lensChoice', 'primaryAction', 'brandGuard', 'lightingRig'].forEach(id => {
+      document.getElementById(id).addEventListener('input', buildSchema);
+      document.getElementById(id).addEventListener('change', buildSchema);
+    });
+
+    document.getElementById('compileBtn').addEventListener('click', buildSchema);
+
+    document.getElementById('copyJsonBtn').addEventListener('click', (e) => {
+      navigator.clipboard.writeText(document.getElementById('jsonOutput').textContent);
+      const btn = e.currentTarget;
+      const orig = btn.textContent;
+      btn.textContent = 'Copied!';
+      setTimeout(() => { btn.textContent = orig; }, 1400);
+    });
+
+    document.getElementById('downloadJsonBtn').addEventListener('click', () => {
+      const blob = new Blob([document.getElementById('jsonOutput').textContent], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ekm-${state.mode.toLowerCase()}-prompt.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    buildSchema();
+  </script>
+</body>
+</html>

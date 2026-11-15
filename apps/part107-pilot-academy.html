@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <title>Part 107 Pilot Academy // EVO7 Flight Command</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Orbitron:wght@600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+      --violet: #4B0077;
+      --magenta: #EA33F7;
+      --gold: #C9A24A;
+      --bg: #000000;
+      --panel: #111111;
+      --panel-2: #181820;
+      --border: #272732;
+      --text: #F4F4F5;
+      --paper: #FFFFFF;
+      --muted: #A1A1AA;
+      --vfr: #10B981;
+      --mvfr: #3B82F6;
+      --ifr: #EF4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: radial-gradient(circle at 20% 0%, rgba(75, 0, 119, 0.35), transparent 50%), var(--bg);
+      color: var(--text);
+      font-family: 'Lato', sans-serif;
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+    h1, h2, h3 {
+      font-family: 'Orbitron', sans-serif;
+      letter-spacing: 0.06em;
+      text-wrap: balance;
+      color: var(--paper);
+    }
+    p, li { text-wrap: pretty; }
+    header {
+      padding: 1rem 2rem;
+      background: rgba(17, 17, 17, 0.94);
+      border-bottom: 1px solid var(--gold);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .badge {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.68rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      border: 1px solid var(--magenta);
+      color: var(--magenta);
+      background: rgba(234, 51, 247, 0.1);
+      text-transform: uppercase;
+    }
+    main {
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem 3rem;
+    }
+    .hud-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.9rem;
+      margin-bottom: 1.25rem;
+    }
+    .stat-box {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--gold);
+      border-radius: 8px;
+      padding: 0.9rem 1rem;
+    }
+    .stat-val {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.55rem;
+      color: var(--paper);
+      margin-top: 0.2rem;
+    }
+    .nav-tabs {
+      display: flex;
+      gap: 0.55rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.25rem;
+    }
+    .tab-btn {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.76rem;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      padding: 0.65rem 1.05rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      background: var(--violet);
+      border-color: var(--magenta);
+      color: var(--paper);
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.35rem;
+      margin-bottom: 1.25rem;
+    }
+    .opt-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      color: var(--paper);
+      padding: 0.85rem 1rem;
+      border-radius: 8px;
+      margin-top: 0.6rem;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: all 0.15s ease;
+    }
+    .opt-btn:hover { border-color: var(--gold); }
+    .opt-btn.correct { border-color: var(--vfr); background: rgba(16, 185, 129, 0.16); }
+    .opt-btn.wrong { border-color: var(--ifr); background: rgba(239, 68, 68, 0.16); }
+    .btn {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.74rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.6rem 1rem;
+      border-radius: 6px;
+      border: 1px solid var(--gold);
+      background: var(--violet);
+      color: var(--paper);
+      cursor: pointer;
+    }
+    input {
+      width: 100%;
+      background: #08080C;
+      border: 1px solid var(--border);
+      color: var(--paper);
+      padding: 0.65rem 0.85rem;
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.95rem;
+    }
+    .decode-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    .decode-token {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--magenta);
+      padding: 0.75rem;
+      border-radius: 6px;
+    }
+    .back-link {
+      color: var(--gold);
+      text-decoration: none;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div style="display:flex;align-items:center;gap:0.85rem;">
+      <img src="../assets/knight-helmet-violett.png" alt="Evol Knight Media" style="width:36px;height:36px;">
+      <div>
+        <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;">
+          <h1 style="font-size:1.15rem;">FAA PART 107 PILOT ACADEMY // EVO7 FLIGHT COMMAND</h1>
+          <span class="badge">◆ New and Improved · Standalone Build</span>
+        </div>
+        <p style="font-size:0.8rem;color:var(--muted);">14 CFR Part 107 Exam Simulator, Live METAR/SPECI Decoder &amp; Sectional Chart Master</p>
+      </div>
+    </div>
+    <a class="back-link" href="../index.html">◀ RETURN TO TOOL HUB</a>
+  </header>
+
+  <main>
+    <section class="hud-stats" aria-label="Pilot Telemetry">
+      <div class="stat-box">
+        <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;">Questions Mastered</div>
+        <div class="stat-val" id="statAnswered">0</div>
+      </div>
+      <div class="stat-box">
+        <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;">Accuracy Rating</div>
+        <div class="stat-val" id="statAccuracy">100%</div>
+      </div>
+      <div class="stat-box">
+        <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;">Current Streak</div>
+        <div class="stat-val" id="statStreak">0</div>
+      </div>
+      <div class="stat-box">
+        <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;">FAA Passing Threshold</div>
+        <div class="stat-val" style="color:var(--gold);">70% (42/60)</div>
+      </div>
+    </section>
+
+    <div class="nav-tabs">
+      <button class="tab-btn active" data-tab="quiz" type="button">01 // Tactical Exam Simulator</button>
+      <button class="tab-btn" data-tab="metar" type="button">02 // Live METAR / SPECI Decoder</button>
+      <button class="tab-btn" data-tab="airspace" type="button">03 // Airspace &amp; 14 CFR Part 107 Quick Reference</button>
+    </div>
+
+    <section id="tab-quiz" class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.75rem;">
+        <span style="font-family:'Orbitron',sans-serif;font-size:0.78rem;color:var(--gold);" id="qCategory">REGULATIONS // 14 CFR 107</span>
+        <span style="font-size:0.8rem;color:var(--muted);" id="qCounter">Question 1 of 12</span>
+      </div>
+      <h2 style="font-size:1.15rem;margin-bottom:0.85rem;" id="qPrompt"></h2>
+      <div id="qOptions"></div>
+      <div id="qExplanation" style="display:none;margin-top:1rem;padding:0.95rem;background:rgba(75,0,119,0.22);border-left:3px solid var(--gold);border-radius:4px;"></div>
+      <div style="margin-top:1.1rem;display:flex;gap:0.65rem;">
+        <button class="btn" id="nextQBtn" type="button">Next Tactical Question ▶</button>
+        <button class="btn" id="resetStatsBtn" type="button" style="background:#181820;">Reset Telemetry</button>
+      </div>
+    </section>
+
+    <section id="tab-metar" class="card" style="display:none;">
+      <h2 style="font-size:1.05rem;margin-bottom:0.5rem;">METAR / TAF TACTICAL DECODER</h2>
+      <p style="font-size:0.86rem;color:var(--muted);margin-bottom:0.75rem;">Enter any raw aviation routine weather report or select a preset station below:</p>
+      <input type="text" id="metarInput" value="KSFO 071756Z 28014G22KT 10SM FEW018 SCT200 17/11 A3004 RMK AO2 SLP172">
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.6rem;">
+        <button class="btn" type="button" data-metar="KSFO 071756Z 28014G22KT 10SM FEW018 SCT200 17/11 A3004 RMK AO2">KSFO Gusty VFR</button>
+        <button class="btn" type="button" data-metar="KOAK 121453Z 16008KT 2SM BR OVC004 13/12 A2992 RMK AO2">KOAK Low IFR Stratus</button>
+        <button class="btn" type="button" data-metar="KLAX 211853Z VRB04KT 4SM HZ BKN015 21/16 A2988 RMK AO2">KLAX MVFR Haze</button>
+      </div>
+      <div class="decode-grid" id="metarDecoded"></div>
+    </section>
+
+    <section id="tab-airspace" class="card" style="display:none;">
+      <h2 style="font-size:1.05rem;margin-bottom:0.85rem;">PART 107 OPERATING RULES &amp; AIRSPACE MATRIX</h2>
+      <div class="decode-grid">
+        <div class="decode-token">
+          <strong style="color:var(--gold);">Max Groundspeed &amp; Altitude</strong>
+          <p style="font-size:0.86rem;margin-top:0.3rem;">87 knots (100 mph) maximum groundspeed. 400 feet AGL maximum altitude (or within 400 feet of a structure if higher).</p>
+        </div>
+        <div class="decode-token">
+          <strong style="color:var(--gold);">Weather Minimums (107.51)</strong>
+          <p style="font-size:0.86rem;margin-top:0.3rem;">Minimum 3 statute miles (3 SM) flight visibility from control station. Cloud clearance: 500 feet below and 2,000 feet horizontally.</p>
+        </div>
+        <div class="decode-token">
+          <strong style="color:var(--gold);">Night Operations (107.29)</strong>
+          <p style="font-size:0.86rem;margin-top:0.3rem;">Permitted with updated training/testing and anti-collision lighting visible for at least 3 statute miles with flash rate sufficient to avoid collision.</p>
+        </div>
+        <div class="decode-token">
+          <strong style="color:var(--gold);">Class B, C, D &amp; Surface E</strong>
+          <p style="font-size:0.86rem;margin-top:0.3rem;">Requires prior ATC authorization (via LAANC or DroneZone). Class G airspace requires no prior ATC authorization.</p>
+        </div>
+        <div class="decode-token">
+          <strong style="color:var(--gold);">Accident Reporting (107.9)</strong>
+          <p style="font-size:0.86rem;margin-top:0.3rem;">Report to FAA within 10 calendar days if serious injury, loss of consciousness, or property damage (other than the sUAS) exceeds $500.</p>
+        </div>
+        <div class="decode-token">
+          <strong style="color:var(--gold);">Operations Over People (Subpart D)</strong>
+          <p style="font-size:0.86rem;margin-top:0.3rem;">Category 1: ≤ 0.55 lbs including everything onboard and no exposed rotating parts that would lacerate human skin.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const STORAGE_KEY = 'ekm_part107_stats_v2';
+    const QUESTIONS = [
+      {
+        category: '14 CFR 107.51 // OPERATING LIMITATIONS',
+        q: 'You are flying a small UAS to inspect a 300-foot communications tower located in Class G airspace. What is the maximum altitude above ground level (AGL) you may fly when within a 400-foot radius of the tower?',
+        options: ['400 feet AGL', '700 feet AGL', '800 feet AGL'],
+        answer: 1,
+        explanation: 'Under 14 CFR §107.51(b), maximum altitude is 400 feet AGL, unless the sUAS is flown within a 400-foot radius of a structure, in which case it may fly up to 400 feet above the structure’s uppermost limit (300 ft + 400 ft = 700 ft AGL).'
+      },
+      {
+        category: '14 CFR 107.51 // WEATHER MINIMUMS',
+        q: 'What are the minimum visibility and cloud clearance requirements for small UAS operations under Part 107?',
+        options: [
+          '3 SM visibility, 500 feet below clouds, 2,000 feet horizontally from clouds',
+          '1 SM visibility, clear of clouds below 1,200 feet AGL',
+          '5 SM visibility, 1,000 feet above and 500 feet below clouds'
+        ],
+        answer: 0,
+        explanation: '14 CFR §107.51(c) and (d) require at least 3 statute miles of flight visibility and cloud clearance of at least 500 feet below the cloud and 2,000 feet horizontally from the cloud.'
+      },
+      {
+        category: '14 CFR 107.9 // ACCIDENT REPORTING',
+        q: 'Within how many days must a Remote Pilot in Command report an sUAS accident that causes $750 of damage to a third-party solar panel?',
+        options: ['Immediately to the nearest NTSB field office', 'Within 10 calendar days to the FAA', 'Within 30 days during registration renewal'],
+        answer: 1,
+        explanation: 'Under 14 CFR §107.9, any operation resulting in serious injury, loss of consciousness, or property damage (other than the drone) greater than $500 must be reported to the FAA within 10 calendar days.'
+      },
+      {
+        category: 'SECTIONAL CHARTS // AIRSPACE',
+        q: 'On a VFR Sectional Chart, what does a dashed magenta line surrounding an airport indicate?',
+        options: [
+          'Class D airspace starting at the surface',
+          'Class E airspace starting at the surface',
+          'Class E airspace with a floor of 700 feet AGL'
+        ],
+        answer: 1,
+        explanation: 'A dashed magenta line marks Class E airspace designated to the surface (which requires LAANC/FAA authorization under 14 CFR §107.41).'
+      },
+      {
+        category: '14 CFR 107.29 // NIGHT OPERATIONS',
+        q: 'When operating an sUAS at night, the anti-collision light must be visible for at least:',
+        options: ['1 statute mile', '3 statute miles', '5 nautical miles'],
+        answer: 1,
+        explanation: '14 CFR §107.29 requires lighted anti-collision lighting visible for at least 3 statute miles with a flash rate sufficient to avoid a collision.'
+      },
+      {
+        category: 'AERODYNAMICS // LOAD FACTOR',
+        q: 'In a coordinated level 60-degree banked turn, the load factor on an aircraft is 2 Gs. How does this affect stall speed?',
+        options: [
+          'Stall speed increases by approximately 41% (square root of 2)',
+          'Stall speed decreases by 50%',
+          'Bank angle has no effect on stall speed'
+        ],
+        answer: 0,
+        explanation: 'Stall speed increases proportionally to the square root of the load factor. At 60° bank (2G load factor), stall speed increases by √2 ≈ 1.41 (41%).'
+      },
+      {
+        category: 'OPERATIONS OVER PEOPLE // SUBPART D',
+        q: 'To qualify for Category 1 operations over people without a declaration of compliance, the sUAS must weigh (including everything on board):',
+        options: ['Less than 55 pounds', '0.55 pounds (250 grams) or less, with no exposed rotating parts that could lacerate skin', 'Under 4.4 pounds with an ASTM parachute'],
+        answer: 1,
+        explanation: 'Category 1 requires the sUAS to weigh 0.55 lbs or less on takeoff and throughout flight and contain no exposed rotating parts that would lacerate human skin upon impact.'
+      },
+      {
+        category: 'REMOTE ID // 14 CFR PART 89',
+        q: 'If a registered sUAS does not have built-in Standard Remote ID and is not flown inside a FRIA, what must the operator equip?',
+        options: [
+          'A Remote ID Broadcast Module, and all operations must remain within Visual Line of Sight (VLOS)',
+          'An ADS-B Out transponder transmitting on 1090 MHz',
+          'A VHF airband transceiver tuned to 121.5 MHz'
+        ],
+        answer: 0,
+        explanation: 'Aircraft equipped with a Remote ID broadcast module must be operated within visual line of sight and broadcast take-off location and aircraft telemetry.'
+      }
+    ];
+
+    let stats = { answered: 0, correct: 0, streak: 0 };
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      if (saved && typeof saved.answered === 'number') stats = saved;
+    } catch (e) {}
+
+    let qIndex = 0;
+
+    function updateStatsUI() {
+      document.getElementById('statAnswered').textContent = stats.answered;
+      const pct = stats.answered === 0 ? 100 : Math.round((stats.correct / stats.answered) * 100);
+      document.getElementById('statAccuracy').textContent = `${pct}%`;
+      document.getElementById('statStreak').textContent = stats.streak;
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(stats)); } catch (e) {}
+    }
+
+    function renderQuestion() {
+      const item = QUESTIONS[qIndex % QUESTIONS.length];
+      document.getElementById('qCategory').textContent = item.category;
+      document.getElementById('qCounter').textContent = `Question ${(qIndex % QUESTIONS.length) + 1} of ${QUESTIONS.length}`;
+      document.getElementById('qPrompt').textContent = item.q;
+      const exp = document.getElementById('qExplanation');
+      exp.style.display = 'none';
+      exp.textContent = '';
+
+      const optsEl = document.getElementById('qOptions');
+      optsEl.innerHTML = '';
+      item.options.forEach((optText, idx) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'opt-btn';
+        btn.textContent = `${String.fromCharCode(65 + idx)}. ${optText}`;
+        btn.addEventListener('click', () => {
+          if (optsEl.dataset.locked === '1') return;
+          optsEl.dataset.locked = '1';
+          stats.answered += 1;
+          if (idx === item.answer) {
+            btn.classList.add('correct');
+            stats.correct += 1;
+            stats.streak += 1;
+          } else {
+            btn.classList.add('wrong');
+            optsEl.children[item.answer].classList.add('correct');
+            stats.streak = 0;
+          }
+          exp.style.display = 'block';
+          exp.textContent = item.explanation;
+          updateStatsUI();
+        });
+        optsEl.appendChild(btn);
+      });
+      optsEl.dataset.locked = '0';
+    }
+
+    function decodeMetar() {
+      const raw = document.getElementById('metarInput').value.trim().toUpperCase();
+      const tokens = raw.split(/\s+/);
+      const out = [];
+
+      const station = tokens[0] || 'ICAO';
+      out.push({ label: 'Station Identifier', val: station, note: 'Reporting aerodrome ICAO code' });
+
+      const timeTok = tokens.find(t => /^\d{6}Z$/.test(t));
+      if (timeTok) {
+        out.push({
+          label: 'Observation Time',
+          val: timeTok,
+          note: `Day ${timeTok.slice(0, 2)} of month at ${timeTok.slice(2, 4)}:${timeTok.slice(4, 6)} UTC (Zulu)`
+        });
+      }
+
+      const windTok = tokens.find(t => /(^\d{5}(G\d{2,3})?KT$)|(^VRB\d{2}KT$)/.test(t));
+      if (windTok) {
+        let note = '';
+        if (windTok.startsWith('VRB')) {
+          note = `Variable wind direction at ${ parseInt(windTok.slice(3, 5), 10) } knots`;
+        } else {
+          const dir = windTok.slice(0, 3);
+          const spd = parseInt(windTok.slice(3, 5), 10);
+          const gMatch = windTok.match(/G(\d{2,3})/);
+          note = `From ${dir}° true at ${spd} knots` + (gMatch ? `, gusting to ${gMatch[1]} knots` : '');
+        }
+        out.push({ label: 'Surface Wind', val: windTok, note });
+      }
+
+      const visTok = tokens.find(t => /^\d+SM$/.test(t));
+      let visNum = 10;
+      if (visTok) {
+        visNum = parseInt(visTok.replace('SM', ''), 10);
+        const legal = visNum >= 3 ? 'Legal for Part 107 (≥ 3 SM)' : 'BELOW Part 107 Minimum (< 3 SM)';
+        out.push({ label: 'Visibility', val: visTok, note: `${visNum} Statute Miles — ${legal}` });
+      }
+
+      const clouds = tokens.filter(t => /^(FEW|SCT|BKN|OVC)\d{3}$/.test(t));
+      let ceilingFt = 99999;
+      if (clouds.length > 0) {
+        const desc = clouds.map(c => {
+          const type = c.slice(0, 3);
+          const alt = parseInt(c.slice(3, 6), 10) * 100;
+          if ((type === 'BKN' || type === 'OVC') && alt < ceilingFt) ceilingFt = alt;
+          return `${type} at ${alt.toLocaleString()} ft AGL`;
+        }).join(' · ');
+        out.push({ label: 'Sky Condition & Ceiling', val: clouds.join(' '), note: desc });
+      }
+
+      const tempTok = tokens.find(t => /^M?\d{2}\/M?\d{2}$/.test(t));
+      if (tempTok) {
+        const [t, d] = tempTok.split('/');
+        out.push({ label: 'Temp / Dewpoint', val: tempTok, note: `Temperature ${t.replace('M', '-')}°C, Dewpoint ${d.replace('M', '-')}°C` });
+      }
+
+      const altTok = tokens.find(t => /^A\d{4}$/.test(t));
+      if (altTok) {
+        out.push({ label: 'Altimeter Setting', val: altTok, note: `${altTok.slice(1, 3)}.${altTok.slice(3, 5)} inHg` });
+      }
+
+      const cat = (visNum < 3 || ceilingFt < 1000) ? 'IFR / BELOW PART 107 VFR' : 'PART 107 VFR LEGAL';
+      out.unshift({ label: 'Part 107 Go / No-Go Verdict', val: cat, note: ceilingFt < 99999 ? `Lowest ceiling: ${ceilingFt} ft AGL` : 'No ceiling reported' });
+
+      document.getElementById('metarDecoded').innerHTML = out.map(item => `
+        <div class="decode-token">
+          <div style="font-size:0.72rem;color:var(--gold);text-transform:uppercase;">${item.label}</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:1.05rem;color:var(--paper);margin:0.2rem 0;">${item.val}</div>
+          <div style="font-size:0.82rem;color:var(--muted);">${item.note}</div>
+        </div>
+      `).join('');
+    }
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        ['quiz', 'metar', 'airspace'].forEach(id => {
+          document.getElementById(`tab-${id}`).style.display = (id === btn.dataset.tab) ? 'block' : 'none';
+        });
+      });
+    });
+
+    document.getElementById('nextQBtn').addEventListener('click', () => {
+      qIndex += 1;
+      renderQuestion();
+    });
+
+    document.getElementById('resetStatsBtn').addEventListener('click', () => {
+      stats = { answered: 0, correct: 0, streak: 0 };
+      updateStatsUI();
+    });
+
+    document.getElementById('metarInput').addEventListener('input', decodeMetar);
+    document.querySelectorAll('[data-metar]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.getElementById('metarInput').value = btn.dataset.metar;
+        decodeMetar();
+      });
+    });
+
+    updateStatsUI();
+    renderQuestion();
+    decodeMetar();
+  </script>
+</body>
+</html>

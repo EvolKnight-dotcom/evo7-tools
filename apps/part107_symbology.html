@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Part 107 — Sectional Chart Symbology Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F1E8D0;
+    --paper-light: #F8F1DC;
+    --paper-dark: #E5D8B5;
+    --ink: #1A1812;
+    --ink-soft: #4A4338;
+    --magenta: #C73E8A;
+    --magenta-soft: #E8B8D5;
+    --blue: #1E5BC6;
+    --blue-soft: #B8C9E8;
+    --terrain: #B8956A;
+    --terrain-dark: #8B6E47;
+    --accent: #D4691A;
+    --grid: rgba(26, 24, 18, 0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Manrope', sans-serif;
+    font-weight: 400;
+    line-height: 1.5;
+    min-height: 100vh;
+    /* subtle paper texture */
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(184, 149, 106, 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(199, 62, 138, 0.04) 0%, transparent 50%),
+      linear-gradient(var(--paper), var(--paper));
+  }
+
+  /* Subtle noise overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.4;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.4 0 0 0 0 0.35 0 0 0 0 0.25 0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    z-index: 1;
+  }
+
+  .wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 4rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Header */
+  header {
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 2rem;
+    margin-bottom: 2.5rem;
+    position: relative;
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .eyebrow::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--ink);
+  }
+
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2.25rem, 5vw, 3.75rem);
+    line-height: 1.05;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+  }
+
+  h1 em {
+    color: var(--magenta);
+    font-style: italic;
+  }
+
+  .subtitle {
+    font-size: 1.05rem;
+    color: var(--ink-soft);
+    max-width: 60ch;
+  }
+
+  .meta-row {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--ink-soft);
+    flex-wrap: wrap;
+  }
+
+  .meta-row span strong {
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  /* Tab navigation */
+  nav.tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 2.5rem;
+    border-bottom: 1px solid var(--ink);
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .tab {
+    background: none;
+    border: none;
+    padding: 1rem 1.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    cursor: pointer;
+    position: relative;
+    white-space: nowrap;
+    transition: color 0.15s ease;
+    font-weight: 500;
+  }
+
+  .tab:hover { color: var(--ink); }
+
+  .tab.active {
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--magenta);
+  }
+
+  .tab-num {
+    color: var(--magenta);
+    font-weight: 700;
+    margin-right: 0.5rem;
+  }
+
+  /* Section headers */
+  .section {
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+  .section.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-intro {
+    margin-bottom: 2rem;
+    padding: 1.25rem 1.5rem;
+    background: var(--paper-light);
+    border-left: 3px solid var(--magenta);
+  }
+
+  .section-intro h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+  }
+
+  .section-intro p {
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+  }
+
+  /* Card grid */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  .card {
+    background: var(--paper-light);
+    border: 1px solid rgba(26, 24, 18, 0.15);
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card:hover {
+    border-color: var(--ink);
+    transform: translateY(-2px);
+    box-shadow: 4px 4px 0 var(--ink);
+  }
+
+  .card.expanded {
+    grid-column: 1 / -1;
+    border-color: var(--magenta);
+    box-shadow: 4px 4px 0 var(--magenta);
+  }
+
+  .card-symbol {
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--paper);
+    border-bottom: 1px solid rgba(26, 24, 18, 0.1);
+    position: relative;
+  }
+
+  .card-symbol svg {
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  .card-body {
+    padding: 1rem 1.25rem;
+  }
+
+  .card-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.15rem;
+    margin-bottom: 0.25rem;
+    line-height: 1.2;
+  }
+
+  .card-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .card-tag.magenta { color: var(--magenta); }
+  .card-tag.blue { color: var(--blue); }
+
+  .card-detail {
+    display: none;
+    padding: 1.25rem 1.5rem 1.5rem;
+    border-top: 1px dashed rgba(26, 24, 18, 0.2);
+    background: var(--paper);
+  }
+
+  .card.expanded .card-detail { display: block; }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  @media (max-width: 600px) {
+    .detail-grid { grid-template-columns: 1fr; }
+  }
+
+  .detail-block h4 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--magenta);
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+  }
+
+  .detail-block p {
+    font-size: 0.95rem;
+    color: var(--ink);
+    line-height: 1.6;
+  }
+
+  .tip-box {
+    margin-top: 1rem;
+    padding: 0.875rem 1rem;
+    background: rgba(199, 62, 138, 0.08);
+    border-left: 2px solid var(--magenta);
+    font-size: 0.9rem;
+  }
+
+  .tip-box strong {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--magenta);
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+
+  /* Footer */
+  footer {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(26, 24, 18, 0.2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  /* Compass rose decoration */
+  .compass {
+    position: absolute;
+    top: 1rem;
+    right: 0;
+    width: 80px;
+    height: 80px;
+    opacity: 0.3;
+  }
+
+  @media (max-width: 600px) {
+    .compass { display: none; }
+    .wrap { padding: 2rem 1rem 3rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <svg class="compass" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="45" fill="none" stroke="#1A1812" stroke-width="0.5"/>
+      <circle cx="50" cy="50" r="35" fill="none" stroke="#1A1812" stroke-width="0.5"/>
+      <g stroke="#1A1812" stroke-width="0.5">
+        <line x1="50" y1="5" x2="50" y2="95"/>
+        <line x1="5" y1="50" x2="95" y2="50"/>
+        <line x1="18" y1="18" x2="82" y2="82"/>
+        <line x1="82" y1="18" x2="18" y2="82"/>
+      </g>
+      <polygon points="50,8 45,50 50,45 55,50" fill="#C73E8A"/>
+      <text x="50" y="14" text-anchor="middle" font-family="DM Serif Display, serif" font-size="8" fill="#1A1812">N</text>
+    </svg>
+    <div class="eyebrow">FAA-CT-8080-2H · STUDY REFERENCE</div>
+    <h1>Sectional Chart <em>Symbology</em><br>for Part 107</h1>
+    <p class="subtitle">The eight categories that drive ~80% of chart-based questions on the Remote Pilot knowledge test. Tap any card to expand the meaning, and the Part 107-specific tip.</p>
+    <div class="meta-row">
+      <span><strong>22</strong> symbols</span>
+      <span><strong>5</strong> categories</span>
+      <span>Aligned to <strong>ACS UA.I.B</strong></span>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs"></nav>
+
+  <main id="content"></main>
+
+  <footer>
+    <span>Knight Castle Studio · Study Reference</span>
+    <span>Always cross-reference the FAA Aeronautical Chart Users' Guide</span>
+  </footer>
+</div>
+
+<script>
+// SVG helpers — build small diagrams using actual sectional conventions
+const svg = {
+  classB: `<svg viewBox="0 0 200 120" width="200" height="120">
+    <circle cx="100" cy="60" r="50" fill="none" stroke="#1E5BC6" stroke-width="3.5"/>
+    <circle cx="100" cy="60" r="32" fill="none" stroke="#1E5BC6" stroke-width="3.5"/>
+    <circle cx="100" cy="60" r="14" fill="none" stroke="#1E5BC6" stroke-width="3.5"/>
+    <text x="100" y="64" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#1E5BC6" font-weight="700">B</text>
+  </svg>`,
+  classC: `<svg viewBox="0 0 200 120" width="200" height="120">
+    <circle cx="100" cy="60" r="50" fill="none" stroke="#C73E8A" stroke-width="3.5"/>
+    <circle cx="100" cy="60" r="28" fill="none" stroke="#C73E8A" stroke-width="3.5"/>
+    <text x="100" y="64" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#C73E8A" font-weight="700">C</text>
+  </svg>`,
+  classD: `<svg viewBox="0 0 200 120" width="200" height="120">
+    <circle cx="100" cy="60" r="42" fill="none" stroke="#1E5BC6" stroke-width="3.5" stroke-dasharray="6,4"/>
+    <text x="100" y="32" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#1E5BC6" font-weight="700">[25]</text>
+    <text x="100" y="64" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#1E5BC6" font-weight="700">D</text>
+  </svg>`,
+  classE_sfc: `<svg viewBox="0 0 200 120" width="200" height="120">
+    <circle cx="100" cy="60" r="42" fill="none" stroke="#C73E8A" stroke-width="2.5" stroke-dasharray="5,3"/>
+    <text x="100" y="64" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#C73E8A" font-weight="700">E sfc</text>
+  </svg>`,
+  classE_700: `<svg viewBox="0 0 200 120" width="200" height="120">
+    <defs>
+      <linearGradient id="magVig" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#C73E8A" stop-opacity="0"/>
+        <stop offset="40%" stop-color="#C73E8A" stop-opacity="0.45"/>
+        <stop offset="60%" stop-color="#C73E8A" stop-opacity="0.45"/>
+        <stop offset="100%" stop-color="#C73E8A" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <rect x="20" y="35" width="160" height="50" fill="url(#magVig)"/>
+    <text x="100" y="105" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#C73E8A" font-weight="700">E from 700' AGL</text>
+  </svg>`,
+  classE_1200: `<svg viewBox="0 0 200 120" width="200" height="120">
+    <defs>
+      <linearGradient id="bluVig" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#1E5BC6" stop-opacity="0"/>
+        <stop offset="40%" stop-color="#1E5BC6" stop-opacity="0.4"/>
+        <stop offset="60%" stop-color="#1E5BC6" stop-opacity="0.4"/>
+        <stop offset="100%" stop-color="#1E5BC6" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <rect x="20" y="35" width="160" height="50" fill="url(#bluVig)"/>
+    <text x="100" y="105" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#1E5BC6" font-weight="700">E from 1,200' AGL</text>
+  </svg>`,
+  classG: `<svg viewBox="0 0 200 120" width="200" height="120">
+    <rect x="20" y="20" width="160" height="80" fill="#F1E8D0" stroke="#8B6E47" stroke-width="0.5" stroke-dasharray="2,2"/>
+    <text x="100" y="58" text-anchor="middle" font-family="DM Serif Display" font-size="13" fill="#4A4338" font-style="italic">uncontrolled</text>
+    <text x="100" y="76" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#4A4338">CLASS G</text>
+  </svg>`,
+  moa: `<svg viewBox="0 0 200 120" width="200" height="120">
+    <defs>
+      <pattern id="magHatch" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+        <line x1="0" y1="0" x2="0" y2="6" stroke="#C73E8A" stroke-width="2"/>
+      </pattern>
+    </defs>
+    <rect x="30" y="25" width="140" height="70" fill="none" stroke="url(#magHatch)" stroke-width="10"/>
+    <text x="100" y="65" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#C73E8A" font-weight="700">DEVILS LAKE EAST</text>
+    <text x="100" y="78" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#C73E8A">MOA</text>
+  </svg>`,
+  restricted: `<svg viewBox="0 0 200 120" width="200" height="120">
+    <defs>
+      <pattern id="bluHatch" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+        <line x1="0" y1="0" x2="0" y2="6" stroke="#1E5BC6" stroke-width="2"/>
+      </pattern>
+    </defs>
+    <rect x="30" y="25" width="140" height="70" fill="none" stroke="url(#bluHatch)" stroke-width="10"/>
+    <text x="100" y="68" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#1E5BC6" font-weight="700">R-5402</text>
+  </svg>`,
+  prohibited: `<svg viewBox="0 0 200 120" width="200" height="120">
+    <defs>
+      <pattern id="bluHatchP" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+        <line x1="0" y1="0" x2="0" y2="6" stroke="#1E5BC6" stroke-width="2"/>
+      </pattern>
+    </defs>
+    <rect x="30" y="25" width="140" height="70" fill="none" stroke="url(#bluHatchP)" stroke-width="10"/>
+    <text x="100" y="68" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#1E5BC6" font-weight="700">P-56</text>
+  </svg>`,
+  warning: `<svg viewBox="0 0 200 120" width="200" height="120">
+    <defs>
+      <pattern id="bluHatchW" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+        <line x1="0" y1="0" x2="0" y2="6" stroke="#1E5BC6" stroke-width="2"/>
+      </pattern>
+    </defs>
+    <rect x="30" y="25" width="140" height="70" fill="none" stroke="url(#bluHatchW)" stroke-width="10"/>
+    <text x="100" y="68" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#1E5BC6" font-weight="700">W-518</text>
+  </svg>`,
+  alert: `<svg viewBox="0 0 200 120" width="200" height="120">
+    <defs>
+      <pattern id="magHatchA" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+        <line x1="0" y1="0" x2="0" y2="6" stroke="#C73E8A" stroke-width="2"/>
+      </pattern>
+    </defs>
+    <rect x="30" y="25" width="140" height="70" fill="none" stroke="url(#magHatchA)" stroke-width="10"/>
+    <text x="100" y="68" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#C73E8A" font-weight="700">A-220</text>
+  </svg>`,
+  airportTowered: `<svg viewBox="0 0 200 120" width="200" height="120">
+    <circle cx="100" cy="60" r="22" fill="#1E5BC6"/>
+    <rect x="78" y="58" width="44" height="4" fill="#F1E8D0"/>
+    <rect x="98" y="38" width="4" height="44" fill="#F1E8D0"/>
+    <text x="100" y="98" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#1E5BC6" font-weight="700">JAMESTOWN (JMS)</text>
+    <text x="100" y="110" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#1E5BC6">CT-118.425</text>
+  </svg>`,
+  airportNonTowered: `<svg viewBox="0 0 200 120" width="200" height="120">
+    <circle cx="100" cy="60" r="22" fill="none" stroke="#C73E8A" stroke-width="3"/>
+    <g transform="translate(100,60)">
+      <line x1="-22" y1="0" x2="22" y2="0" stroke="#C73E8A" stroke-width="3"/>
+      <line x1="0" y1="-22" x2="0" y2="22" stroke="#C73E8A" stroke-width="3"/>
+    </g>
+    <text x="100" y="98" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#C73E8A" font-weight="700">FRIED</text>
+    <text x="100" y="110" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#C73E8A">122.9</text>
+  </svg>`,
+  airportPrivate: `<svg viewBox="0 0 200 120" width="200" height="120">
+    <circle cx="100" cy="60" r="20" fill="none" stroke="#C73E8A" stroke-width="2.5"/>
+    <text x="100" y="64" text-anchor="middle" font-family="DM Serif Display" font-size="18" fill="#C73E8A" font-weight="700">R</text>
+    <text x="100" y="98" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#C73E8A" font-weight="700">MUTSCHLER (Pvt)</text>
+  </svg>`,
+  heliport: `<svg viewBox="0 0 200 120" width="200" height="120">
+    <rect x="80" y="40" width="40" height="40" fill="none" stroke="#C73E8A" stroke-width="2.5"/>
+    <text x="100" y="68" text-anchor="middle" font-family="DM Serif Display" font-size="22" fill="#C73E8A" font-weight="700">H</text>
+    <text x="100" y="100" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#C73E8A">HELIPORT</text>
+  </svg>`,
+  obstacleSingle: `<svg viewBox="0 0 200 120" width="200" height="120">
+    <polygon points="100,30 90,80 110,80" fill="#1A1812"/>
+    <circle cx="100" cy="80" r="2.5" fill="#1A1812"/>
+    <text x="135" y="55" font-family="JetBrains Mono" font-size="11" fill="#1A1812" font-weight="700">1722</text>
+    <text x="135" y="68" font-family="JetBrains Mono" font-size="10" fill="#1A1812">(203)</text>
+  </svg>`,
+  obstacleLighted: `<svg viewBox="0 0 200 120" width="200" height="120">
+    <g transform="translate(100,55)">
+      <line x1="-12" y1="-15" x2="-18" y2="-22" stroke="#1A1812" stroke-width="1.5"/>
+      <line x1="0" y1="-22" x2="0" y2="-30" stroke="#1A1812" stroke-width="1.5"/>
+      <line x1="12" y1="-15" x2="18" y2="-22" stroke="#1A1812" stroke-width="1.5"/>
+    </g>
+    <polygon points="100,30 90,80 110,80" fill="#1A1812"/>
+    <circle cx="100" cy="80" r="2.5" fill="#1A1812"/>
+    <text x="135" y="55" font-family="JetBrains Mono" font-size="11" fill="#1A1812" font-weight="700">1995</text>
+    <text x="135" y="68" font-family="JetBrains Mono" font-size="10" fill="#1A1812">(499)</text>
+  </svg>`,
+  obstacleGroup: `<svg viewBox="0 0 200 120" width="200" height="120">
+    <polygon points="85,40 75,80 95,80" fill="#1A1812"/>
+    <polygon points="115,40 105,80 125,80" fill="#1A1812"/>
+    <circle cx="85" cy="80" r="2" fill="#1A1812"/>
+    <circle cx="115" cy="80" r="2" fill="#1A1812"/>
+    <text x="100" y="105" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#1A1812">GROUP OBSTACLE</text>
+  </svg>`,
+  mef: `<svg viewBox="0 0 200 120" width="200" height="120">
+    <line x1="20" y1="60" x2="180" y2="60" stroke="#4A4338" stroke-width="0.5"/>
+    <line x1="100" y1="20" x2="100" y2="100" stroke="#4A4338" stroke-width="0.5"/>
+    <text x="135" y="50" font-family="JetBrains Mono" font-size="22" fill="#1E5BC6" font-weight="700">2</text>
+    <text x="155" y="50" font-family="JetBrains Mono" font-size="22" fill="#1E5BC6" font-weight="700">7</text>
+    <text x="170" y="50" font-family="JetBrains Mono" font-size="14" fill="#1E5BC6" font-weight="700">5</text>
+    <text x="100" y="115" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#4A4338">2,750' MSL highest in quadrant</text>
+  </svg>`,
+  latitude: `<svg viewBox="0 0 200 120" width="200" height="120">
+    <line x1="20" y1="40" x2="180" y2="40" stroke="#4A4338" stroke-width="1"/>
+    <line x1="20" y1="60" x2="180" y2="60" stroke="#1A1812" stroke-width="2"/>
+    <line x1="20" y1="80" x2="180" y2="80" stroke="#4A4338" stroke-width="1"/>
+    <text x="10" y="64" text-anchor="end" font-family="DM Serif Display" font-size="14" fill="#1A1812" font-weight="700">47°</text>
+    <text x="100" y="105" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#4A4338">N/S of EQUATOR</text>
+  </svg>`,
+  longitude: `<svg viewBox="0 0 200 120" width="200" height="120">
+    <line x1="60" y1="15" x2="60" y2="95" stroke="#4A4338" stroke-width="1"/>
+    <line x1="100" y1="15" x2="100" y2="95" stroke="#1A1812" stroke-width="2"/>
+    <line x1="140" y1="15" x2="140" y2="95" stroke="#4A4338" stroke-width="1"/>
+    <text x="100" y="12" text-anchor="middle" font-family="DM Serif Display" font-size="14" fill="#1A1812" font-weight="700">98°</text>
+    <text x="100" y="115" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#4A4338">E/W of GREENWICH</text>
+  </svg>`
+};
+
+const data = {
+  airspace: {
+    title: 'Airspace Classes',
+    blurb: 'Color and line style tell you everything. Blue = towered/Class B/D. Magenta = non-towered/Class C/E. Solid = bigger sticks (B, C). Dashed = smaller (D, E surface). Faded shading = where Class E starts overhead.',
+    items: [
+      { key: 'classB', name: 'Class B', tag: 'Solid blue · two or three rings', color: 'blue',
+        meaning: 'Major metropolitan airports (SFO, LAX, JFK, ORD). Surface to typically 10,000\' MSL. Often shaped like an upside-down wedding cake with multiple shelves at different altitudes.',
+        tip: 'Part 107 drone ops require LAANC or DroneZone authorization in Class B. Each ring has its own ceiling/floor printed inside it (e.g., 100/SFC means 10,000\' down to surface).' },
+      { key: 'classC', name: 'Class C', tag: 'Solid magenta · two rings', color: 'magenta',
+        meaning: 'Mid-sized airports with operating control tower, radar approach, and IFR service (Oakland, San Jose, Sacramento). Inner ring 5 NM radius surface to 4,000\' AGL; outer ring 10 NM 1,200\'–4,000\' AGL.',
+        tip: 'LAANC authorization required for drone ops. Look for the magenta numbers like "40/SFC" inside the rings — top of the box / bottom of the box, in hundreds of feet MSL.' },
+      { key: 'classD', name: 'Class D', tag: 'Dashed blue · single ring', color: 'blue',
+        meaning: 'Smaller towered airports. Surface to typically 2,500\' AGL. The blue number in brackets [25] inside the ring is the ceiling in hundreds of feet MSL.',
+        tip: 'LAANC authorization required. Class D reverts to Class E or G when the tower closes — a common Part 107 trick question.' },
+      { key: 'classE_sfc', name: 'Class E to Surface', tag: 'Dashed magenta', color: 'magenta',
+        meaning: 'Around non-towered airports with instrument approaches. Class E controlled airspace extends all the way down to the ground inside the dashed magenta line.',
+        tip: 'LAANC required. Don\'t confuse the dashed magenta (Class E surface) with the solid magenta of Class C — they look similar but mean different things.' },
+      { key: 'classE_700', name: 'Class E from 700\' AGL', tag: 'Faded magenta vignette', color: 'magenta',
+        meaning: 'A soft magenta band/shading on the chart. Inside this area, controlled Class E airspace begins at 700\' above the ground.',
+        tip: 'You almost always fly under this as a Part 107 pilot (max 400\' AGL), so no authorization is needed for the airspace itself — but the airport underneath may still require LAANC.' },
+      { key: 'classE_1200', name: 'Class E from 1,200\' AGL', tag: 'Faded blue vignette', color: 'blue',
+        meaning: 'A soft blue band/shading. Inside, Class E begins at 1,200\' AGL. Outside the band entirely, Class E typically begins at 14,500\' MSL.',
+        tip: 'Functionally Class G underneath you for drone flight purposes. No authorization needed for the airspace.' },
+      { key: 'classG', name: 'Class G — Uncontrolled', tag: 'No marking · default', color: '',
+        meaning: 'Everything that isn\'t marked otherwise. No ATC clearance required for any aircraft. Most rural Part 107 flying happens here.',
+        tip: 'Even in Class G you still must follow all Part 107 rules: 400\' AGL max, daylight or civil twilight (with anti-collision lighting), VLOS, etc.' }
+    ]
+  },
+  specialUse: {
+    title: 'Special Use Airspace',
+    blurb: 'These are blocks of airspace with restrictions or hazards. The hatched border tells you what kind. P, R, W = blue hatching (more restrictive). MOA, A = magenta hatching (advisory).',
+    items: [
+      { key: 'moa', name: 'Military Operations Area (MOA)', tag: 'Magenta hatched border', color: 'magenta',
+        meaning: 'Airspace where the military conducts training (high-speed maneuvers, aerial refueling). Civil aircraft can transit with caution.',
+        tip: 'Not prohibited for Part 107, but check NOTAMs for active times. Avoid when "hot." Always named (e.g., "DEVILS LAKE EAST MOA").' },
+      { key: 'restricted', name: 'Restricted Area', tag: 'Blue hatched border, R-####', color: 'blue',
+        meaning: 'Hazards exist (artillery, missile testing, aerial gunnery). Entry requires permission from the controlling agency.',
+        tip: 'Identified by R-#### (e.g., R-5402). Times of operation are listed on the chart legend or in the Chart Supplement. Do not enter without authorization.' },
+      { key: 'prohibited', name: 'Prohibited Area', tag: 'Blue hatched border, P-##', color: 'blue',
+        meaning: 'Flight is prohibited entirely. National security or other reasons. Examples: P-56 (around the White House), P-49 (Camp David).',
+        tip: 'Never fly here. Period. The DC P-56 is also surrounded by the larger DC SFRA/FRZ — Part 107 ops in the DC area require special authorization.' },
+      { key: 'warning', name: 'Warning Area', tag: 'Blue hatched border, W-####', color: 'blue',
+        meaning: 'Same hazards as Restricted Areas, but located over international waters (3+ NM offshore). Identified by W-####.',
+        tip: 'Typically irrelevant for Part 107 (you\'re inland), but tested. Memorize: W = water/offshore, R = land.' },
+      { key: 'alert', name: 'Alert Area', tag: 'Magenta hatched border, A-###', color: 'magenta',
+        meaning: 'High volume of pilot training or unusual aerial activity. Both transient and resident pilots share responsibility for collision avoidance.',
+        tip: 'No restrictions, just heads-up to be alert. Example: A-220 around Florida pilot training corridors.' }
+    ]
+  },
+  airports: {
+    title: 'Airport Symbols',
+    blurb: 'The single most reliable color rule on the chart: BLUE means the airport has an operating control tower. MAGENTA means it does not. Memorize this and ~5 chart questions become free points.',
+    items: [
+      { key: 'airportTowered', name: 'Towered Airport', tag: 'Blue · runway pattern visible', color: 'blue',
+        meaning: 'Operating control tower. The runway layout is depicted inside the symbol if the longest runway is 8,069\' or longer. Frequencies are listed nearby (CT- = control tower).',
+        tip: 'Drone ops require LAANC or DroneZone authorization. The "ASOS" or "AWOS" frequency next to it is the automated weather you\'ll need for your weather check.' },
+      { key: 'airportNonTowered', name: 'Non-Towered Airport', tag: 'Magenta · runway pattern visible', color: 'magenta',
+        meaning: 'No control tower (or tower is part-time and currently closed). Pilots self-announce on CTAF (Common Traffic Advisory Frequency).',
+        tip: 'Notify the airport operator if flying within 5 NM (best practice, not strictly required since 2016). Check airspace overlay — many non-towered airports sit under Class E to surface, which DOES require LAANC.' },
+      { key: 'airportPrivate', name: 'Private Airport', tag: 'Magenta circle with R', color: 'magenta',
+        meaning: 'Restricted use, not available to general public. The (Pvt) tag and "R" inside the circle distinguish it from public airports.',
+        tip: 'Still counts as an airport for Part 107 awareness purposes. Owners often welcome a heads-up call before you fly nearby.' },
+      { key: 'heliport', name: 'Heliport', tag: 'Magenta H in box', color: 'magenta',
+        meaning: 'Helicopter operations. Hospitals, oil platforms, news stations, executive pads. Not all heliports are charted — only the more significant ones.',
+        tip: 'Watch for hospital heliports especially. Helicopters often approach from any direction at low altitude — be prepared to land your drone immediately.' }
+    ]
+  },
+  obstacles: {
+    title: 'Obstacles',
+    blurb: 'Towers and tall structures. The number arithmetic is critical for Part 107: TOP number is MSL (height above sea level), BOTTOM number in parentheses is AGL (height above the ground).',
+    items: [
+      { key: 'obstacleSingle', name: 'Single Obstacle', tag: 'Filled triangle', color: '',
+        meaning: 'A single tower, antenna, smokestack, or similar. The top number (e.g., 1722) is the elevation of the TOP of the obstacle in feet MSL. The number in parentheses (203) is the height of the obstacle ABOVE THE GROUND.',
+        tip: 'The Part 107 question pattern: "What is the height of the obstacle?" — they want the AGL number (parentheses). "What is the elevation?" — they want the MSL number (top).' },
+      { key: 'obstacleLighted', name: 'Lighted Obstacle', tag: 'Triangle with light rays', color: '',
+        meaning: 'Same as single obstacle but lighted at night. Indicated by the radiating-line "starburst" symbol over the triangle.',
+        tip: 'Required for obstacles 200\' AGL or higher. If you see a height ≥200\' AGL without rays, the lights may be inoperative — check NOTAMs.' },
+      { key: 'obstacleGroup', name: 'Group Obstacle', tag: 'Two filled triangles', color: '',
+        meaning: 'Two or more obstacles close together (wind farms, tower clusters). Heights given are for the TALLEST in the group.',
+        tip: 'Wind farms often appear as group obstacles with the symbol and "Wind Turbines" labeled. Treat the entire footprint as obstacle terrain.' },
+      { key: 'mef', name: 'Maximum Elevation Figure (MEF)', tag: 'Large blue numbers', color: 'blue',
+        meaning: 'The highest known terrain or obstacle in that quadrangle, expressed in thousands and hundreds of feet MSL. "27⁵" means 2,750\' MSL.',
+        tip: 'Each lat/long quadrangle has one MEF in its center. Read it as: large number = thousands+hundreds, smaller superscript = tens. So "12³" = 1,230\' MSL.' }
+    ]
+  },
+  geography: {
+    title: 'Latitude & Longitude',
+    blurb: 'The grid. Latitude lines run east-west and measure your position N/S of the equator. Longitude lines run north-south (pole to pole) and measure your position E/W of Greenwich, England. Don\'t confuse them.',
+    items: [
+      { key: 'latitude', name: 'Lines of Latitude', tag: 'Horizontal · parallels', color: '',
+        meaning: 'Run parallel to the equator (which is 0° latitude). Every horizontal line on the chart is a parallel of latitude. Labeled in degrees, e.g., 47°. Each degree = 60 nautical miles.',
+        tip: 'Mnemonic: Lat-i-TUDE = lad-DER rungs. They\'re the rungs running across. Always measured north or south of the equator.' },
+      { key: 'longitude', name: 'Lines of Longitude', tag: 'Vertical · meridians', color: '',
+        meaning: 'Run pole to pole. The Prime Meridian (0°) passes through Greenwich, England. The continental US sits between roughly 67°W and 125°W.',
+        tip: 'Mnemonic: lonGITUDE = the LONG lines from pole to pole. The tick marks between numbered lines are minutes (60 min/degree) and the smaller ticks are 30 seconds.' }
+    ]
+  }
+};
+
+// Render
+const tabs = document.getElementById('tabs');
+const content = document.getElementById('content');
+const sectionKeys = Object.keys(data);
+
+sectionKeys.forEach((key, i) => {
+  const t = document.createElement('button');
+  t.className = 'tab' + (i === 0 ? ' active' : '');
+  t.dataset.target = key;
+  t.innerHTML = `<span class="tab-num">0${i+1}</span>${data[key].title}`;
+  tabs.appendChild(t);
+
+  const sec = document.createElement('section');
+  sec.className = 'section' + (i === 0 ? ' active' : '');
+  sec.id = 'sec-' + key;
+  sec.innerHTML = `
+    <div class="section-intro">
+      <h2>${data[key].title}</h2>
+      <p>${data[key].blurb}</p>
+    </div>
+    <div class="grid">
+      ${data[key].items.map((it, idx) => `
+        <article class="card" data-section="${key}" data-idx="${idx}">
+          <div class="card-symbol">${svg[it.key] || ''}</div>
+          <div class="card-body">
+            <div class="card-name">${it.name}</div>
+            <div class="card-tag ${it.color}">${it.tag}</div>
+          </div>
+          <div class="card-detail">
+            <div class="detail-grid">
+              <div class="detail-block">
+                <h4>What it means</h4>
+                <p>${it.meaning}</p>
+              </div>
+              <div class="detail-block">
+                <h4>Part 107 angle</h4>
+                <p>${it.tip}</p>
+              </div>
+            </div>
+          </div>
+        </article>
+      `).join('')}
+    </div>
+  `;
+  content.appendChild(sec);
+});
+
+// Tab switching
+tabs.addEventListener('click', e => {
+  const t = e.target.closest('.tab');
+  if (!t) return;
+  document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(x => x.classList.remove('active'));
+  t.classList.add('active');
+  document.getElementById('sec-' + t.dataset.target).classList.add('active');
+});
+
+// Card expand
+content.addEventListener('click', e => {
+  const c = e.target.closest('.card');
+  if (!c) return;
+  const wasOpen = c.classList.contains('expanded');
+  c.parentElement.querySelectorAll('.card.expanded').forEach(x => x.classList.remove('expanded'));
+  if (!wasOpen) c.classList.add('expanded');
+});
+</script>
+</body>
+</html>

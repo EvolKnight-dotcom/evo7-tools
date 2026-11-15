@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <title>XIRIX Outfit &amp; Lookbook Studio — Evol Knight Media</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Orbitron:wght@600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+      --violet: #4B0077;
+      --magenta: #EA33F7;
+      --gold: #C9A24A;
+      --bg: #000000;
+      --panel: #111111;
+      --panel-2: #181820;
+      --border: #272732;
+      --text: #F4F4F5;
+      --paper: #FFFFFF;
+      --muted: #A1A1AA;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: radial-gradient(circle at 85% 0%, rgba(75, 0, 119, 0.35), transparent 50%), var(--bg);
+      color: var(--text);
+      font-family: 'Lato', sans-serif;
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+    h1, h2, h3 {
+      font-family: 'Orbitron', sans-serif;
+      letter-spacing: 0.06em;
+      text-wrap: balance;
+      color: var(--paper);
+    }
+    header {
+      padding: 1rem 2rem;
+      background: rgba(17, 17, 17, 0.94);
+      border-bottom: 1px solid var(--gold);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .badge {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.68rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      border: 1px solid var(--magenta);
+      color: var(--magenta);
+      background: rgba(234, 51, 247, 0.1);
+      text-transform: uppercase;
+    }
+    main {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem 3rem;
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 1020px) {
+      main { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+    }
+    label {
+      display: block;
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gold);
+      margin: 0.7rem 0 0.3rem;
+      font-weight: 700;
+    }
+    select, input {
+      width: 100%;
+      background: #09090D;
+      border: 1px solid var(--border);
+      color: var(--paper);
+      padding: 0.6rem 0.75rem;
+      border-radius: 6px;
+      font-family: inherit;
+    }
+    .btn {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.74rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.6rem 0.95rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+      color: var(--paper);
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: var(--violet);
+      border-color: var(--magenta);
+    }
+    .btn:hover { border-color: var(--gold); }
+    .code-box {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      background: #060609;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      white-space: pre-wrap;
+      color: #E4E4E7;
+      margin-top: 0.75rem;
+    }
+    .lookbook-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 0.85rem;
+      margin-top: 0.85rem;
+    }
+    .look-item {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--magenta);
+      border-radius: 6px;
+      padding: 0.8rem;
+      font-size: 0.84rem;
+    }
+    .back-link {
+      color: var(--gold);
+      text-decoration: none;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div style="display:flex;align-items:center;gap:0.85rem;">
+      <img src="../assets/knight-helmet-violett.png" alt="Evol Knight Media" style="width:36px;height:36px;">
+      <div>
+        <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;">
+          <h1 style="font-size:1.15rem;">XIRIX OUTFIT &amp; MODE-C LOOKBOOK STUDIO</h1>
+          <span class="badge">◆ New and Improved</span>
+        </div>
+        <p style="font-size:0.8rem;color:var(--muted);">Luxury Sci-Fi Streetwear Configurator + Mode C Wardrobe Transfer JSON Compiler + Persistent Lookbook</p>
+      </div>
+    </div>
+    <a class="back-link" href="../index.html">◀ RETURN TO TOOL HUB</a>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2 style="font-size:0.95rem;">GARMENT ARCHITECTURE</h2>
+
+      <label for="silhouette">Outerwear / Upper Silhouette</label>
+      <select id="silhouette">
+        <option value="Sculpted matte-obsidian cropped bomber jacket with articulated Raglan sleeves">Sculpted Matte-Obsidian Cropped Bomber</option>
+        <option value="Asymmetric high-collar ballistic nylon trench coat with magnetic storm placket">Asymmetric High-Collar Ballistic Trench</option>
+        <option value="Heavyweight 600gsm structured hoodie with raised silicone XIRIX chest emblem">600gsm Structured Architectural Hoodie</option>
+        <option value="Tailored sleeveless Neo-Samurai utility vest over compression merino base layer">Neo-Samurai Utility Vest + Merino Base</option>
+      </select>
+
+      <label for="bottoms">Lower Silhouette / Trousers</label>
+      <select id="bottoms">
+        <option value="Tapered technical cargo trousers with pleated articulated knees and matte cobra buckles">Tapered Articulated Technical Cargos</option>
+        <option value="Wide-leg architectural pleated wool-blend trousers with concealed ankle zips">Wide-Leg Architectural Wool Trousers</option>
+        <option value="Stacked waxed-denim moto trousers with tonal reinforced knee panels">Waxed-Denim Reinforced Moto Trousers</option>
+      </select>
+
+      <label for="footwear">Footwear</label>
+      <select id="footwear">
+        <option value="Chunky Vibram-sole tactical combat boots in matte onyx leather">Vibram-Sole Matte Onyx Tactical Boots</option>
+        <option value="High-top vulcanized architectural sneakers with carbon-fiber heel counter">High-Top Carbon-Heel Sneakers</option>
+        <option value="Monolithic slip-on futuristic Chelsea boots with matte purple welt detail">Monolithic Violet-Welt Chelsea Boots</option>
+      </select>
+
+      <label for="palette">Colorway &amp; Hardware Trim</label>
+      <select id="palette">
+        <option value="Deep Obsidian (#08080A) with Knight Core Violett (#4B0077) lining and brushed champagne gold hardware">Obsidian + Knight Violett + Brushed Gold</option>
+        <option value="Stealth Matte Charcoal (#18181B) with tonal gunmetal hardware and subtle electric magenta piping">Stealth Charcoal + Gunmetal + Magenta Piping</option>
+        <option value="Chalk Bone (#EAEAE6) technical Gore-Tex shell with matte black waterproof zippers">Chalk Bone Gore-Tex + Matte Black</option>
+      </select>
+
+      <label for="logoPlacement">XIRIX Orthographic Logo Lock</label>
+      <select id="logoPlacement">
+        <option value="Embossed matte silicone 'XIRIX' wordmark centered on upper chest (exact 5-letter spelling: X-I-R-I-X)">Embossed Chest Wordmark (Exact X-I-R-I-X)</option>
+        <option value="Woven jacquard 'XIRIX' collar tab +レーザー etched hardware">Woven Collar Tab + Etched Hardware</option>
+        <option value="Unbranded stealth silhouette (zero external typography)">Stealth Zero-Logo Silhouette</option>
+      </select>
+
+      <div style="display:flex;gap:0.55rem;flex-wrap:wrap;margin-top:1.1rem;">
+        <button class="btn btn-primary" id="randomizeBtn" type="button">Randomize Fit</button>
+        <button class="btn" id="saveLookBtn" type="button">+ Save to Lookbook</button>
+        <button class="btn" id="copyPromptBtn" type="button">Copy Active Output</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
+        <h2 style="font-size:0.95rem;">COMPILED PROMPT &amp; MODE-C TRANSFER SCHEMA</h2>
+        <div style="display:flex;gap:0.45rem;">
+          <button class="btn btn-primary" id="viewTextBtn" type="button">Prose Prompt</button>
+          <button class="btn" id="viewJsonBtn" type="button">Mode C JSON Schema</button>
+        </div>
+      </div>
+
+      <pre class="code-box" id="outputBox"></pre>
+
+      <h3 style="font-size:0.88rem;color:var(--gold);margin-top:1.35rem;">SAVED XIRIX LOOKBOOK (LOCALSTORAGE)</h3>
+      <div class="lookbook-grid" id="lookbookGrid"></div>
+    </section>
+  </main>
+
+  <script>
+    const LOOKBOOK_KEY = 'ekm_xirix_lookbook_v2';
+    let viewMode = 'text';
+
+    function getSelections() {
+      return {
+        top: document.getElementById('silhouette').value,
+        bottom: document.getElementById('bottoms').value,
+        shoes: document.getElementById('footwear').value,
+        palette: document.getElementById('palette').value,
+        logo: document.getElementById('logoPlacement').value
+      };
+    }
+
+    function compileOutput() {
+      const s = getSelections();
+      if (viewMode === 'text') {
+        return [
+          `XIRIX EDITORIAL STREETWEAR SPECIFICATION:`,
+          `• Upper Silhouette: ${s.top}`,
+          `• Lower Silhouette: ${s.bottom}`,
+          `• Footwear: ${s.shoes}`,
+          `• Colorway & Trim: ${s.palette}`,
+          `• Branding Lock: ${s.logo}`,
+          `• Photography & Material Lock: 85mm f/2.0 editorial studio portrait, 4:5 aspect ratio, razor-sharp fabric micro-weave, natural skin texture, physically accurate seam drape.`,
+          `• Negative / Disallowed Guard: XIRX, X1RIX, XIRIXX, ZIRIX, XYRIX, plastic skin, melted zippers, asymmetrical pupils, gibberish text.`
+        ].join('\n');
+      } else {
+        const schema = {
+          prompt_type: 'wardrobe_transfer_mode_c',
+          brand: 'XIRIX',
+          version: '2026-07',
+          garment_specification: {
+            upper_silhouette: s.top,
+            lower_silhouette: s.bottom,
+            footwear: s.shoes,
+            colorway_and_hardware: s.palette,
+            orthographic_logo_lock: s.logo
+          },
+          optical_and_material_locks: {
+            aspect_ratio: '4:5',
+            lens: '85mm f/2.0 prime, ISO 100',
+            textile_fidelity: 'High-frequency fabric weave, realistic seam tension, natural contact shadows'
+          },
+          disallowed: ['XIRX', 'X1RIX', 'XIRIXX', 'ZIRIX', 'XYRIX', 'plastic skin', 'gibberish text', 'floating collar']
+        };
+        return JSON.stringify(schema, null, 2);
+      }
+    }
+
+    function render() {
+      document.getElementById('outputBox').textContent = compileOutput();
+      renderLookbook();
+    }
+
+    function loadLookbook() {
+      try {
+        const raw = localStorage.getItem(LOOKBOOK_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (e) {}
+      return [];
+    }
+
+    function renderLookbook() {
+      const items = loadLookbook();
+      const grid = document.getElementById('lookbookGrid');
+      if (items.length === 0) {
+        grid.innerHTML = `<div style="color:var(--muted);font-size:0.85rem;">No looks saved yet. Click "+ Save to Lookbook" to store combinations.</div>`;
+        return;
+      }
+      grid.innerHTML = items.map((item, idx) => `
+        <div class="look-item">
+          <div style="font-family:'Orbitron',sans-serif;font-size:0.75rem;color:var(--gold);margin-bottom:0.3rem;">LOOK #${items.length - idx}</div>
+          <div><strong>Top:</strong> ${item.top}</div>
+          <div style="margin-top:0.2rem;"><strong>Bottom:</strong> ${item.bottom}</div>
+          <div style="margin-top:0.2rem;color:var(--muted);">${item.palette}</div>
+        </div>
+      `).join('');
+    }
+
+    ['silhouette', 'bottoms', 'footwear', 'palette', 'logoPlacement'].forEach(id => {
+      document.getElementById(id).addEventListener('change', render);
+    });
+
+    document.getElementById('viewTextBtn').addEventListener('click', () => {
+      viewMode = 'text';
+      document.getElementById('viewTextBtn').classList.add('btn-primary');
+      document.getElementById('viewJsonBtn').classList.remove('btn-primary');
+      render();
+    });
+
+    document.getElementById('viewJsonBtn').addEventListener('click', () => {
+      viewMode = 'json';
+      document.getElementById('viewJsonBtn').classList.add('btn-primary');
+      document.getElementById('viewTextBtn').classList.remove('btn-primary');
+      render();
+    });
+
+    document.getElementById('randomizeBtn').addEventListener('click', () => {
+      ['silhouette', 'bottoms', 'footwear', 'palette', 'logoPlacement'].forEach(id => {
+        const sel = document.getElementById(id);
+        sel.selectedIndex = Math.floor(Math.random() * sel.options.length);
+      });
+      render();
+    });
+
+    document.getElementById('saveLookBtn').addEventListener('click', () => {
+      const items = loadLookbook();
+      items.unshift(getSelections());
+      try { localStorage.setItem(LOOKBOOK_KEY, JSON.stringify(items.slice(0, 12))); } catch (e) {}
+      renderLookbook();
+    });
+
+    document.getElementById('copyPromptBtn').addEventListener('click', (e) => {
+      navigator.clipboard.writeText(document.getElementById('outputBox').textContent);
+      const btn = e.currentTarget;
+      const orig = btn.textContent;
+      btn.textContent = 'Copied!';
+      setTimeout(() => { btn.textContent = orig; }, 1400);
+    });
+
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,2383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EVO7 Part 107 Flight Academy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Lato:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#000000;
+  --surface:#111111;
+  --surface2:#16161c;
+  --panel:#0d0d12;
+  --line:#26262f;
+  --line-bright:#3a3a48;
+  --violett:#4B0077;
+  --violett-bright:#7a2bbf;
+  --ultraviolet:#9d5cff;
+  --lavender:#c9b8e8;
+  --silver:#b8bcc8;
+  --moonstone:#8fa3b8;
+  --text:#F4F4F5;
+  --text-dim:#9a9aa6;
+  --text-faint:#5e5e6a;
+  --ok:#4ade80;
+  --warn:#fbbf24;
+  --bad:#f87171;
+  --vfr:#4ade80;
+  --mvfr:#60a5fa;
+  --ifr:#f87171;
+  --lifr:#e879f9;
+  --radius:6px;
+  --font-head:'Orbitron',ui-monospace,monospace;
+  --font-body:'Lato','Helvetica Neue',Arial,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  font-size:15px;
+  line-height:1.6;
+  min-height:100vh;
+}
+body::before{
+  content:"";
+  position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(75,0,119,.22), transparent 60%),
+    repeating-linear-gradient(0deg, transparent 0 47px, rgba(157,92,255,.028) 47px 48px),
+    repeating-linear-gradient(90deg, transparent 0 47px, rgba(157,92,255,.028) 47px 48px);
+  pointer-events:none;z-index:0;
+}
+body.high-contrast{--text-dim:#c8c8d2;--text-faint:#9a9aa6;--line:#4a4a58;--line-bright:#6a6a7c}
+body.reduced-motion *,body.reduced-motion *::before,body.reduced-motion *::after{animation-duration:.001s !important;transition-duration:.001s !important}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.001s !important;transition-duration:.001s !important}}
+
+/* ---------- layout ---------- */
+#app{display:flex;min-height:100vh;position:relative;z-index:1}
+#sidebar{
+  width:232px;flex-shrink:0;
+  background:linear-gradient(180deg,#0a0a0e,#0d0d12);
+  border-right:1px solid var(--line);
+  padding:22px 0;
+  display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+}
+#logo{padding:0 22px 20px;border-bottom:1px solid var(--line);margin-bottom:14px}
+#logo .mark{
+  font-family:var(--font-head);font-weight:900;font-size:26px;letter-spacing:.14em;
+  background:linear-gradient(120deg,#e6dff2 20%,var(--ultraviolet) 55%,var(--violett) 90%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+#logo .sub{font-family:var(--font-head);font-size:9px;letter-spacing:.34em;color:var(--text-faint);font-weight:500;margin-top:3px}
+.nav-section{font-family:var(--font-head);font-size:9px;letter-spacing:.28em;color:var(--text-faint);padding:14px 22px 6px;font-weight:700}
+.nav-btn{
+  display:flex;align-items:center;gap:11px;width:100%;
+  background:none;border:none;color:var(--text-dim);
+  font-family:var(--font-body);font-size:13.5px;font-weight:700;letter-spacing:.02em;
+  padding:10px 22px;cursor:pointer;text-align:left;
+  border-left:2px solid transparent;transition:all .15s;
+}
+.nav-btn svg{width:16px;height:16px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.7}
+.nav-btn:hover{color:var(--text);background:rgba(157,92,255,.05)}
+.nav-btn.active{color:var(--lavender);border-left-color:var(--ultraviolet);background:linear-gradient(90deg,rgba(75,0,119,.24),transparent)}
+.nav-btn .pill{margin-left:auto;font-size:10px;font-weight:700;background:var(--violett);color:#e9d9ff;border-radius:9px;padding:1px 7px}
+#sidebar .rank-chip{margin:auto 16px 0;padding:12px 14px;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(160deg,#121218,#0b0b10)}
+#sidebar .rank-chip .r-label{font-family:var(--font-head);font-size:8px;letter-spacing:.3em;color:var(--text-faint)}
+#sidebar .rank-chip .r-name{font-family:var(--font-head);font-size:12px;font-weight:700;color:var(--lavender);letter-spacing:.08em;margin:3px 0 7px}
+#main{flex:1;padding:30px 38px 60px;max-width:1220px;min-width:0}
+.screen{display:none}
+.screen.active{display:block;animation:screenIn .3s ease}
+@keyframes screenIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ---------- typography ---------- */
+h1,h2,h3,h4{font-family:var(--font-head);text-transform:uppercase}
+h1{font-size:22px;font-weight:700;letter-spacing:.12em;margin-bottom:4px}
+h2{font-size:15px;font-weight:700;letter-spacing:.14em;color:var(--lavender);margin-bottom:14px}
+h3{font-size:12px;font-weight:700;letter-spacing:.16em;color:var(--silver)}
+.eyebrow{font-family:var(--font-head);font-size:9px;letter-spacing:.32em;color:var(--ultraviolet);font-weight:700;text-transform:uppercase;margin-bottom:6px}
+.lede{color:var(--text-dim);max-width:70ch;margin-bottom:22px}
+.screen-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.mono{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+
+/* ---------- panels & cards ---------- */
+.panel{
+  background:linear-gradient(165deg,var(--surface2),var(--panel));
+  border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;position:relative;
+}
+.panel.glow{box-shadow:inset 0 1px 0 rgba(157,92,255,.14), 0 0 0 1px rgba(75,0,119,.25)}
+.panel .p-title{font-family:var(--font-head);font-size:10.5px;font-weight:700;letter-spacing:.22em;color:var(--silver);text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.panel .p-title::before{content:"";width:7px;height:7px;background:var(--ultraviolet);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:1000px){.grid3,.grid4{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.grid2,.grid3,.grid4{grid-template-columns:1fr}#main{padding:20px 16px 60px}}
+
+/* ---------- buttons ---------- */
+.btn{
+  font-family:var(--font-head);font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+  background:linear-gradient(160deg,#1a1a22,#111116);color:var(--lavender);
+  border:1px solid var(--line-bright);border-radius:4px;
+  padding:10px 18px;cursor:pointer;transition:all .15s;
+}
+.btn:hover{border-color:var(--ultraviolet);color:#fff;box-shadow:0 0 14px rgba(157,92,255,.22)}
+.btn:focus-visible,button:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--ultraviolet);outline-offset:2px}
+.btn.primary{background:linear-gradient(160deg,var(--violett-bright),var(--violett));border-color:var(--violett-bright);color:#fff}
+.btn.primary:hover{box-shadow:0 0 20px rgba(122,43,191,.5)}
+.btn.small{padding:6px 12px;font-size:9.5px}
+.btn.ghost{background:transparent;border-color:var(--line)}
+.btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+/* ---------- tabs ---------- */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:22px;flex-wrap:wrap}
+.tab{
+  font-family:var(--font-head);font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  background:none;border:none;color:var(--text-faint);padding:10px 16px;cursor:pointer;
+  border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s;
+}
+.tab:hover{color:var(--text-dim)}
+.tab.active{color:var(--lavender);border-bottom-color:var(--ultraviolet)}
+
+/* ---------- dashboard ---------- */
+.dash-top{display:grid;grid-template-columns:270px 1fr 250px;gap:16px;margin-bottom:16px}
+@media(max-width:1050px){.dash-top{grid-template-columns:1fr}}
+.readiness-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.gauge{position:relative;width:172px;height:172px}
+.gauge svg{transform:rotate(-90deg)}
+.gauge .g-val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.gauge .g-num{font-family:var(--font-head);font-size:34px;font-weight:900;color:#fff}
+.gauge .g-cap{font-family:var(--font-head);font-size:8px;letter-spacing:.3em;color:var(--text-faint)}
+.gauge::after{
+  content:"";position:absolute;inset:14px;border-radius:50%;
+  background:conic-gradient(from 0deg, rgba(157,92,255,.18), transparent 40%);
+  animation:sweep 6s linear infinite;pointer-events:none;
+}
+@keyframes sweep{to{transform:rotate(360deg)}}
+.mastery-row{display:flex;flex-direction:column;gap:11px}
+.m-item .m-head{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+.m-item .m-name{color:var(--text-dim);font-weight:700;letter-spacing:.03em}
+.m-item .m-pct{font-family:var(--font-head);font-size:11px;color:var(--lavender)}
+.bar{height:5px;background:#1b1b23;border-radius:3px;overflow:hidden;position:relative}
+.bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--violett),var(--ultraviolet));border-radius:3px;transition:width .6s ease}
+.stat-stack{display:flex;flex-direction:column;gap:12px}
+.stat{display:flex;justify-content:space-between;align-items:baseline;padding-bottom:11px;border-bottom:1px solid var(--line)}
+.stat:last-child{border-bottom:none;padding-bottom:0}
+.stat .s-label{font-size:12px;color:var(--text-dim)}
+.stat .s-val{font-family:var(--font-head);font-size:15px;font-weight:700;color:var(--lavender)}
+.mission-card{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.mission-card .m-txt b{color:var(--lavender)}
+.dash-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:16px}
+@media(max-width:1050px){.dash-grid{grid-template-columns:1fr}}
+
+/* ---------- METAR ---------- */
+.metar-strip{
+  display:flex;flex-wrap:wrap;gap:6px;
+  background:#050508;border:1px solid var(--line);border-radius:var(--radius);
+  padding:18px;margin-bottom:18px;
+  font-family:ui-monospace,Menlo,Consolas,monospace;font-size:17px;
+}
+.mgroup{
+  padding:5px 9px;border-radius:4px;border:1px solid transparent;
+  cursor:pointer;background:none;color:var(--text);font:inherit;letter-spacing:.02em;
+  transition:all .12s;
+}
+.mgroup:hover{border-color:var(--line-bright);background:rgba(157,92,255,.07)}
+.mgroup.sel{border-color:var(--ultraviolet);background:rgba(75,0,119,.35);color:#fff;box-shadow:0 0 12px rgba(157,92,255,.3)}
+.field-detail{display:grid;grid-template-columns:150px 1fr;gap:8px 18px;font-size:14px}
+.field-detail dt{font-family:var(--font-head);font-size:9.5px;letter-spacing:.2em;color:var(--text-faint);text-transform:uppercase;padding-top:3px}
+.field-detail dd{color:var(--text)}
+.field-detail .trap{color:var(--warn)}
+.cat-badge{font-family:var(--font-head);font-weight:700;font-size:11px;letter-spacing:.14em;padding:4px 12px;border-radius:3px;display:inline-block}
+.cat-VFR{background:rgba(74,222,128,.14);color:var(--vfr);border:1px solid rgba(74,222,128,.4)}
+.cat-MVFR{background:rgba(96,165,250,.14);color:var(--mvfr);border:1px solid rgba(96,165,250,.4)}
+.cat-IFR{background:rgba(248,113,113,.14);color:var(--ifr);border:1px solid rgba(248,113,113,.4)}
+.cat-LIFR{background:rgba(232,121,249,.14);color:var(--lifr);border:1px solid rgba(232,121,249,.4)}
+textarea.metar-input,input.metar-input{
+  width:100%;background:#050508;border:1px solid var(--line-bright);border-radius:4px;
+  color:var(--text);font-family:ui-monospace,Menlo,monospace;font-size:15px;
+  padding:12px;resize:vertical;
+}
+textarea.metar-input:focus,input.metar-input:focus{border-color:var(--ultraviolet)}
+.decode-table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:14px}
+.decode-table th{font-family:var(--font-head);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-faint);text-align:left;padding:7px 10px;border-bottom:1px solid var(--line)}
+.decode-table td{padding:8px 10px;border-bottom:1px solid #1a1a22;vertical-align:top}
+.decode-table td.code{font-family:ui-monospace,Menlo,monospace;color:var(--ultraviolet);white-space:nowrap}
+.callout{border-left:2px solid var(--ultraviolet);background:rgba(75,0,119,.12);padding:12px 16px;border-radius:0 4px 4px 0;margin:12px 0;font-size:14px}
+.callout.warn{border-left-color:var(--warn);background:rgba(251,191,36,.07)}
+.callout.bad{border-left-color:var(--bad);background:rgba(248,113,113,.07)}
+.callout.ok{border-left-color:var(--ok);background:rgba(74,222,128,.07)}
+
+/* ---------- quiz ---------- */
+.q-meta{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.chip{font-family:var(--font-head);font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;border:1px solid var(--line-bright);color:var(--text-dim);border-radius:3px;padding:3px 9px}
+.chip.violet{border-color:var(--violett-bright);color:var(--lavender)}
+.q-text{font-size:17px;font-weight:400;line-height:1.55;margin-bottom:18px;max-width:78ch}
+.opt{
+  display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;
+  background:linear-gradient(160deg,#14141a,#0e0e13);border:1px solid var(--line);border-radius:5px;
+  color:var(--text);font-family:var(--font-body);font-size:14.5px;line-height:1.5;
+  padding:13px 16px;margin-bottom:9px;cursor:pointer;transition:all .13s;
+}
+.opt:hover{border-color:var(--ultraviolet)}
+.opt .key{font-family:var(--font-head);font-size:11px;font-weight:700;color:var(--text-faint);border:1px solid var(--line-bright);border-radius:3px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.opt.sel{border-color:var(--ultraviolet);background:rgba(75,0,119,.22)}
+.opt.correct{border-color:var(--ok);background:rgba(74,222,128,.09)}
+.opt.correct .key{border-color:var(--ok);color:var(--ok)}
+.opt.wrong{border-color:var(--bad);background:rgba(248,113,113,.08)}
+.opt.wrong .key{border-color:var(--bad);color:var(--bad)}
+.opt:disabled{cursor:default}
+.explain{margin-top:16px}
+.explain .why{margin-bottom:10px}
+.explain .distract{font-size:13.5px;color:var(--text-dim);margin:4px 0}
+.explain .distract b{color:var(--silver)}
+.faa-ref{font-family:var(--font-head);font-size:9px;letter-spacing:.16em;color:var(--moonstone);text-transform:uppercase;margin-top:12px;display:inline-block;border:1px solid var(--line);padding:4px 10px;border-radius:3px}
+.progress-track{display:flex;gap:4px;margin-bottom:18px}
+.progress-track i{flex:1;height:4px;background:#1b1b23;border-radius:2px}
+.progress-track i.done{background:var(--ultraviolet)}
+.progress-track i.miss{background:var(--bad)}
+.progress-track i.cur{background:var(--lavender)}
+.timer-big{font-family:var(--font-head);font-size:26px;font-weight:700;color:var(--lavender);letter-spacing:.08em}
+.timer-big.low{color:var(--bad)}
+.result-hero{text-align:center;padding:34px 20px}
+.result-hero .r-pct{font-family:var(--font-head);font-size:56px;font-weight:900;background:linear-gradient(120deg,#fff,var(--ultraviolet));-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* ---------- chart lab ---------- */
+#chartWrap{position:relative;background:#0a0d0a;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+#chartSvg{display:block;width:100%;height:auto;cursor:grab;touch-action:none}
+#chartSvg:active{cursor:grabbing}
+.chart-controls{position:absolute;top:12px;right:12px;display:flex;flex-direction:column;gap:6px;z-index:5}
+.chart-controls .btn{padding:6px 11px}
+.sym-card{cursor:pointer;transition:all .15s;border:1px solid var(--line)}
+.sym-card:hover{border-color:var(--ultraviolet);transform:translateY(-2px)}
+.sym-card .s-icon{height:64px;display:flex;align-items:center;justify-content:center;background:#0a0d0a;border-radius:4px;margin-bottom:10px}
+.sym-card .s-name{font-family:var(--font-head);font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--lavender);text-transform:uppercase}
+.sym-card .s-cat{font-size:11px;color:var(--text-faint)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;z-index:60;padding:20px}
+.modal.open{display:flex}
+.modal .modal-box{max-width:640px;width:100%;max-height:86vh;overflow-y:auto}
+.pulse-ring{animation:pulseR 1.6s ease-out infinite;transform-origin:center}
+@keyframes pulseR{0%{opacity:.9}70%{opacity:.15}100%{opacity:.9}}
+
+/* ---------- mock exam ---------- */
+.exam-grid{display:grid;grid-template-columns:1fr 210px;gap:18px}
+@media(max-width:900px){.exam-grid{grid-template-columns:1fr}}
+.qnav{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.qnav button{
+  font-family:var(--font-head);font-size:11px;font-weight:700;aspect-ratio:1;
+  background:#14141a;border:1px solid var(--line);color:var(--text-dim);border-radius:4px;cursor:pointer;
+}
+.qnav button.answered{border-color:var(--violett-bright);color:var(--lavender);background:rgba(75,0,119,.25)}
+.qnav button.flagged{border-color:var(--warn);color:var(--warn)}
+.qnav button.cur{outline:2px solid var(--ultraviolet)}
+.domain-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.domain-row .d-name{width:170px;font-size:12.5px;color:var(--text-dim);font-weight:700;flex-shrink:0}
+.domain-row .d-pct{font-family:var(--font-head);font-size:11px;color:var(--lavender);width:42px;text-align:right;flex-shrink:0}
+.domain-row .bar{flex:1}
+
+/* ---------- badges / progress ---------- */
+.badge{display:flex;gap:13px;align-items:center;opacity:.35;filter:grayscale(1)}
+.badge.earned{opacity:1;filter:none}
+.badge .b-icon{width:44px;height:44px;flex-shrink:0;border:1px solid var(--violett-bright);border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 35% 30%,#241436,#0d0d12);box-shadow:0 0 12px rgba(122,43,191,.3)}
+.badge .b-name{font-family:var(--font-head);font-size:10.5px;font-weight:700;letter-spacing:.1em;color:var(--lavender);text-transform:uppercase}
+.badge .b-desc{font-size:12px;color:var(--text-dim)}
+.rank-ladder{display:flex;flex-direction:column;gap:0}
+.rung{display:flex;gap:14px;align-items:center;padding:10px 0;border-bottom:1px solid #1a1a22}
+.rung .r-dot{width:11px;height:11px;border-radius:50%;border:2px solid var(--line-bright);flex-shrink:0}
+.rung.passed .r-dot{background:var(--ultraviolet);border-color:var(--ultraviolet);box-shadow:0 0 8px rgba(157,92,255,.5)}
+.rung.current .r-dot{border-color:var(--lavender);background:var(--violett)}
+.rung .r-name{font-family:var(--font-head);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim)}
+.rung.passed .r-name,.rung.current .r-name{color:var(--lavender)}
+.rung .r-xp{margin-left:auto;font-family:var(--font-head);font-size:10px;color:var(--text-faint)}
+
+/* ---------- settings / reference ---------- */
+.setting-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);gap:20px}
+.setting-row .s-name{font-weight:700}
+.setting-row .s-desc{font-size:12.5px;color:var(--text-dim)}
+.toggle{position:relative;width:46px;height:24px;flex-shrink:0;background:#1b1b23;border:1px solid var(--line-bright);border-radius:13px;cursor:pointer;transition:all .2s}
+.toggle::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--text-faint);transition:all .2s}
+.toggle[aria-checked="true"]{background:var(--violett);border-color:var(--violett-bright)}
+.toggle[aria-checked="true"]::after{left:24px;background:#fff}
+.ref-search{width:100%;background:#050508;border:1px solid var(--line-bright);border-radius:4px;color:var(--text);font-family:var(--font-body);font-size:14px;padding:11px 14px;margin-bottom:18px}
+.ref-item{padding:13px 0;border-bottom:1px solid #1a1a22}
+.ref-item .r-title{font-weight:700;color:var(--lavender)}
+.ref-item .r-body{font-size:13.5px;color:var(--text-dim)}
+.toast{
+  position:fixed;bottom:24px;right:24px;z-index:100;
+  background:linear-gradient(160deg,#1c1024,#120a18);border:1px solid var(--violett-bright);
+  border-radius:5px;padding:13px 18px;font-size:13.5px;color:var(--lavender);
+  box-shadow:0 6px 24px rgba(0,0,0,.6), 0 0 16px rgba(122,43,191,.25);
+  opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;max-width:320px;
+}
+.toast.show{opacity:1;transform:none}
+.toast b{font-family:var(--font-head);font-size:10px;letter-spacing:.2em;text-transform:uppercase;display:block;margin-bottom:2px;color:var(--ultraviolet)}
+.small-note{font-size:12px;color:var(--text-faint)}
+.mt{margin-top:16px}.mb{margin-bottom:16px}
+hr.div{border:none;border-top:1px solid var(--line);margin:18px 0}
+
+/* ---------- launch ---------- */
+#launch{
+  position:fixed;inset:0;z-index:200;background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+  transition:opacity .5s;
+}
+#launch.gone{opacity:0;pointer-events:none}
+#launch .big{
+  font-family:var(--font-head);font-weight:900;font-size:clamp(44px,9vw,84px);letter-spacing:.16em;
+  background:linear-gradient(120deg,#f4f4f5 15%,var(--ultraviolet) 55%,var(--violett) 95%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+#launch .tag{font-family:var(--font-head);font-size:11px;letter-spacing:.5em;color:var(--text-dim);text-transform:uppercase}
+#launch .scanline{width:min(420px,80vw);height:1px;background:linear-gradient(90deg,transparent,var(--ultraviolet),transparent);animation:scan 2.4s ease-in-out infinite}
+@keyframes scan{0%,100%{opacity:.2;transform:scaleX(.4)}50%{opacity:1;transform:scaleX(1)}}
+.disclaimer{font-size:11px;color:var(--text-faint);max-width:56ch;text-align:center;line-height:1.5}
+</style>
+</head>
+<body>
+<aside role="note" style="padding:12px 20px;background:#241530;color:#fff;font:14px sans-serif;border-bottom:1px solid #8c55b8">Recovered study prototype · Question content and exam topic weights need review against current FAA/PSI guidance. Scores and ranks are practice feedback. Saved progress stays local to this browser.</aside>
+<div id="launch">
+  <div class="big">EVO7</div>
+  <div class="tag">Part 107 Flight Academy</div>
+  <div class="scanline"></div>
+  <p class="disclaimer">Original practice simulation for FAA Part&nbsp;107 exam preparation. Not an official FAA examination. Verify all regulatory content against current FAA publications before flight.</p>
+  <button class="btn primary" id="launchBtn">Initialize Training</button>
+</div>
+
+<div id="app">
+  <nav id="sidebar" aria-label="Primary">
+    <div id="logo"><div class="mark">EVO7</div><div class="sub">Flight Academy</div></div>
+    <div class="nav-section">Command</div>
+    <button class="nav-btn active" data-screen="dashboard"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="5"/><rect x="13" y="10" width="8" height="11"/><rect x="3" y="13" width="8" height="8"/></svg>Dashboard</button>
+    <div class="nav-section">Laboratories</div>
+    <button class="nav-btn" data-screen="metar"><svg viewBox="0 0 24 24"><path d="M4 15a5 5 0 1 1 3-9 6 6 0 0 1 11.6 2A4 4 0 0 1 18 15z"/><path d="M8 19h.01M12 21h.01M16 19h.01"/></svg>METAR Lab</button>
+    <button class="nav-btn" data-screen="chart"><svg viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg>Sectional Lab</button>
+    <div class="nav-section">Training</div>
+    <button class="nav-btn" data-screen="quiz"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.4 2.3c-.8.3-.9 1-.9 1.7"/><path d="M12 17h.01"/></svg>Adaptive Quiz<span class="pill" id="reviewPill" hidden>0</span></button>
+    <button class="nav-btn" data-screen="exam"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Mock Exam</button>
+    <div class="nav-section">Records</div>
+    <button class="nav-btn" data-screen="progress"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg>Progression</button>
+    <button class="nav-btn" data-screen="reference"><svg viewBox="0 0 24 24"><path d="M4 19V5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 1-2-2z"/><path d="M19 17H6a2 2 0 0 0 0 4"/></svg>Reference</button>
+    <button class="nav-btn" data-screen="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2z"/></svg>Settings</button>
+    <div class="rank-chip">
+      <div class="r-label">Current Rank</div>
+      <div class="r-name" id="sideRank">Cadet Orientation</div>
+      <div class="bar"><i id="sideXpBar" style="width:0%"></i></div>
+      <div class="small-note mono" id="sideXp" style="margin-top:5px">0 XP</div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- ============ DASHBOARD ============ -->
+    <section class="screen active" id="screen-dashboard">
+      <div class="screen-head">
+        <div><div class="eyebrow">Command Deck</div><h1 id="dashGreeting">Flight Operations</h1><p class="lede" style="margin:6px 0 0">Readiness telemetry across all Part&nbsp;107 knowledge domains.</p></div>
+        <div class="btn-row"><button class="btn primary" data-goto="quiz">Launch Recommended Mission</button></div>
+      </div>
+      <div class="dash-top">
+        <div class="panel glow readiness-wrap">
+          <div class="p-title" style="align-self:flex-start">Exam Readiness</div>
+          <div class="gauge">
+            <svg width="172" height="172" viewBox="0 0 172 172">
+              <circle cx="86" cy="86" r="76" fill="none" stroke="#1b1b23" stroke-width="9"/>
+              <circle id="gaugeArc" cx="86" cy="86" r="76" fill="none" stroke="url(#gaugeGrad)" stroke-width="9" stroke-linecap="round" stroke-dasharray="477.5" stroke-dashoffset="477.5"/>
+              <defs><linearGradient id="gaugeGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4B0077"/><stop offset="1" stop-color="#9d5cff"/></linearGradient></defs>
+            </svg>
+            <div class="g-val"><div class="g-num" id="readinessNum">0%</div><div class="g-cap">Estimated</div></div>
+          </div>
+          <div class="small-note" id="readinessNote">Complete drills to calibrate.</div>
+        </div>
+        <div class="panel">
+          <div class="p-title">Domain Mastery</div>
+          <div class="mastery-row" id="masteryList"></div>
+        </div>
+        <div class="panel">
+          <div class="p-title">Telemetry</div>
+          <div class="stat-stack">
+            <div class="stat"><span class="s-label">Study streak</span><span class="s-val" id="statStreak">0 days</span></div>
+            <div class="stat"><span class="s-label">Questions answered</span><span class="s-val" id="statAnswered">0</span></div>
+            <div class="stat"><span class="s-label">Overall accuracy</span><span class="s-val" id="statAccuracy">—</span></div>
+            <div class="stat"><span class="s-label">Latest mock exam</span><span class="s-val" id="statMock">—</span></div>
+            <div class="stat"><span class="s-label">Reviews due</span><span class="s-val" id="statReviews">0</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="dash-grid">
+        <div class="panel">
+          <div class="p-title">Recommended Next Mission</div>
+          <div class="mission-card">
+            <div class="m-txt" id="missionText">Begin with a calibration drill so EVO7 can map your weak zones.</div>
+            <button class="btn" id="missionBtn" data-goto="quiz">Deploy</button>
+          </div>
+          <hr class="div">
+          <div class="p-title">Daily Missions</div>
+          <div id="dailyMissions"></div>
+        </div>
+        <div class="panel">
+          <div class="p-title">Accuracy Trend — Last 10 Sessions</div>
+          <svg id="trendChart" viewBox="0 0 340 120" width="100%" aria-label="Accuracy trend chart"></svg>
+          <hr class="div">
+          <div class="small-note" id="weakTopicNote">Weak-topic recommendations appear here after your first session.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ METAR LAB ============ -->
+    <section class="screen" id="screen-metar">
+      <div class="screen-head">
+        <div><div class="eyebrow">Weather Laboratory</div><h1>METAR / SPECI Trainer</h1></div>
+        <button class="btn small ghost" id="newMetarBtn">Generate New Report</button>
+      </div>
+      <div class="tabs" role="tablist" id="metarTabs">
+        <button class="tab active" data-mtab="anatomy" role="tab">Anatomy</button>
+        <button class="tab" data-mtab="decoder" role="tab">Live Decoder</button>
+        <button class="tab" data-mtab="build" role="tab">Build-a-METAR</button>
+        <button class="tab" data-mtab="timed" role="tab">Timed Decode</button>
+        <button class="tab" data-mtab="scenario" role="tab">Scenario</button>
+      </div>
+
+      <div class="mtab" id="mtab-anatomy">
+        <p class="lede">Select any data group in the report below to interrogate it. Every METAR is procedurally generated and internally consistent — regenerate as often as you like.</p>
+        <div class="metar-strip" id="anatomyStrip" role="listbox" aria-label="METAR data groups"></div>
+        <div class="panel glow" id="anatomyDetail"><div class="p-title">Field Analysis</div><p class="lede" style="margin:0">Select a group above to begin.</p></div>
+      </div>
+
+      <div class="mtab" id="mtab-decoder" hidden>
+        <p class="lede">Paste or type any METAR or SPECI report. EVO7 parses it, classifies the flight category, and briefs the sUAS operational implications.</p>
+        <textarea class="metar-input" id="decoderInput" rows="2" spellcheck="false" placeholder="METAR KOAK 121853Z 28016G24KT 10SM FEW020 SCT250 18/12 A3005"></textarea>
+        <div class="btn-row mt">
+          <button class="btn primary" id="decodeBtn">Decode Report</button>
+          <button class="btn ghost" id="decodeSampleBtn">Load Random Sample</button>
+        </div>
+        <div id="decoderOut" class="mt"></div>
+      </div>
+
+      <div class="mtab" id="mtab-build" hidden>
+        <p class="lede">Read the plain-language weather brief, then construct the coded METAR body. Groups are checked individually — order and syntax both count.</p>
+        <div class="panel mb" id="buildBrief"></div>
+        <input class="metar-input" id="buildInput" spellcheck="false" autocomplete="off" placeholder="Type the coded METAR body here…" aria-label="Coded METAR entry">
+        <div class="btn-row mt">
+          <button class="btn primary" id="buildCheckBtn">Check My METAR</button>
+          <button class="btn ghost" id="buildNewBtn">New Brief</button>
+          <button class="btn ghost" id="buildRevealBtn">Reveal Solution</button>
+        </div>
+        <div id="buildOut" class="mt"></div>
+      </div>
+
+      <div class="mtab" id="mtab-timed" hidden>
+        <p class="lede">Randomized reports, one question each, against the clock. Answer before time expires — speed under pressure is tracked separately from accuracy.</p>
+        <div class="btn-row mb"><button class="btn primary" id="timedStartBtn">Begin Timed Drill — 8 Reports</button><span class="timer-big" id="timedClock" hidden>20</span></div>
+        <div id="timedArea"></div>
+      </div>
+
+      <div class="mtab" id="mtab-scenario" hidden>
+        <p class="lede">A live mission tasking with real weather. Decide: acceptable, marginal, or unsafe — then justify it. Both the verdict and the reasoning are graded.</p>
+        <div class="btn-row mb"><button class="btn primary" id="scenStartBtn">Generate Mission</button></div>
+        <div id="scenArea"></div>
+      </div>
+    </section>
+
+    <!-- ============ CHART LAB ============ -->
+    <section class="screen" id="screen-chart">
+      <div class="screen-head">
+        <div><div class="eyebrow">Navigation Laboratory</div><h1>Sectional Chart Trainer</h1><p class="lede" style="margin:6px 0 0">Original chart-style training graphic — the <b>Knight Sector</b>. Symbology follows FAA chart conventions; cross-check real planning against a current sectional and the FAA Chart User's Guide.</p></div>
+      </div>
+      <div class="tabs" role="tablist" id="chartTabs">
+        <button class="tab active" data-ctab="map" role="tab">Chart View</button>
+        <button class="tab" data-ctab="explorer" role="tab">Symbol Explorer</button>
+        <button class="tab" data-ctab="locate" role="tab">Locate &amp; Identify</button>
+        <button class="tab" data-ctab="detective" role="tab">Airspace Detective</button>
+        <button class="tab" data-ctab="coords" role="tab">Coordinate Challenge</button>
+      </div>
+
+      <div class="ctab" id="ctab-map">
+        <p class="lede">Drag to pan, use the controls (or +/− keys) to zoom. Click any feature to identify it.</p>
+        <div id="chartWrap">
+          <div class="chart-controls">
+            <button class="btn small" id="zoomIn" aria-label="Zoom in">+</button>
+            <button class="btn small" id="zoomOut" aria-label="Zoom out">−</button>
+            <button class="btn small" id="zoomReset" aria-label="Reset view">⌂</button>
+          </div>
+        </div>
+        <div class="panel mt" id="mapInfo"><div class="p-title">Feature Readout</div><p class="lede" style="margin:0">Click a chart feature to interrogate it.</p></div>
+      </div>
+
+      <div class="ctab" id="ctab-explorer" hidden>
+        <p class="lede">Every symbol card shows the mark, its meaning, the operational consequence for a remote pilot, and the trap the FAA likes to set with it.</p>
+        <div class="grid4" id="symbolGrid"></div>
+      </div>
+
+      <div class="ctab" id="ctab-locate" hidden>
+        <p class="lede">A target pulses on the chart. Identify what it is. Questions and answer order are re-randomized on every run.</p>
+        <div class="btn-row mb"><button class="btn primary" id="locateStartBtn">Start Drill — 6 Targets</button></div>
+        <div id="locateArea"></div>
+      </div>
+
+      <div class="ctab" id="ctab-detective" hidden>
+        <p class="lede">Given a position, work the full airspace problem: surface class, overlying classes, authorization requirements — and the chart evidence that proves it.</p>
+        <div class="btn-row mb"><button class="btn primary" id="detectiveStartBtn">Open a Case</button></div>
+        <div id="detectiveArea"></div>
+      </div>
+
+      <div class="ctab" id="ctab-coords" hidden>
+        <p class="lede">Latitude and longitude off the graticule. The chart spans 36°00′–36°30′N, 121°00′–121°30′W with 5-minute ticks.</p>
+        <div class="btn-row mb"><button class="btn primary" id="coordStartBtn">Start Challenge — 5 Fixes</button></div>
+        <div id="coordArea"></div>
+      </div>
+    </section>
+
+    <!-- ============ ADAPTIVE QUIZ ============ -->
+    <section class="screen" id="screen-quiz">
+      <div class="screen-head">
+        <div><div class="eyebrow">Training Sortie</div><h1>Adaptive Quiz</h1></div>
+      </div>
+      <div id="quizSetup">
+        <p class="lede">Each sortie samples a fresh, randomized question set weighted toward your weakest domains and any spaced-repetition reviews that are due. No two runs are identical.</p>
+        <div class="grid3 mb">
+          <div class="panel"><div class="p-title">Standard Sortie</div><p style="font-size:13.5px;color:var(--text-dim)">10 questions, adaptively weighted across all domains.</p><button class="btn primary mt" id="quizStd">Launch</button></div>
+          <div class="panel"><div class="p-title">Focus Mode</div><p style="font-size:13.5px;color:var(--text-dim)">METAR + sectional charts only. The two heavyweight domains.</p><button class="btn mt" id="quizFocus">Launch Focus</button></div>
+          <div class="panel"><div class="p-title">Review Queue</div><p style="font-size:13.5px;color:var(--text-dim)"><span id="quizReviewCount">0</span> spaced-repetition items due for review.</p><button class="btn mt" id="quizReview">Run Reviews</button></div>
+        </div>
+      </div>
+      <div id="quizArea" hidden></div>
+    </section>
+
+    <!-- ============ MOCK EXAM ============ -->
+    <section class="screen" id="screen-exam">
+      <div class="screen-head">
+        <div><div class="eyebrow">Examination Bay</div><h1>Mock Knowledge Exam</h1></div>
+      </div>
+      <div id="examSetup">
+        <p class="lede">A full-length, 60-question timed simulation sampled fresh each attempt across the official knowledge areas. No feedback until you submit. Flag anything for review. Passing standard: 70%.</p>
+        <div class="callout warn">Original practice simulation — not the FAA examination and not drawn from live exam content.</div>
+        <button class="btn primary" id="examStartBtn">Begin Examination — 2:00:00</button>
+        <div id="examLast" class="mt"></div>
+      </div>
+      <div id="examArea" hidden></div>
+      <div id="examResults" hidden></div>
+    </section>
+
+    <!-- ============ PROGRESSION ============ -->
+    <section class="screen" id="screen-progress">
+      <div class="screen-head">
+        <div><div class="eyebrow">Service Record</div><h1>Progression &amp; Achievements</h1></div>
+      </div>
+      <div class="grid2">
+        <div class="panel"><div class="p-title">Rank Ladder</div><div class="rank-ladder" id="rankLadder"></div></div>
+        <div class="panel"><div class="p-title">Achievement Badges</div><div style="display:flex;flex-direction:column;gap:16px" id="badgeList"></div></div>
+      </div>
+      <div class="panel mt">
+        <div class="p-title">Performance Analytics</div>
+        <div class="grid3">
+          <div class="stat-stack" id="analyticsA"></div>
+          <div class="stat-stack" id="analyticsB"></div>
+          <div class="stat-stack" id="analyticsC"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ REFERENCE ============ -->
+    <section class="screen" id="screen-reference">
+      <div class="screen-head">
+        <div><div class="eyebrow">Archive</div><h1>Reference Library</h1></div>
+      </div>
+      <input class="ref-search" id="refSearch" type="search" placeholder="Search regulations, METAR fields, chart symbols, weather theory…" aria-label="Search reference library">
+      <div id="refList"></div>
+    </section>
+
+    <!-- ============ SETTINGS ============ -->
+    <section class="screen" id="screen-settings">
+      <div class="screen-head">
+        <div><div class="eyebrow">Systems</div><h1>Settings &amp; Accessibility</h1></div>
+      </div>
+      <div class="panel" style="max-width:620px">
+        <div class="setting-row"><div><div class="s-name">Reduced motion</div><div class="s-desc">Disables the radar sweep, transitions, and pulse effects.</div></div><button class="toggle" role="switch" aria-checked="false" data-setting="reducedMotion" aria-label="Reduced motion"></button></div>
+        <div class="setting-row"><div><div class="s-name">High contrast</div><div class="s-desc">Brightens secondary text and borders.</div></div><button class="toggle" role="switch" aria-checked="false" data-setting="highContrast" aria-label="High contrast"></button></div>
+        <div class="setting-row"><div><div class="s-name">Interface audio</div><div class="s-desc">Subtle confirmation and alert tones.</div></div><button class="toggle" role="switch" aria-checked="true" data-setting="sound" aria-label="Interface audio"></button></div>
+        <div class="setting-row" style="border-bottom:none"><div><div class="s-name">Reset all progress</div><div class="s-desc">Clears XP, mastery, streaks, badges, and review queues. Cannot be undone.</div></div><button class="btn small" id="resetBtn">Reset</button></div>
+      </div>
+      <p class="small-note mt" style="max-width:620px">Progress is saved locally in this browser. EVO7 is an original study aid; regulatory content should be verified against current FAA publications (14 CFR Part 107, Remote Pilot ACS, AIM, Chart User's Guide, Aviation Weather Handbook).</p>
+    </section>
+  </main>
+</div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true"><div class="modal-box panel glow" id="modalBox"></div></div>
+<div class="toast" id="toast" role="status"></div>
+<script>
+"use strict";
+/* ================================================================
+   EVO7 PART 107 FLIGHT ACADEMY — core engine
+   ================================================================ */
+
+/* ---------- utilities ---------- */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const pick=arr=>arr[Math.floor(Math.random()*arr.length)];
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+const pad=(n,w=2)=>String(n).padStart(w,"0");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function toast(title,msg){const t=$("#toast");t.innerHTML=`<b>${esc(title)}</b>${esc(msg)}`;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),3200)}
+
+/* ---------- audio ---------- */
+let audioCtx=null;
+function blip(freq=660,dur=.07,type="sine",gain=.05){
+  if(!state.settings.sound)return;
+  try{
+    audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+    const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+    o.type=type;o.frequency.value=freq;g.gain.value=gain;
+    o.connect(g);g.connect(audioCtx.destination);
+    o.start();g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+dur);
+    o.stop(audioCtx.currentTime+dur);
+  }catch(e){}
+}
+const sfx={ok:()=>{blip(740,.06);setTimeout(()=>blip(988,.09),70)},bad:()=>blip(196,.16,"square",.045),nav:()=>blip(520,.045,"sine",.03),badge:()=>{blip(659,.08);setTimeout(()=>blip(880,.08),90);setTimeout(()=>blip(1319,.14),180)}};
+
+/* ---------- persistent state ---------- */
+const TOPICS={
+  regulations:"Regulations",airspace:"Airspace",weather:"Weather Theory",
+  metar:"METAR / Wx Sources",charts:"Sectional Charts",loading:"Loading & Performance",
+  operations:"Operations",adm:"ADM / Human Factors",emergency:"Emergency & Airports"
+};
+const RANKS=[
+  {name:"Cadet Orientation",xp:0},{name:"Weather Analyst",xp:250},{name:"Chart Navigator",xp:600},
+  {name:"Airspace Controller",xp:1000},{name:"Mission Planner",xp:1500},{name:"Remote Pilot",xp:2200},
+  {name:"EVO7 Flight Commander",xp:3000}
+];
+const BADGES=[
+  {id:"first",name:"First Sortie",desc:"Complete your first quiz session."},
+  {id:"wxeye",name:"Weather Eye",desc:"Answer 10 METAR questions correctly."},
+  {id:"chartmaster",name:"Chart Master",desc:"Answer 10 sectional chart questions correctly."},
+  {id:"streak3",name:"Three-Day Burn",desc:"Maintain a 3-day study streak."},
+  {id:"mockpass",name:"Checkride Ready",desc:"Score 80%+ on a mock exam."},
+  {id:"perfect",name:"Zero Defects",desc:"Finish any drill of 5+ questions with 100% accuracy."},
+  {id:"decoder",name:"Cipher Clerk",desc:"Decode 5 reports in the Live Decoder."},
+  {id:"builder",name:"Report Architect",desc:"Build 3 correct METARs from plain language."}
+];
+const defaultState=()=>({
+  xp:0,answered:0,correct:0,streakDays:0,lastStudyDate:null,
+  mastery:Object.fromEntries(Object.keys(TOPICS).map(t=>[t,{seen:0,right:0,ema:0}])),
+  badges:{},counters:{metarRight:0,chartRight:0,decodes:0,builds:0},
+  reviews:[],           // {qid, due(ts), interval}
+  sessions:[],          // {date, pct, topic}
+  mockHistory:[],       // {date, pct, byDomain}
+  daily:{date:null,items:[]},
+  settings:{reducedMotion:false,highContrast:false,sound:true}
+});
+let state;
+function loadState(){
+  const base=defaultState();
+  try{
+    const raw=localStorage.getItem("evo7state");
+    if(!raw){state=base;return}
+    const saved=JSON.parse(raw);
+    state={
+      ...base,...saved,
+      mastery:Object.fromEntries(Object.keys(TOPICS).map(t=>[t,{...base.mastery[t],...(saved.mastery&&saved.mastery[t]||{})}])),
+      badges:{...base.badges,...(saved.badges||{})},
+      counters:{...base.counters,...(saved.counters||{})},
+      settings:{...base.settings,...(saved.settings||{})},
+      daily:{...base.daily,...(saved.daily||{})},
+      reviews:Array.isArray(saved.reviews)?saved.reviews:[],
+      sessions:Array.isArray(saved.sessions)?saved.sessions:[],
+      mockHistory:Array.isArray(saved.mockHistory)?saved.mockHistory:[]
+    };
+  }
+  catch(e){state=defaultState()}
+}
+function saveState(){try{localStorage.setItem("evo7state",JSON.stringify(state))}catch(e){}}
+function touchStreak(){
+  const today=new Date().toISOString().slice(0,10);
+  if(state.lastStudyDate===today)return;
+  const y=new Date(Date.now()-864e5).toISOString().slice(0,10);
+  state.streakDays=(state.lastStudyDate===y)?state.streakDays+1:1;
+  state.lastStudyDate=today;
+  if(state.streakDays>=3)earnBadge("streak3");
+  saveState();
+}
+function earnBadge(id){
+  if(state.badges[id])return;
+  state.badges[id]=Date.now();saveState();
+  const b=BADGES.find(x=>x.id===id);
+  if(b){toast("Badge Earned",b.name);sfx.badge()}
+  renderProgress();
+}
+function addXP(n){
+  const before=currentRank();
+  state.xp+=n;saveState();
+  const after=currentRank();
+  if(after.name!==before.name){toast("Promotion",`Rank achieved: ${after.name}`);sfx.badge()}
+  renderRankChip();
+}
+function currentRank(){let r=RANKS[0];for(const k of RANKS)if(state.xp>=k.xp)r=k;return r}
+function nextRank(){return RANKS.find(k=>k.xp>state.xp)||null}
+function recordAnswer(topic,ok,fast){
+  const m=state.mastery[topic]||state.mastery.operations;
+  m.seen++;if(ok)m.right++;
+  m.ema=m.ema*0.82+(ok?1:0)*0.18;
+  state.answered++;if(ok)state.correct++;
+  if(topic==="metar"&&ok){state.counters.metarRight++;if(state.counters.metarRight>=10)earnBadge("wxeye")}
+  if(topic==="charts"&&ok){state.counters.chartRight++;if(state.counters.chartRight>=10)earnBadge("chartmaster")}
+  addXP(ok?(fast?15:10):2);
+  touchStreak();saveState();
+}
+function masteryPct(t){const m=state.mastery[t];return m.seen===0?0:Math.round(m.ema*100)}
+function scheduleReview(qid,wasWrong){
+  const now=Date.now();
+  const ex=state.reviews.find(r=>r.qid===qid);
+  if(wasWrong){
+    if(ex){ex.interval=1;ex.due=now+36e5}          // 1 h
+    else state.reviews.push({qid,due:now+36e5,interval:1});
+  }else if(ex){
+    ex.interval=Math.min(ex.interval*3,9);
+    ex.due=now+ex.interval*864e5;
+    if(ex.interval>=9)state.reviews=state.reviews.filter(r=>r!==ex); // graduated
+  }
+  saveState();
+}
+const dueReviews=()=>state.reviews.filter(r=>r.due<=Date.now());
+
+/* ================================================================
+   QUESTION BANK — original practice items modeled on FAA concepts
+   ================================================================ */
+const BANK=[
+/* ---- REGULATIONS ---- */
+{id:"reg1",topic:"regulations",sub:"Operating limits",diff:1,t:35,ref:"14 CFR §107.51(a)",
+ q:"What is the maximum groundspeed at which a small unmanned aircraft may be operated under Part 107?",
+ opts:["87 knots (100 mph)","100 knots (115 mph)","87 mph (76 knots)","55 knots (63 mph)"],a:0,
+ why:"§107.51(a) caps groundspeed at 87 knots, which equals 100 miles per hour. Groundspeed — not airspeed — is the regulated value, so a tailwind counts against you.",
+ dx:[null,"Reverses the units — the limit is 87 knots, not 100 knots.","Swaps the unit labels; 87 is the knot value.","55 relates to the 55-pound weight limit, a classic number-confusion trap."]},
+{id:"reg2",topic:"regulations",sub:"Operating limits",diff:2,t:40,ref:"14 CFR §107.51(b)",
+ q:"A remote pilot wants to inspect a 900-foot broadcast tower. What is the maximum altitude permitted without a waiver?",
+ opts:["400 ft above the tower's uppermost limit, when within a 400-ft radius of it","400 ft AGL, regardless of the structure","900 ft AGL only while directly over the tower","No limit, because the mission is commercial infrastructure inspection"],a:0,
+ why:"§107.51(b) allows flight above 400 ft AGL when the aircraft stays within a 400-ft lateral radius of a structure and no higher than 400 ft above its uppermost limit — here, up to 1,300 ft AGL beside the tower.",
+ dx:[null,"The structure exception in §107.51(b)(2) specifically permits exceeding 400 ft AGL near structures.","The allowance is a 400-ft radius around the structure, not just directly overhead — and it extends 400 ft above it.","Commercial purpose grants no altitude relief; the rule applies to all Part 107 operations."]},
+{id:"reg3",topic:"regulations",sub:"Certification",diff:1,t:25,ref:"14 CFR §107.61",
+ q:"What is the minimum age to be eligible for a remote pilot certificate with an sUAS rating?",
+ opts:["16 years","18 years","14 years","21 years"],a:0,
+ why:"§107.61 sets eligibility at 16 years of age, plus English proficiency and passing the knowledge test.",
+ dx:[null,"18 is not required; the FAA aligned the sUAS minimum with the private-pilot-glider style minimum of 16.","14 is the minimum for a student glider certificate, not Part 107.","21 relates to no Part 107 requirement."]},
+{id:"reg4",topic:"regulations",sub:"Currency",diff:1,t:30,ref:"14 CFR §107.65",
+ q:"To exercise remote pilot privileges, recurrent training must have been completed within the preceding —",
+ opts:["24 calendar months","12 calendar months","36 calendar months","24 months to the day"],a:0,
+ why:"§107.65 requires completion of the initial test or recurrent training within the previous 24 calendar months. The free online recurrent course satisfies this.",
+ dx:[null,"12 months is a common guess borrowed from other currency rules; Part 107 uses 24.","36 months is the registration renewal period trap.","'Calendar months' means through the end of the month, not date-to-date — a wording trap the exam uses."]},
+{id:"reg5",topic:"regulations",sub:"Fitness",diff:2,t:35,ref:"14 CFR §107.27, §91.17",
+ q:"Under Part 107, a person may not act as a remote pilot in command with a blood alcohol concentration of —",
+ opts:[".04 or greater, or within 8 hours of consuming alcohol",".08 or greater, or within 12 hours of consuming alcohol",".04 or greater, or within 12 hours of consuming alcohol",".02 or greater, or within 8 hours of consuming alcohol"],a:0,
+ why:"Part 107 adopts §91.17: no alcohol within the preceding 8 hours, no acting while under the influence, and no BAC of .04 or greater.",
+ dx:[null,".08 is the common driving limit — aviation is stricter at .04, and the wait is 8 hours, not 12.","The BAC figure is right but the time is 8 hours.","The BAC threshold is .04, not .02."]},
+{id:"reg6",topic:"regulations",sub:"Registration",diff:1,t:30,ref:"14 CFR Part 48",
+ q:"An sUAS registration issued under Part 48 is valid for how long?",
+ opts:["3 years","2 years","5 years","Indefinitely, until ownership changes"],a:0,
+ why:"Part 48 online registration is valid for 3 years and is renewable. Aircraft over 0.55 lb must be registered and marked before flight.",
+ dx:[null,"2 years confuses registration with the old certificate schedule.","5 years is the passport-style guess; registration is 3.","Registration expires and must be renewed even with no ownership change."]},
+{id:"reg7",topic:"regulations",sub:"Reporting",diff:2,t:45,ref:"14 CFR §107.9",
+ q:"During an operation, your aircraft strikes a parked car causing $1,100 in damage. What does §107.9 require?",
+ opts:["Report to the FAA within 10 calendar days","Report to the NTSB immediately","No report — only injuries are reportable","Report to local law enforcement within 48 hours"],a:0,
+ why:"§107.9 requires a report to the FAA within 10 calendar days for serious injury, loss of consciousness, or property damage of at least $500 (other than the sUAS itself). $1,100 exceeds the threshold.",
+ dx:[null,"NTSB notification rules exist separately (49 CFR 830), but the §107.9 requirement here is the FAA 10-day report.","Property damage of $500 or more to other property is independently reportable.","Part 107 specifies FAA reporting, not a law-enforcement timeline."]},
+{id:"reg8",topic:"regulations",sub:"Authority",diff:1,t:30,ref:"14 CFR §107.19",
+ q:"Who is directly responsible for, and the final authority as to, the operation of the small unmanned aircraft system?",
+ opts:["The remote pilot in command","The visual observer","The person manipulating the controls","The certificate holder who owns the aircraft"],a:0,
+ why:"§107.19 places direct responsibility and final authority on the remote pilot in command, who must be designated before or during each flight.",
+ dx:[null,"A VO assists with see-and-avoid but holds no command authority.","A non-certificated person may manipulate controls only under direct RPIC supervision — authority stays with the RPIC.","Ownership does not confer operational authority."]},
+{id:"reg9",topic:"regulations",sub:"Emergencies",diff:2,t:35,ref:"14 CFR §107.21",
+ q:"In an in-flight emergency requiring immediate action, the remote pilot in command may —",
+ opts:["Deviate from any Part 107 rule to the extent needed to meet the emergency","Deviate only from altitude and speed limits","Not deviate from any rule without prior ATC approval","Deviate only if a visual observer is present"],a:0,
+ why:"§107.21 authorizes deviation from any rule of Part 107 to the extent necessary to meet the emergency, with a written report to the FAA upon request.",
+ dx:[null,"The authority is not limited to specific rules.","Emergency authority requires no prior approval — a report may be requested afterward.","VO presence is unrelated to emergency deviation authority."]},
+{id:"reg10",topic:"regulations",sub:"Night operations",diff:2,t:40,ref:"14 CFR §107.29",
+ q:"To operate at night under current Part 107 rules, the small unmanned aircraft must —",
+ opts:["Have lighted anti-collision lighting visible for at least 3 statute miles with a flash rate sufficient to avoid collision","Carry position lights visible for 1 statute mile","Be operated only with a night waiver","Have a strobe visible for 5 statute miles"],a:0,
+ why:"Since the 2021 rule change, night flight is permitted without a waiver if the RPIC has current training/testing and the aircraft uses anti-collision lighting visible for 3 SM with an adequate flash rate.",
+ dx:[null,"The standard is anti-collision lighting at 3 SM, not 1 SM position lights.","A waiver is no longer required for night operations meeting §107.29.","3 statute miles is the visibility standard, not 5."]},
+{id:"reg11",topic:"regulations",sub:"Multiple aircraft",diff:1,t:25,ref:"14 CFR §107.35",
+ q:"Without a waiver, how many small unmanned aircraft may one person operate at the same time?",
+ opts:["One","Two, if a visual observer assists","Three, within visual line of sight","Unlimited, if all are under 0.55 lb"],a:0,
+ why:"§107.35 prohibits a person from operating or acting as RPIC or VO for more than one unmanned aircraft at a time; swarm operations require a waiver.",
+ dx:[null,"A VO does not authorize multi-aircraft operation.","VLOS does not lift the one-aircraft rule.","Weight is irrelevant to §107.35."]},
+{id:"reg12",topic:"regulations",sub:"Inspection",diff:1,t:30,ref:"14 CFR §107.7",
+ q:"Upon request, a remote pilot must present the remote pilot certificate to —",
+ opts:["The FAA, NTSB, TSA, or any federal, state, or local law enforcement officer","Only FAA aviation safety inspectors","Any member of the public who asks","Airport management only"],a:0,
+ why:"§107.7 requires making the certificate and identification available to the FAA Administrator, NTSB, TSA, or any law enforcement officer upon request.",
+ dx:[null,"The obligation extends beyond FAA inspectors to NTSB, TSA, and law enforcement.","The public has no inspection authority under §107.7.","Airport managers are not listed inspection authorities."]},
+
+/* ---- AIRSPACE ---- */
+{id:"air1",topic:"airspace",sub:"Authorization",diff:1,t:35,ref:"14 CFR §107.41",
+ q:"Prior ATC authorization is required before operating a small UA in which airspace?",
+ opts:["Class B, Class C, Class D, and the lateral boundaries of surface Class E designated for an airport","Class G below 400 ft AGL","Any airspace within 5 NM of any airport","Class E beginning at 700 ft AGL"],a:0,
+ why:"§107.41 requires authorization (typically via LAANC or FAA DroneZone) for B, C, D, and surface-area Class E. Class G needs no authorization.",
+ dx:[null,"Class G is uncontrolled — no authorization required.","Distance from an airport is not the test; airspace class is.","E-at-700 overlies your operation; a sub-400-ft flight there is in Class G."]},
+{id:"air2",topic:"airspace",sub:"Class G",diff:1,t:30,ref:"AIM 3-3-1",
+ q:"Which statement about Class G airspace is correct for Part 107 operations?",
+ opts:["It is uncontrolled, and no ATC authorization is required to operate in it","It requires LAANC authorization below 400 ft","It exists only above 14,500 ft MSL","It is depicted with a solid magenta line"],a:0,
+ why:"Class G is uncontrolled airspace. Part 107 flights there need no ATC authorization, though all other operating rules still apply.",
+ dx:[null,"LAANC applies to controlled airspace, not Class G.","Class G typically exists from the surface up to the overlying Class E floor — often 700 or 1,200 ft AGL.","A solid magenta line depicts Class C; Class G has no boundary symbol of its own."]},
+{id:"air3",topic:"airspace",sub:"Class E",diff:2,t:40,ref:"FAA Chart User's Guide",
+ q:"On a sectional chart, the fuzzy magenta vignette (gradient band) around an airport indicates —",
+ opts:["Class E airspace beginning at 700 ft AGL","Class E airspace beginning at the surface","Class C airspace","A military operations area"],a:0,
+ why:"The magenta vignette lowers the Class E floor from 1,200 ft to 700 ft AGL inside the shaded area. Below 700 ft the airspace remains Class G — a favorite exam trap.",
+ dx:[null,"Surface Class E is shown with a dashed magenta line, not a vignette.","Class C is a solid magenta line.","MOAs are outlined with magenta hatching and labeled by name."]},
+{id:"air4",topic:"airspace",sub:"Class D",diff:2,t:40,ref:"FAA Chart User's Guide",
+ q:"A dashed blue circle around an airport with a boxed number [26] indicates —",
+ opts:["Class D airspace with a ceiling of 2,600 ft MSL","Class D airspace with a ceiling of 2,600 ft AGL","Class B airspace with a floor of 2,600 ft","Class E surface area 26 NM wide"],a:0,
+ why:"Dashed blue depicts Class D; the bracketed figure is the ceiling in hundreds of feet MSL — here 2,600 MSL. ATC authorization is required for sUAS.",
+ dx:[null,"The boxed ceiling value is MSL, not AGL — the classic Class D trap.","Class B uses solid blue lines with floor/ceiling shown as a fraction.","The number is a ceiling, not a dimension."]},
+{id:"air5",topic:"airspace",sub:"LAANC",diff:1,t:30,ref:"FAA UAS guidance",
+ q:"LAANC (Low Altitude Authorization and Notification Capability) provides —",
+ opts:["Near-real-time ATC authorization for sUAS in controlled airspace at or below approved grid altitudes","A weather briefing service for remote pilots","Automatic waivers for night operations","Radar flight following for drones"],a:0,
+ why:"LAANC processes airspace authorizations for B, C, D, and surface E airspace against pre-approved UAS Facility Map grid altitudes, usually in seconds.",
+ dx:[null,"LAANC is an authorization service, not a weather product.","Night operations no longer need waivers, and LAANC does not issue waivers.","No radar service is provided to sUAS."]},
+{id:"air6",topic:"airspace",sub:"Special use",diff:2,t:35,ref:"AIM 3-4-3",
+ q:"Restricted areas, such as R-4407, denote airspace where —",
+ opts:["Invisible hazards like artillery fire or guided missiles may exist; entry requires permission from the using or controlling agency when active","Flight is permanently prohibited under all circumstances","Only military aircraft may ever operate","Student training is being conducted"],a:0,
+ why:"Restricted areas contain unusual, often invisible hazards. When active ('hot'), authorization from the controlling agency is required to enter.",
+ dx:[null,"Permanent prohibition describes Prohibited areas (P-numbers).","Civil flight is permitted when the area is inactive or with permission.","Student training is associated with Alert areas."]},
+{id:"air7",topic:"airspace",sub:"Special use",diff:2,t:35,ref:"AIM 3-4-5",
+ q:"What is true of a Military Operations Area (MOA) for a Part 107 remote pilot?",
+ opts:["Flight is not prohibited, but extreme vigilance for high-speed military traffic is essential","Entry is prohibited at all times","ATC authorization is always required to enter","MOAs extend only above 18,000 ft MSL"],a:0,
+ why:"MOAs separate military training from IFR traffic; they do not bar Part 107 operations, but fast, low-altitude military traffic makes see-and-avoid critical.",
+ dx:[null,"MOAs are not prohibited airspace.","MOAs alone impose no sUAS authorization requirement — the underlying airspace class governs.","Many MOAs reach well below 18,000 ft, sometimes near the surface."]},
+{id:"air8",topic:"airspace",sub:"TFR",diff:1,t:30,ref:"14 CFR §91.137–145",
+ q:"Where should a remote pilot check for Temporary Flight Restrictions before a mission?",
+ opts:["Current NOTAMs","The sectional chart printed legend","The aircraft's user manual","Local news broadcasts only"],a:0,
+ why:"TFRs are issued by NOTAM and change constantly — stadium, disaster, VIP, and firefighting TFRs will never appear on a printed sectional.",
+ dx:[null,"Printed charts cannot show temporary restrictions issued after publication.","Manufacturer manuals contain no airspace status.","News may mention events but is not an authoritative source."]},
+
+/* ---- WEATHER THEORY ---- */
+{id:"wx1",topic:"weather",sub:"Stability",diff:2,t:35,ref:"Aviation Weather Handbook Ch. 12",
+ q:"A stable air mass is most likely to produce —",
+ opts:["Stratiform clouds, smooth air, poor surface visibility in haze","Cumulus clouds and good visibility","Turbulence and showery precipitation","Thunderstorms"],a:0,
+ why:"Stable air resists vertical motion: layered stratus clouds, continuous light precipitation, smooth flight, and pollutants trapped low, reducing visibility.",
+ dx:[null,"Cumulus and good visibility signal unstable air with vertical mixing.","Turbulence and showers indicate instability.","Thunderstorms require unstable air plus moisture and lift."]},
+{id:"wx2",topic:"weather",sub:"Stability",diff:2,t:35,ref:"Aviation Weather Handbook Ch. 12",
+ q:"Which combination signals an unstable atmosphere?",
+ opts:["Cumuliform clouds, turbulence, good visibility, showery precipitation","Stratus layers and steady drizzle","Fog and smooth air","Temperature inversion at the surface"],a:0,
+ why:"Instability drives vertical currents: building cumulus, bumpy air, showers, and excellent visibility as haze mixes out.",
+ dx:[null,"Stratus and drizzle indicate stability.","Fog forms in stable, calm conditions.","An inversion is the signature of very stable air."]},
+{id:"wx3",topic:"weather",sub:"Fog",diff:1,t:30,ref:"Aviation Weather Handbook Ch. 14",
+ q:"Fog formation is most likely when —",
+ opts:["The temperature–dew point spread is small and decreasing","The spread is large and increasing","Winds are strong and gusty","Density altitude is high"],a:0,
+ why:"When temperature approaches the dew point (spread ~2 °C or less) with light wind and condensation nuclei present, saturation and fog are imminent.",
+ dx:[null,"A widening spread means drying air — fog dissipates.","Strong wind usually mixes fog out (or lifts it to low stratus).","Density altitude relates to performance, not saturation."]},
+{id:"wx4",topic:"weather",sub:"Thunderstorms",diff:1,t:30,ref:"Aviation Weather Handbook Ch. 19",
+ q:"The three ingredients required for thunderstorm formation are —",
+ opts:["Moisture, unstable air, and a lifting force","Moisture, stable air, and high pressure","Cold temperatures, wind shear, and haze","Dry air, lift, and an inversion"],a:0,
+ why:"Water vapor supplies energy, instability lets parcels accelerate upward, and lift (fronts, heating, terrain) starts the process.",
+ dx:[null,"Stable air and high pressure suppress convection.","None of these three are the classic ingredients.","Dry air and inversions inhibit thunderstorm growth."]},
+{id:"wx5",topic:"weather",sub:"Thunderstorms",diff:2,t:35,ref:"Aviation Weather Handbook Ch. 19",
+ q:"The mature stage of a thunderstorm begins when —",
+ opts:["Precipitation begins falling from the cloud base","The first updraft forms","Lightning first occurs","The anvil top dissipates"],a:0,
+ why:"Rain reaching the surface marks the mature stage — the most violent phase, with simultaneous updrafts and downdrafts, gust fronts, and possible microbursts.",
+ dx:[null,"Updrafts alone define the cumulus (building) stage.","Lightning can occur across stages; it is not the stage marker the FAA uses.","A collapsing anvil relates to dissipation."]},
+{id:"wx6",topic:"weather",sub:"Density altitude",diff:2,t:35,ref:"PHAK Ch. 11",
+ q:"High density altitude (hot, high, humid) affects a small quadcopter by —",
+ opts:["Reducing rotor thrust and battery-limited climb performance","Increasing lift because warm air rises","Having no effect below 400 ft AGL","Improving motor cooling and efficiency"],a:0,
+ why:"Thin air gives rotors less mass to accelerate: more RPM and power are needed for the same thrust, shrinking payload margin and endurance.",
+ dx:[null,"Warm air rising does not add lift to a rotor working in thinner air.","Density altitude acts at any height, including the surface.","Hot conditions typically worsen, not improve, motor and battery thermal margins."]},
+{id:"wx7",topic:"weather",sub:"Wind",diff:2,t:35,ref:"Aviation Weather Handbook Ch. 9",
+ q:"On a sunny afternoon along a coastline, a sea breeze develops because —",
+ opts:["Land heats faster than water, so air rises over land and cooler air flows in from the sea","Water heats faster than land","Pressure is always lower over water","The Coriolis force reverses near shorelines"],a:0,
+ why:"Differential heating creates lower pressure over the warm land; cooler maritime air moves onshore — a factor for coastal drone operations and afternoon turbulence.",
+ dx:[null,"Water's high heat capacity makes it heat more slowly than land.","Sea-level pressure over water is not inherently lower.","Coriolis does not reverse locally."]},
+{id:"wx8",topic:"weather",sub:"Fronts",diff:2,t:35,ref:"Aviation Weather Handbook Ch. 10",
+ q:"The one weather element that always changes as a front passes is —",
+ opts:["Wind direction","Cloud type","Precipitation intensity","Visibility"],a:0,
+ why:"Frontal passage always brings a wind shift; temperature, pressure trend, and moisture usually change too, but wind direction is the constant indicator.",
+ dx:[null,"Clouds may or may not change noticeably.","Some fronts pass dry.","Visibility change is common but not guaranteed."]},
+
+/* ---- METAR / WX SOURCES ---- */
+{id:"met1",topic:"metar",sub:"Ceiling",diff:1,t:30,ref:"Aviation Weather Handbook Ch. 24",
+ q:"In a METAR, the ceiling is defined as the height of the lowest layer reported as —",
+ opts:["Broken (BKN) or overcast (OVC), or the vertical visibility (VV)","Few (FEW) or scattered (SCT)","Any cloud layer below 10,000 ft","The highest overcast layer"],a:0,
+ why:"Ceiling is the lowest BKN or OVC layer — or VV into an obscuration. FEW and SCT layers never constitute a ceiling.",
+ dx:[null,"FEW (1–2 oktas) and SCT (3–4 oktas) cover less than half the sky and are not ceilings.","Height alone is irrelevant without BKN/OVC coverage.","The lowest qualifying layer, not the highest, is the ceiling."]},
+{id:"met2",topic:"metar",sub:"Flight category",diff:1,t:30,ref:"AWC flight category criteria",
+ q:"VFR conditions require —",
+ opts:["Ceiling greater than 3,000 ft AND visibility greater than 5 SM","Ceiling above 1,000 ft OR visibility above 3 SM","Any conditions during daylight","Visibility of at least 1 SM"],a:0,
+ why:"VFR: ceiling > 3,000 ft and vis > 5 SM. MVFR: 1,000–3,000 ft and/or 3–5 SM. IFR: 500–<1,000 and/or 1–<3. LIFR: <500 and/or <1.",
+ dx:[null,"Those numbers describe the MVFR/IFR boundary, and the test is AND, not OR.","Daylight does not define VFR.","1 SM is within IFR territory."]},
+{id:"met3",topic:"metar",sub:"Wind",diff:1,t:25,ref:"Aviation Weather Handbook Ch. 24",
+ q:"In the wind group 24018G26KT, 'G26' means —",
+ opts:["Gusts to 26 knots","Wind from 26 degrees","Gradient wind at 2,600 ft","26% gust probability"],a:0,
+ why:"G introduces the gust value: wind from 240° true at 18 knots, gusting to 26 knots. An 8-knot gust factor matters greatly to a small UA.",
+ dx:[null,"Direction is the first three digits (240°).","No altitude information exists in the surface wind group.","METARs report observations, not probabilities."]},
+{id:"met4",topic:"metar",sub:"Report types",diff:1,t:25,ref:"Aviation Weather Handbook Ch. 24",
+ q:"A SPECI is —",
+ opts:["An unscheduled special report issued when weather changes significantly between routine observations","A forecast valid for 6 hours","A pilot report of turbulence","A radar summary product"],a:0,
+ why:"SPECI reports are triggered by significant changes — thunderstorm onset, rapid visibility or ceiling drops — between hourly METARs.",
+ dx:[null,"Forecasts are TAFs; SPECI is an observation.","Pilot reports are PIREPs (UA/UUA).","Radar products are separate charts and mosaics."]},
+{id:"met5",topic:"metar",sub:"Forecasts",diff:2,t:35,ref:"Aviation Weather Handbook Ch. 25",
+ q:"A TAF differs from a METAR in that a TAF is —",
+ opts:["A forecast for the area within 5 SM of an airport, typically valid 24 or 30 hours","An hourly observation of actual conditions","Valid for the entire ARTCC region","Issued only when thunderstorms are expected"],a:0,
+ why:"Terminal Aerodrome Forecasts predict conditions within 5 statute miles of the terminal, issued four times daily for 24–30 hour periods.",
+ dx:[null,"Hourly observations describe METARs.","TAF coverage is a 5 SM terminal area, not a center's airspace.","TAFs are routine scheduled products."]},
+{id:"met6",topic:"metar",sub:"Temperature",diff:1,t:25,ref:"Aviation Weather Handbook Ch. 24",
+ q:"In the group M02/M04, the 'M' prefix indicates —",
+ opts:["Minus — temperature −2 °C, dew point −4 °C","Measured values","Missing data","Metric units"],a:0,
+ why:"M denotes below-zero Celsius values: temperature −2 °C, dew point −4 °C, a 2-degree spread worth watching for fog or frost.",
+ dx:[null,"All METAR temperatures are measured; M specifically flags negatives.","Missing elements are simply omitted or coded with slashes.","METAR temperatures are always Celsius; M is not a unit flag."]},
+{id:"met7",topic:"metar",sub:"Altimeter",diff:1,t:25,ref:"Aviation Weather Handbook Ch. 24",
+ q:"'A2992' in a METAR reports —",
+ opts:["Altimeter setting 29.92 inches of mercury","Altitude 2,992 ft","Air pressure 2992 millibars","ATIS information code 2992"],a:0,
+ why:"The A group gives the altimeter setting in inches of mercury with the decimal removed: 29.92 inHg (standard pressure).",
+ dx:[null,"No altitude is encoded in a METAR body.","Millibar (hectopascal) settings use a Q prefix internationally.","ATIS codes are single letters."]},
+{id:"met8",topic:"metar",sub:"Remarks",diff:2,t:30,ref:"Aviation Weather Handbook Ch. 24",
+ q:"'RMK AO2' at the end of a METAR indicates —",
+ opts:["An automated station with a precipitation discriminator","Two amendments to the report","Altimeter checked twice","Airport is open, 2 runways"],a:0,
+ why:"AO2 = automated observation with a precipitation-type sensor (rain vs. snow). AO1 lacks the discriminator.",
+ dx:[null,"Amendments apply to TAFs, not METAR remarks.","No such altimeter code exists.","Runway counts never appear in remarks."]},
+
+/* ---- SECTIONAL CHARTS ---- */
+{id:"cht1",topic:"charts",sub:"Airports",diff:1,t:25,ref:"FAA Chart User's Guide",
+ q:"An airport symbol printed in magenta on a sectional chart indicates —",
+ opts:["An airport without an operating control tower","A towered airport","A military field","A seaplane base"],a:0,
+ why:"Magenta = non-towered; blue = an airport with a control tower. Color is the fastest tower/no-tower discriminator on the chart.",
+ dx:[null,"Towered airports are printed in blue.","Military fields use distinct symbols but color still follows the tower rule.","Seaplane bases use an anchor symbol."]},
+{id:"cht2",topic:"charts",sub:"MEF",diff:2,t:40,ref:"FAA Chart User's Guide",
+ q:"The Maximum Elevation Figure '2³' printed in a chart quadrangle means —",
+ opts:["The highest terrain or obstacle in that quadrangle is no higher than 2,300 ft MSL","Terrain averages 2,300 ft AGL","The floor of controlled airspace is 2,300 ft","A 2.3-mile obstruction-free radius"],a:0,
+ why:"MEF gives the altitude in thousands and hundreds of feet MSL clearing the highest known feature (terrain or obstacle, with allowances), rounded up — here 2,300 ft MSL.",
+ dx:[null,"MEF is MSL and a maximum, not an average or AGL value.","Airspace floors are shown by airspace symbology, not MEF.","MEF has no lateral-distance meaning."]},
+{id:"cht3",topic:"charts",sub:"Obstacles",diff:2,t:40,ref:"FAA Chart User's Guide",
+ q:"An obstruction symbol shows '1449 (400)'. This means —",
+ opts:["Obstacle top is 1,449 ft MSL and 400 ft above ground level","Top is 400 ft MSL, base at 1,449 ft","Obstacle is 1,449 ft tall","Lighted obstacle at 400 ft MSL"],a:0,
+ why:"The bold figure is height above mean sea level; the parenthetical is height above ground. At a 1,049-ft site, a 400-ft tower tops out at 1,449 MSL — and Part 107 lets you inspect it within a 400-ft radius.",
+ dx:[null,"MSL is always the larger, bold value; AGL is in parentheses.","The AGL value (400) is the structure's height, not 1,449.","Lighting is shown with ray marks, not the numbers."]},
+{id:"cht4",topic:"charts",sub:"Data blocks",diff:2,t:40,ref:"FAA Chart User's Guide",
+ q:"In the airport data block 'CT — 118.3 ★ ', the star symbol after the tower frequency indicates —",
+ opts:["The control tower operates part time","A rotating beacon is on the field","Fuel is available","The frequency is for emergencies only"],a:0,
+ why:"A star following the CT frequency means the tower is not continuous — when closed, the airspace typically reverts (often to E or G) and the frequency becomes CTAF.",
+ dx:[null,"The rotating beacon is the star on the airport symbol itself, not after the frequency.","Fuel service is shown by tick marks around the airport symbol.","No emergency-only marking exists in the data block."]},
+{id:"cht5",topic:"charts",sub:"Frequencies",diff:1,t:30,ref:"AIM 4-1-9",
+ q:"At a non-towered airport, the frequency used by traffic to self-announce position and intentions is the —",
+ opts:["CTAF","ATIS","Approach control frequency","Guard (121.5)"],a:0,
+ why:"The Common Traffic Advisory Frequency — marked with a magenta Ⓒ on the chart — is where pilots broadcast position reports. Monitoring it is superb situational awareness for remote pilots near airports.",
+ dx:[null,"ATIS is a recorded information broadcast at towered fields.","Approach control serves IFR/radar services, not pattern self-announcements.","121.5 is the emergency frequency."]},
+{id:"cht6",topic:"charts",sub:"Navigation",diff:2,t:35,ref:"FAA Chart User's Guide",
+ q:"An isogonic line labeled '13°E' on a sectional chart shows —",
+ opts:["Magnetic variation — magnetic north is 13° east of true north along that line","A 13° runway alignment","The eastern boundary of Class E","Latitude 13° east"],a:0,
+ why:"Isogonic lines (dashed magenta) connect points of equal magnetic variation, used to convert between true and magnetic direction.",
+ dx:[null,"Runway alignment appears in airport diagrams, not isogonic lines.","Airspace boundaries use their own symbology.","Latitude is never expressed in degrees east."]},
+{id:"cht7",topic:"charts",sub:"Hazards",diff:1,t:30,ref:"FAA Chart User's Guide",
+ q:"A small parachute symbol near an airport warns a remote pilot of —",
+ opts:["Parachute jumping activity — jumpers may descend through your operating altitude","A designated emergency landing field","A ballooning launch site","Ejection-seat testing"],a:0,
+ why:"The parachute symbol marks jump zones. Canopies descend through low altitudes at unpredictable positions — a direct collision hazard for sUAS.",
+ dx:[null,"No emergency-field symbol uses a parachute.","Balloon activity is separately noted when charted.","No such civil chart symbol exists."]},
+{id:"cht8",topic:"charts",sub:"Data blocks",diff:2,t:35,ref:"FAA Chart User's Guide",
+ q:"An airport data block reads 'MOONSTONE (MST) 449 L 32'. The '449' is —",
+ opts:["Field elevation, 449 ft MSL","The longest runway, 4,490 ft","The CTAF frequency","Traffic pattern altitude"],a:0,
+ why:"The first number after the name/identifier is field elevation in feet MSL. 'L' means runway lighting; '32' is runway length in hundreds of feet (3,200 ft).",
+ dx:[null,"Runway length is the trailing figure in hundreds of feet (32 = 3,200 ft).","Frequencies include a decimal and appear separately.","TPA is not printed in sectional data blocks."]},
+
+/* ---- LOADING & PERFORMANCE ---- */
+{id:"ld1",topic:"loading",sub:"CG",diff:2,t:35,ref:"PHAK Ch. 10",
+ q:"Loading an aircraft with the center of gravity aft of limits produces —",
+ opts:["Reduced stability and potentially unrecoverable pitch behavior","Improved stability and control authority","No effect if under maximum weight","Better efficiency in forward flight"],a:0,
+ why:"An aft CG shrinks the restoring moment: the aircraft becomes less stable in pitch and may become uncontrollable — weight alone being legal does not make the loading safe.",
+ dx:[null,"Aft CG degrades, not improves, stability.","CG position matters independently of total weight.","Any efficiency effect is dwarfed by the controllability hazard."]},
+{id:"ld2",topic:"loading",sub:"Weight",diff:1,t:30,ref:"PHAK Ch. 10",
+ q:"Operating a small UA above its maximum gross weight most directly causes —",
+ opts:["Reduced climb performance, shorter endurance, and increased structural stress","Improved wind penetration","Faster battery charging","Lower stall speed"],a:0,
+ why:"Excess weight demands more thrust and power: climb margin shrinks, batteries drain faster, and structural and motor loads rise.",
+ dx:[null,"Any penetration benefit is a myth; control margin decreases.","Charging is unrelated to flight weight.","Higher weight raises, not lowers, stall speed on fixed-wing UA."]},
+{id:"ld3",topic:"loading",sub:"Load factor",diff:2,t:40,ref:"PHAK Ch. 5",
+ q:"In a level 60° banked turn, the load factor on the aircraft is —",
+ opts:["2 Gs — double the apparent weight","1 G, unchanged","1.4 Gs","4 Gs"],a:0,
+ why:"Load factor = 1/cos(bank). At 60°, cos = 0.5, so n = 2: structure and lift requirements double, and stall speed rises about 41%.",
+ dx:[null,"Level turns always add load factor above 1 G.","1.4 G corresponds to about a 45° bank.","4 G would require roughly a 75.5° bank."]},
+{id:"ld4",topic:"loading",sub:"Batteries",diff:1,t:30,ref:"Manufacturer guidance / Remote Pilot Study Guide",
+ q:"Cold ambient temperatures affect lithium-polymer flight batteries by —",
+ opts:["Reducing usable capacity and voltage under load, shortening flight time","Increasing capacity","Eliminating the risk of thermal runaway","Having no measurable effect"],a:0,
+ why:"Cold slows the chemistry: voltage sags under load and effective capacity drops sharply, sometimes triggering early low-voltage failsafes. Pre-warm packs and pad your reserves.",
+ dx:[null,"Capacity falls in cold, it never rises.","Thermal runaway risk changes but is not eliminated.","The effect is significant and flight-limiting."]},
+{id:"ld5",topic:"loading",sub:"Performance",diff:2,t:35,ref:"PHAK Ch. 11",
+ q:"Compared with a cool morning at sea level, a 95 °F afternoon at a 5,000-ft site will —",
+ opts:["Raise density altitude substantially, degrading hover and climb performance","Lower density altitude","Not change performance below 400 ft AGL","Improve propeller efficiency"],a:0,
+ why:"Heat plus elevation stacks density altitude — the aircraft performs as if much higher. Hover power increases and payload margin shrinks.",
+ dx:[null,"Heat and elevation both raise density altitude.","Density altitude applies at the surface, not just aloft.","Thin air reduces propeller thrust."]},
+
+/* ---- OPERATIONS ---- */
+{id:"op1",topic:"operations",sub:"VLOS",diff:1,t:30,ref:"14 CFR §107.31",
+ q:"Visual line of sight under §107.31 must be maintained using —",
+ opts:["Unaided vision, except corrective lenses (glasses or contacts)","Binoculars whenever needed","The aircraft's FPV camera feed","A telescope operated by the visual observer"],a:0,
+ why:"VLOS means the naked eye — corrective lenses allowed. Vision aids may supplement momentarily but cannot be the means of compliance.",
+ dx:[null,"Binoculars may assist briefly but cannot satisfy the VLOS requirement.","An FPV feed never satisfies §107.31.","Vision-aid devices don't count for the VO either."]},
+{id:"op2",topic:"operations",sub:"Visual observer",diff:2,t:35,ref:"14 CFR §107.33",
+ q:"When a visual observer is used, which statement is correct?",
+ opts:["The RPIC and VO must maintain effective communication at all times, and using a VO is optional","A VO is mandatory for every Part 107 flight","The VO assumes see-and-avoid responsibility, relieving the RPIC","The VO may control the aircraft during emergencies"],a:0,
+ why:"§107.33 makes VOs optional. When used, RPIC and VO must coordinate scanning and maintain effective communication; ultimate responsibility stays with the RPIC.",
+ dx:[null,"Part 107 never mandates a VO for standard operations.","Responsibility for collision avoidance remains with the RPIC.","Only the RPIC or a supervised person may manipulate controls."]},
+{id:"op3",topic:"operations",sub:"Right of way",diff:1,t:25,ref:"14 CFR §107.37",
+ q:"When a helicopter approaches your operating area, you must —",
+ opts:["Yield the right of way — give way to all manned aircraft and never pass over, under, or ahead unless well clear","Hold position and let the helicopter avoid you","Climb above 400 ft to clear its path","Yield only if the helicopter is on an emergency mission"],a:0,
+ why:"§107.37 requires small UA to yield to all other aircraft. Descend and move away laterally; a climb often makes things worse.",
+ dx:[null,"The burden is entirely on the remote pilot.","Climbing above 400 ft violates §107.51 and may cross the helicopter's path.","The yield requirement applies to every manned aircraft."]},
+{id:"op4",topic:"operations",sub:"Over people",diff:2,t:40,ref:"14 CFR §107.110",
+ q:"A Category 1 operation over people requires the small unmanned aircraft to —",
+ opts:["Weigh 0.55 lb or less, including everything attached, with no exposed rotating parts that could lacerate skin","Weigh under 55 lb with propeller guards","Carry a parachute recovery system","Hold an airworthiness certificate"],a:0,
+ why:"Category 1: takeoff weight ≤ 0.55 lb and no exposed rotating parts capable of lacerating human skin; Remote ID compliance applies for sustained flight over open-air assemblies.",
+ dx:[null,"55 lb is the general Part 107 limit, not the Category 1 threshold.","Parachutes relate to some waiver/means-of-compliance paths, not Category 1.","Airworthiness certification defines Category 4."]},
+{id:"op5",topic:"operations",sub:"Moving vehicles",diff:2,t:35,ref:"14 CFR §107.25",
+ q:"Operating a small UA from a moving land vehicle is permitted when —",
+ opts:["The operation is over a sparsely populated area and not transporting property for compensation across state lines","Never, under any circumstances","The vehicle stays under 30 mph","A visual observer drives the vehicle"],a:0,
+ why:"§107.25 allows moving-vehicle operations over sparsely populated areas; the driver may not serve as RPIC/manipulator, and interstate property carriage for hire is excluded.",
+ dx:[null,"A blanket prohibition is the trap — sparsely populated areas are permitted.","No speed limit is specified in §107.25.","The person driving cannot simultaneously fly, and VO duties don't change the rule."]},
+{id:"op6",topic:"operations",sub:"Preflight",diff:1,t:30,ref:"14 CFR §107.49",
+ q:"Before each flight, §107.49 requires the remote pilot to assess —",
+ opts:["The operating environment: local weather, airspace and flight restrictions, persons and property on the ground, and ground hazards","Only the battery charge level","Only NOTAMs","The aircraft's resale value"],a:0,
+ why:"§107.49 mandates a full pre-flight familiarization — environment, airspace, weather, participants briefed, control links checked, and sufficient power for the intended operation.",
+ dx:[null,"Battery state is one element of a much larger required assessment.","NOTAMs are necessary but not sufficient.","Not a regulatory consideration."]},
+{id:"op7",topic:"operations",sub:"Hazardous ops",diff:1,t:25,ref:"14 CFR §107.23",
+ q:"Under §107.23, dropping an object from a small unmanned aircraft is —",
+ opts:["Permitted only if it creates no undue hazard to persons or property","Always prohibited","Permitted only over water","Permitted with a visual observer watching the drop zone"],a:0,
+ why:"Objects may be dropped if reasonable precautions prevent injury or property damage — and never in a careless or reckless manner.",
+ dx:[null,"The rule conditions, rather than prohibits, dropping objects.","No over-water exception exists.","A VO does not change the hazard standard."]},
+
+/* ---- ADM / HUMAN FACTORS ---- */
+{id:"adm1",topic:"adm",sub:"Hazardous attitudes",diff:1,t:30,ref:"Remote Pilot ACS / PHAK Ch. 2",
+ q:"'Rules are for other people — I know what I'm doing.' The hazardous attitude and its antidote are —",
+ opts:["Anti-authority — 'Follow the rules; they are usually right.'","Macho — 'Taking chances is foolish.'","Impulsivity — 'Not so fast; think first.'","Resignation — 'I'm not helpless; I can make a difference.'"],a:0,
+ why:"Dismissing rules and procedures is anti-authority. The trained antidote is deliberate: follow the rules — they are usually right.",
+ dx:[null,"Macho is proving oneself through risk-taking, not rejecting rules.","Impulsivity is acting without thinking, not rule rejection.","Resignation is surrendering control of outcomes."]},
+{id:"adm2",topic:"adm",sub:"Hazardous attitudes",diff:1,t:30,ref:"PHAK Ch. 2",
+ q:"A pilot launches in gusty winds to impress a client watching from the parking lot. The hazardous attitude is —",
+ opts:["Macho","Invulnerability","Anti-authority","Resignation"],a:0,
+ why:"Taking risks to prove capability to others is the macho attitude. Antidote: 'Taking chances is foolish.'",
+ dx:[null,"Invulnerability is believing accidents happen only to others.","No rule is being rejected here; the driver is image.","Resignation would sound like 'what's the use.'"]},
+{id:"adm3",topic:"adm",sub:"Hazardous attitudes",diff:1,t:30,ref:"PHAK Ch. 2",
+ q:"The antidote for the hazardous attitude of invulnerability is —",
+ opts:["'It could happen to me.'","'Not so fast — think first.'","'Follow the rules.'","'I'm not helpless.'"],a:0,
+ why:"Invulnerability — the belief that mishaps happen to other people — is countered by internalizing 'It could happen to me.'",
+ dx:[null,"That counters impulsivity.","That counters anti-authority.","That counters resignation."]},
+{id:"adm4",topic:"adm",sub:"CRM",diff:2,t:35,ref:"Remote Pilot ACS, AC 107-2",
+ q:"Crew Resource Management in an sUAS operation means —",
+ opts:["Effectively using all available resources — human, hardware, and information — before and during flight","Assigning blame after an incident","Having the largest possible crew","Delegating final authority to the visual observer"],a:0,
+ why:"CRM is the disciplined use of every resource: crew briefings, VO integration, checklists, ATC information, weather products, and clear communication loops.",
+ dx:[null,"CRM is proactive risk management, not post-incident blame.","Crew size is irrelevant; coordination quality is the point.","Final authority always remains with the RPIC (§107.19)."]},
+{id:"adm5",topic:"adm",sub:"Physiology",diff:2,t:35,ref:"AC 107-2 / PHAK Ch. 17",
+ q:"Which condition most degrades a remote pilot's ability to scan for traffic, even below 400 ft AGL?",
+ opts:["Fatigue and dehydration","Mild hunger","Standing in shade","Wearing polarized sunglasses on an overcast day"],a:0,
+ why:"Fatigue slows scanning, narrows attention, and impairs judgment — the IMSAFE checklist (Illness, Medication, Stress, Alcohol, Fatigue, Emotion) exists to catch it before flight.",
+ dx:[null,"Mild hunger is a minor stressor by comparison.","Shade generally helps visibility and comfort.","Polarized lenses matter mainly for glare and some screens; fatigue is the dominant hazard listed."]},
+
+/* ---- EMERGENCY & AIRPORTS ---- */
+{id:"em1",topic:"emergency",sub:"Traffic patterns",diff:2,t:40,ref:"AIM 4-3-3",
+ q:"Standard traffic patterns at an airport use —",
+ opts:["Left turns, unless right traffic is indicated for the runway","Right turns at all non-towered airports","Whatever direction the wind favors","Straight-in approaches only"],a:0,
+ why:"Left-hand patterns are standard; 'RP' in the Chart Supplement or segmented circle indicators show non-standard right traffic. Knowing the pattern tells a remote pilot where manned aircraft will be low.",
+ dx:[null,"Right traffic is the exception, marked when it applies.","Wind picks the runway, not the turn direction.","Straight-ins occur but are not the standard pattern."]},
+{id:"em2",topic:"emergency",sub:"Runways",diff:2,t:40,ref:"AIM 4-3-6",
+ q:"An aircraft announces 'final for Runway 17.' From which direction is it approaching the field?",
+ opts:["From the north, flying a heading of approximately 170°","From the south, heading 350°","From the east, heading 260°","From the west at pattern altitude"],a:0,
+ why:"Runway numbers are magnetic heading ÷ 10: landing Runway 17 means flying about 170° — southbound — so the aircraft arrives from the north side of the airport.",
+ dx:[null,"Heading 350° describes Runway 35, the opposite direction.","260° would be Runway 26.","Runway 17 fixes the direction; 'west' is unrelated."]},
+{id:"em3",topic:"emergency",sub:"Lost link",diff:1,t:30,ref:"AC 107-2",
+ q:"If the control link is lost, the remote pilot should already know —",
+ opts:["The aircraft's programmed lost-link behavior (e.g., return-to-home altitude and route) and have set it for the site","That the aircraft will always hover in place","That the FAA must be phoned before the aircraft moves","That nothing can be done"],a:0,
+ why:"Preflight planning includes configuring and verifying failsafe behavior — RTH altitude above obstacles, a safe home point, and an understanding of what the aircraft will autonomously do.",
+ dx:[null,"Default behaviors vary by aircraft and settings; hovering until battery exhaustion may be worse.","No pre-movement phone call is required; fly the emergency.","Failsafe planning is precisely what can be done."]},
+{id:"em4",topic:"emergency",sub:"In-flight emergency",diff:2,t:35,ref:"14 CFR §107.21, AC 107-2",
+ q:"Your aircraft's battery warning triggers early over a crowded park edge. The best course of action is —",
+ opts:["Land as soon as practicable in the nearest safe area clear of people, deviating from rules if required by the emergency","Continue the mission to avoid losing the shot","Climb to extend glide range","Fly directly over the crowd to the home point"],a:0,
+ why:"Aviate first: get the aircraft down safely away from people. §107.21 authorizes rule deviation to the extent the emergency demands.",
+ dx:[null,"Mission completion never outranks safety of persons.","Climbing consumes the failing battery faster on a rotorcraft.","Overflying the crowd creates exactly the hazard to avoid."]}
+];
+
+/* ================================================================
+   METAR ENGINE — procedural generator, parser, field intelligence
+   ================================================================ */
+const STATIONS=["KOAK","KSFO","KAPC","KHWD","KCCR","KMRY","KSNS","KSTS","KSAC","KLVK","KPAO","KWVI"];
+function genMetar(profile){
+  // profile: "vfr" | "mvfr" | "ifr" | "lifr" | random
+  const p=profile||pick(["vfr","vfr","vfr","mvfr","mvfr","ifr","lifr"]);
+  const stn=pick(STATIONS);
+  const day=rnd(1,28), hr=rnd(0,23), min=pick([53,56,55,50]);
+  const spd=p==="vfr"?rnd(3,16):rnd(4,22);
+  const calm=p==="vfr"&&Math.random()<0.15;
+  const dir=Math.round(rnd(1,36))*10;
+  const gust=(!calm&&spd>=12&&Math.random()<0.5)?spd+rnd(6,12):null;
+  const vrb=!calm&&spd<=6&&Math.random()<0.2;
+  let vis,layers=[],wx=[];
+  const mk=(cov,h)=>cov+pad(h,3);
+  if(p==="vfr"){
+    vis=pick([10,10,10,8,7,6]);
+    const n=rnd(0,2);
+    if(n>=1)layers.push(mk(pick(["FEW","SCT"]),rnd(35,80)));
+    if(n>=2)layers.push(mk(pick(["SCT","BKN"]),rnd(100,250)));
+  }else if(p==="mvfr"){
+    vis=pick([3,4,5,5,4]);
+    layers.push(mk(pick(["BKN","BKN","OVC"]),rnd(12,30)));
+    if(Math.random()<0.5)layers.unshift(mk("SCT",rnd(6,11)));
+    if(Math.random()<0.5)wx.push(pick(["-RA","BR","HZ","-DZ"]));
+  }else if(p==="ifr"){
+    vis=pick([1,2,2.5,1.5]);
+    layers.push(mk(pick(["BKN","OVC"]),rnd(5,9)));
+    wx.push(pick(["RA","BR","-RA BR","DZ","-SHRA"]));
+  }else{
+    vis=pick([0.25,0.5,0.75]);
+    layers.push(mk(pick(["OVC","OVC","VV"]),rnd(1,4)));
+    wx.push(pick(["FG","FZFG","FG","BR"]));
+  }
+  const t=p==="lifr"?rnd(6,14):rnd(4,30);
+  const spread=p==="lifr"?rnd(0,1):p==="ifr"?rnd(1,3):rnd(2,14);
+  const dp=Math.max(t-spread,-8);
+  const alt=(2960+rnd(0,60));
+  const visStr=vis===0.25?"1/4SM":vis===0.5?"1/2SM":vis===0.75?"3/4SM":vis===1.5?"1 1/2SM":vis===2.5?"2 1/2SM":vis+"SM";
+  const windStr=calm?"00000KT":(vrb?"VRB":pad(dir,3))+pad(spd)+(gust?"G"+pad(gust):"")+"KT";
+  const tt=t<0?"M"+pad(-t):pad(t), dd=dp<0?"M"+pad(-dp):pad(dp);
+  const groups=["METAR",stn,pad(day)+pad(hr)+pad(min)+"Z",windStr,visStr,...wx,...layers,tt+"/"+dd,"A"+alt,"RMK","AO2"];
+  return {text:groups.join(" "),profile:p,data:{stn,day,hr,min,dir:calm?0:dir,spd:calm?0:spd,gust,vrb,calm,vis,wx,layers,t,dp,alt,spread}};
+}
+
+/* flight category from ceiling(ft) + vis(SM) */
+function flightCat(ceil,vis){
+  const c=ceil==null?99999:ceil, v=vis==null?99:vis;
+  if(c<500||v<1)return "LIFR";
+  if(c<1000||v<3)return "IFR";
+  if(c<=3000||v<=5)return "MVFR";
+  return "VFR";
+}
+function ceilingOf(layers){
+  let c=null;
+  for(const L of layers){
+    const m=L.match(/^(BKN|OVC|VV)(\d{3})/);
+    if(m){const h=parseInt(m[2],10)*100;if(c===null||h<c)c=h}
+  }
+  return c;
+}
+
+/* ---------- METAR parser (for decoder + anatomy) ---------- */
+const WXCODE={RA:"rain",SN:"snow",DZ:"drizzle",SH:"showers",TS:"thunderstorm",FG:"fog",BR:"mist",HZ:"haze",FZ:"freezing",GR:"hail",GS:"small hail",PL:"ice pellets",SQ:"squalls",FU:"smoke",DU:"dust",SA:"sand",VC:"in the vicinity",MI:"shallow",BC:"patches",PR:"partial",BL:"blowing",DR:"low drifting",UP:"unknown precipitation",PO:"dust whirls",VA:"volcanic ash"};
+function decodeWx(tok){
+  let s=tok,out=[];
+  if(s.startsWith("-")){out.push("light");s=s.slice(1)}
+  else if(s.startsWith("+")){out.push("heavy");s=s.slice(1)}
+  else out.push("moderate");
+  while(s.length>=2){const c=s.slice(0,2);out.push(WXCODE[c]||c);s=s.slice(2)}
+  return out.join(" ");
+}
+const COVER={SKC:"sky clear",CLR:"clear below 12,000 ft (automated)",FEW:"few (1–2 oktas)",SCT:"scattered (3–4 oktas)",BKN:"broken (5–7 oktas)",OVC:"overcast (8 oktas)",VV:"vertical visibility (indefinite ceiling)"};
+function parseMetar(txt){
+  const raw=txt.trim().toUpperCase().replace(/\s+/g," ");
+  if(!raw)return {error:"Empty input — paste a METAR or SPECI report."};
+  let toks=raw.split(" ");
+  const out={raw,tokens:[],type:null,stn:null,time:null,mod:null,wind:null,vis:null,rvr:[],wx:[],sky:[],temp:null,dew:null,alt:null,rmk:null,warnings:[]};
+  const push=(code,name,mean)=>out.tokens.push({code,name,mean});
+  let i=0;
+  if(toks[i]==="METAR"||toks[i]==="SPECI"){out.type=toks[i];push(toks[i],"Report type",toks[i]==="SPECI"?"Special (unscheduled) report — significant weather change":"Routine hourly observation");i++}
+  else out.warnings.push("No report-type prefix (METAR/SPECI) — acceptable, many feeds omit it.");
+  if(/^[A-Z][A-Z0-9]{3}$/.test(toks[i]||"")){out.stn=toks[i];push(toks[i],"Station identifier","ICAO station "+toks[i]);i++}
+  else return {error:"Could not find a 4-character station identifier where expected (e.g., KOAK)."};
+  if(/^\d{6}Z$/.test(toks[i]||"")){const m=toks[i];out.time={day:+m.slice(0,2),hr:+m.slice(2,4),min:+m.slice(4,6)};push(m,"Date / time","Day "+out.time.day+" at "+pad(out.time.hr)+":"+pad(out.time.min)+" UTC (Zulu)");i++}
+  else out.warnings.push("Date-time group (DDHHMMZ) missing or malformed.");
+  if(toks[i]==="AUTO"||toks[i]==="COR"){out.mod=toks[i];push(toks[i],"Report modifier",toks[i]==="AUTO"?"Fully automated report, no human augmentation":"Corrected report");i++}
+  const wm=(toks[i]||"").match(/^(VRB|\d{3})(\d{2,3})(G(\d{2,3}))?KT$/);
+  if(wm){
+    const dir=wm[1],spd=+wm[2],g=wm[4]?+wm[4]:null;
+    out.wind={dir,spd,gust:g};
+    let d=dir==="VRB"?"variable direction":(dir==="000"&&spd===0?"calm":"from "+(+dir)+"° true");
+    push(toks[i],"Wind",spd===0&&dir==="000"?"Wind calm":"Wind "+d+" at "+spd+" kt"+(g?", gusting "+g+" kt (gust factor "+(g-spd)+" kt)":""));
+    i++;
+    const vv=(toks[i]||"").match(/^(\d{3})V(\d{3})$/);
+    if(vv){push(toks[i],"Wind variability","Direction varying between "+(+vv[1])+"° and "+(+vv[2])+"°");i++}
+  }else out.warnings.push("Wind group (dddffKT) missing or malformed.");
+  // visibility (may be "1 1/2SM")
+  let visTok=null;
+  const frac=s=>{const f=s.replace("SM","").split("/");return (+f[0])/(+f[1])};
+  if(/^\d+$/.test(toks[i]||"")&&/^\d\/\dSM$/.test(toks[i+1]||"")){visTok=toks[i]+" "+toks[i+1];out.vis=(+toks[i])+frac(toks[i+1]);i+=2}
+  else if(/^(\d\/\d)SM$/.test(toks[i]||"")){visTok=toks[i];out.vis=frac(toks[i]);i++}
+  else if(/^(\d+)SM$/.test(toks[i]||"")){visTok=toks[i];out.vis=+toks[i].replace("SM","");i++}
+  else if(/^M1\/4SM$/.test(toks[i]||"")){visTok=toks[i];out.vis=0.2;i++}
+  if(visTok)push(visTok,"Visibility","Prevailing visibility "+visTok.replace("SM"," statute miles").replace("M1/4","less than ¼"));
+  else out.warnings.push("Visibility group (…SM) missing — cannot fully classify flight category.");
+  while(/^R\d{2}[LRC]?\/[MP]?\d{4}(V[MP]?\d{4})?FT$/.test(toks[i]||"")){out.rvr.push(toks[i]);push(toks[i],"Runway visual range","RVR for runway "+toks[i].slice(1,3)+" — value in feet");i++}
+  while(toks[i]&&/^[-+]?(VC)?(MI|BC|PR|DR|BL|SH|TS|FZ)?(DZ|RA|SN|SG|IC|PL|GR|GS|UP|FG|BR|HZ|FU|VA|DU|SA|PO|SQ|FC|SS|DS)+$/.test(toks[i])){out.wx.push(toks[i]);push(toks[i],"Weather phenomena",decodeWx(toks[i]));i++}
+  while(toks[i]&&/^(SKC|CLR|FEW|SCT|BKN|OVC|VV)(\d{3})?(CB|TCU)?$/.test(toks[i])){
+    const sm=toks[i].match(/^(SKC|CLR|FEW|SCT|BKN|OVC|VV)(\d{3})?(CB|TCU)?$/);
+    out.sky.push(toks[i]);
+    let mean=COVER[sm[1]]+(sm[2]?" at "+(+sm[2]*100).toLocaleString()+" ft AGL":"")+(sm[3]==="CB"?" — cumulonimbus!":sm[3]==="TCU"?" — towering cumulus":"");
+    push(toks[i],"Sky condition",mean);i++;
+  }
+  const tm=(toks[i]||"").match(/^(M?\d{2})\/(M?\d{2})?$/);
+  if(tm){
+    const cv=s=>s?(s.startsWith("M")?-+s.slice(1):+s):null;
+    out.temp=cv(tm[1]);out.dew=cv(tm[2]);
+    push(toks[i],"Temperature / dew point","Temperature "+out.temp+" °C, dew point "+(out.dew===null?"missing":out.dew+" °C")+(out.dew!==null?" (spread "+(out.temp-out.dew)+" °C)":""));i++;
+  }else out.warnings.push("Temperature/dew point group missing or malformed.");
+  const am=(toks[i]||"").match(/^A(\d{4})$/);
+  if(am){out.alt=(+am[1]/100).toFixed(2);push(toks[i],"Altimeter","Altimeter setting "+out.alt+" inHg");i++}
+  else out.warnings.push("Altimeter group (Axxxx) missing.");
+  if(toks[i]==="RMK"){out.rmk=toks.slice(i+1).join(" ");push(toks.slice(i).join(" "),"Remarks","Additional data: "+(out.rmk||"none")+(/\bAO2\b/.test(out.rmk)?" — AO2: automated station with precipitation discriminator":/\bAO1\b/.test(out.rmk)?" — AO1: automated station without precipitation discriminator":""))}
+  else if(toks[i])out.warnings.push("Unrecognized trailing group: \""+toks.slice(i).join(" ")+"\"");
+  out.ceiling=ceilingOf(out.sky);
+  out.cat=flightCat(out.ceiling,out.vis);
+  return out;
+}
+
+/* per-field study intelligence for Anatomy mode */
+const FIELD_INTEL={
+ "Report type":{fmt:"METAR | SPECI",units:"—",abbr:"SPECI = special",angle:"Know that SPECI means a significant, unscheduled change occurred — expect exam questions on when SPECIs are issued.",trap:"Assuming SPECI is a forecast. It is an observation, like METAR."},
+ "Station identifier":{fmt:"4-char ICAO (Kxxx in CONUS)",units:"—",abbr:"K prefix = contiguous US",angle:"Match the station to the mission area — the exam gives multiple reports and asks about a specific field.",trap:"Confusing the 3-letter IATA code with the 4-letter ICAO identifier."},
+ "Date / time":{fmt:"DDHHMMZ",units:"UTC (Zulu)",abbr:"Z = Zulu",angle:"Convert Zulu to local time correctly; Pacific is UTC−8 (−7 DST).",trap:"Reading the first two digits as the month. They are the day of the month."},
+ "Report modifier":{fmt:"AUTO | COR",units:"—",abbr:"AUTO = no human observer",angle:"AUTO reports may miss phenomena a human would add (e.g., distant lightning).",trap:"Thinking AUTO means the report is unreliable — it is fully valid."},
+ "Wind":{fmt:"dddff(Ggg)KT",units:"degrees TRUE / knots",abbr:"G = gust, VRB = variable, 00000KT = calm",angle:"Direction is TRUE north in the body (voice broadcasts are magnetic). Compute the gust factor — large factors mean turbulence and control risk for sUAS.",trap:"Treating METAR wind direction as magnetic. It is true."},
+ "Wind variability":{fmt:"dddVddd",units:"degrees true",abbr:"V = varying between",angle:"Reported when direction varies 60° or more with winds above 6 kt.",trap:"Confusing with VRB, which is used for lighter variable winds."},
+ "Visibility":{fmt:"vvSM (fractions allowed)",units:"statute miles",abbr:"SM = statute miles, M = less than",angle:"Part 107 minimum is 3 SM from the control station (§107.51(c)). Visibility drives flight category boundaries.",trap:"Mixing statute and nautical miles — surface visibility is statute."},
+ "Runway visual range":{fmt:"Rrr/vvvvFT",units:"feet",abbr:"P = more than, M = less than",angle:"Rarely tested for sUAS, but recognize the group so it doesn't break your decode.",trap:"Reading RVR (feet) as prevailing visibility (miles)."},
+ "Weather phenomena":{fmt:"intensity + descriptor + phenomenon",units:"—",abbr:"− light, + heavy, VC vicinity, TS thunderstorm, FZ freezing",angle:"TS anywhere in the report is a no-go trigger; FZ phenomena threaten props and links.",trap:"Missing that no prefix means MODERATE intensity."},
+ "Sky condition":{fmt:"cover + height (hundreds ft AGL)",units:"feet AGL",abbr:"FEW 1–2, SCT 3–4, BKN 5–7, OVC 8 oktas",angle:"Ceiling = lowest BKN/OVC/VV. §107.51 requires 500 ft below clouds — a 1,200-ft ceiling caps you near 700 ft.",trap:"Calling a SCT layer a ceiling, or reading heights as MSL. They are AGL."},
+ "Temperature / dew point":{fmt:"TT/DD, M = negative",units:"°C",abbr:"M = minus",angle:"A shrinking spread predicts fog/low cloud; near-freezing moisture means icing on props.",trap:"Reading M as 'measured'. It means minus."},
+ "Altimeter":{fmt:"Axxxx",units:"inches of mercury",abbr:"A = altimeter (US)",angle:"29.92 is standard. Rapidly falling pressure signals approaching weather.",trap:"Confusing A3005 (30.05 inHg) with Q1017 (hectopascals, international)."},
+ "Remarks":{fmt:"RMK + codes",units:"varies",abbr:"AO2 = precip discriminator, SLP = sea-level pressure, PK WND = peak wind",angle:"Know AO1 vs AO2 and that remarks carry detail like lightning bearings and precise temperatures (T-group).",trap:"Ignoring remarks — SPECI triggers and hazards often hide there."},
+ "Flight category":{fmt:"derived: ceiling + visibility",units:"—",abbr:"VFR / MVFR / IFR / LIFR",angle:"VFR: >3,000 ft AND >5 SM. MVFR: 1,000–3,000 and/or 3–5. IFR: 500–<1,000 and/or 1–<3. LIFR: <500 and/or <1.",trap:"Forgetting the category takes the WORSE of ceiling or visibility."}
+};
+
+/* ---------- Anatomy mode ---------- */
+let anatomyParsed=null;
+function renderAnatomy(){
+  const g=genMetar();
+  anatomyParsed=parseMetar(g.text);
+  const strip=$("#anatomyStrip");
+  strip.innerHTML="";
+  anatomyParsed.tokens.forEach((tk,idx)=>{
+    const b=document.createElement("button");
+    b.className="mgroup";b.textContent=tk.code;b.setAttribute("role","option");
+    b.addEventListener("click",()=>{
+      $$("#anatomyStrip .mgroup").forEach(x=>x.classList.remove("sel"));
+      b.classList.add("sel");sfx.nav();showFieldDetail(tk);
+    });
+    strip.appendChild(b);
+  });
+  // synthetic flight-category chip
+  const fc=document.createElement("button");
+  fc.className="mgroup";fc.innerHTML="→ "+anatomyParsed.cat;
+  fc.addEventListener("click",()=>{
+    $$("#anatomyStrip .mgroup").forEach(x=>x.classList.remove("sel"));
+    fc.classList.add("sel");sfx.nav();
+    showFieldDetail({code:anatomyParsed.cat,name:"Flight category",mean:"Derived category: "+anatomyParsed.cat+" (ceiling "+(anatomyParsed.ceiling==null?"none":anatomyParsed.ceiling.toLocaleString()+" ft")+", visibility "+(anatomyParsed.vis??"?")+" SM)"});
+  });
+  strip.appendChild(fc);
+  $("#anatomyDetail").innerHTML='<div class="p-title">Field Analysis</div><p class="lede" style="margin:0">Select a group above to begin.</p>';
+}
+function showFieldDetail(tk){
+  const it=FIELD_INTEL[tk.name]||{fmt:"—",units:"—",abbr:"—",angle:"—",trap:"—"};
+  $("#anatomyDetail").innerHTML=`
+    <div class="p-title">Field Analysis — ${esc(tk.name)}</div>
+    <dl class="field-detail">
+      <dt>Selected code</dt><dd class="mono" style="color:var(--ultraviolet)">${esc(tk.code)}</dd>
+      <dt>Decoded meaning</dt><dd>${esc(tk.mean)}</dd>
+      <dt>Format / syntax</dt><dd class="mono">${esc(it.fmt)}</dd>
+      <dt>Units</dt><dd>${esc(it.units)}</dd>
+      <dt>Abbreviations</dt><dd>${esc(it.abbr)}</dd>
+      <dt>Part 107 exam angle</dt><dd>${esc(it.angle)}</dd>
+      <dt>Common trap</dt><dd class="trap">⚠ ${esc(it.trap)}</dd>
+    </dl>`;
+}
+
+/* ---------- Live Decoder ---------- */
+function runDecoder(){
+  const txt=$("#decoderInput").value;
+  const p=parseMetar(txt);
+  const out=$("#decoderOut");
+  if(p.error){out.innerHTML=`<div class="callout bad"><b>Malformed report.</b> ${esc(p.error)}</div>`;sfx.bad();return}
+  const spread=(p.temp!=null&&p.dew!=null)?p.temp-p.dew:null;
+  const concerns=[];
+  if(p.wx.some(w=>/TS/.test(w)))concerns.push("Thunderstorm reported — NO-GO. Lightning, downdrafts, and gust fronts are lethal to sUAS.");
+  if(p.wx.some(w=>/FZ/.test(w)))concerns.push("Freezing phenomena — icing on rotors and airframe; do not fly.");
+  if(p.wx.some(w=>/FG|BR/.test(w)))concerns.push("Fog or mist present — VLOS may be impossible; §107.51 requires 3 SM visibility.");
+  if(p.vis!=null&&p.vis<3)concerns.push("Visibility "+p.vis+" SM is below the 3 SM Part 107 minimum (§107.51(c)).");
+  if(p.ceiling!=null&&p.ceiling<900)concerns.push("Ceiling "+p.ceiling+" ft: staying 500 ft below clouds (§107.51(d)) caps you at "+(p.ceiling-500)+" ft AGL.");
+  if(p.wind&&p.wind.gust&&p.wind.gust-p.wind.spd>=8)concerns.push("Gust factor "+(p.wind.gust-p.wind.spd)+" kt — expect control difficulty and battery drain on small airframes.");
+  if(p.wind&&(p.wind.gust||p.wind.spd)>=20)concerns.push("Winds/gusts at or above 20 kt exceed many sUAS operating limits — check your POH.");
+  if(spread!=null&&spread<=2)concerns.push("Temperature–dew point spread "+spread+" °C — fog or low stratus formation is likely, especially near dawn/dusk.");
+  state.counters.decodes++;if(state.counters.decodes>=5)earnBadge("decoder");saveState();
+  out.innerHTML=`
+    <div class="panel glow">
+      <div class="p-title">Decode Complete — ${esc(p.stn)}</div>
+      <div class="btn-row mb"><span class="cat-badge cat-${p.cat}">${p.cat}</span>
+        <span class="chip">Ceiling: ${p.ceiling==null?"none reported":p.ceiling.toLocaleString()+" ft AGL"}</span>
+        <span class="chip">Visibility: ${p.vis==null?"?":p.vis+" SM"}</span>
+        ${spread!=null?`<span class="chip">T–Td spread: ${spread} °C</span>`:""}
+      </div>
+      <table class="decode-table"><thead><tr><th>Code</th><th>Field</th><th>Plain language</th></tr></thead>
+      <tbody>${p.tokens.map(t=>`<tr><td class="code">${esc(t.code)}</td><td>${esc(t.name)}</td><td>${esc(t.mean)}</td></tr>`).join("")}</tbody></table>
+      ${p.warnings.length?`<div class="callout warn mt"><b>Parser notes:</b><br>${p.warnings.map(esc).join("<br>")}</div>`:""}
+      ${concerns.length?`<div class="callout ${p.cat==="VFR"?"warn":"bad"} mt"><b>sUAS operational considerations:</b><ul style="margin:6px 0 0 18px">${concerns.map(c=>`<li>${esc(c)}</li>`).join("")}</ul></div>`
+        :`<div class="callout ok mt"><b>sUAS outlook:</b> Conditions meet Part 107 weather minimums. Fly the full preflight assessment regardless (§107.49).</div>`}
+    </div>`;
+  sfx.ok();
+}
+
+/* ---------- Build-a-METAR ---------- */
+let buildTarget=null;
+function newBuild(){
+  buildTarget=genMetar();
+  const d=buildTarget.data;
+  const windTxt=d.calm?"winds are calm":d.vrb?`wind is light and variable at ${d.spd} knots`:`wind is from ${d.dir}° true at ${d.spd} knots${d.gust?`, gusting to ${d.gust} knots`:""}`;
+  const visTxt=d.vis<1?`${d.vis===0.25?"one quarter":d.vis===0.5?"one half":"three quarters"} of a statute mile`:`${d.vis} statute mile${d.vis>1?"s":""}`;
+  const skyTxt=d.layers.length===0?"the sky is clear":d.layers.map(L=>{
+    const m=L.match(/^([A-Z]{2,3})(\d{3})$/);
+    const names={FEW:"a few clouds",SCT:"scattered clouds",BKN:"a broken layer",OVC:"an overcast layer",VV:"indefinite ceiling (vertical visibility)"};
+    return `${names[m[1]]} at ${(+m[2]*100).toLocaleString()} ft`;
+  }).join(", ");
+  const wxTxt=d.wx.length?`Present weather: ${d.wx.map(decodeWx).join("; ")}. `:"";
+  $("#buildBrief").innerHTML=`
+    <div class="p-title">Weather Brief — ${esc(d.stn)}</div>
+    <p>Routine observation at <b>${esc(d.stn)}</b> on day <b>${d.day}</b> of the month at <b>${pad(d.hr)}:${pad(d.min)} UTC</b>.
+    The ${windTxt}. Prevailing visibility is ${visTxt}. ${wxTxt}Sky: ${skyTxt}.
+    Temperature <b>${d.t} °C</b>, dew point <b>${d.dp} °C</b>. Altimeter <b>${(d.alt/100).toFixed(2)} inHg</b>.</p>
+    <p class="small-note">Build the body only — you may omit "METAR" and "RMK AO2". Use VRB for variable wind.</p>`;
+  $("#buildInput").value="";$("#buildOut").innerHTML="";
+}
+function checkBuild(reveal){
+  if(!buildTarget)newBuild();
+  const targetGroups=buildTarget.text.split(" ").filter(g=>g!=="METAR"&&g!=="RMK"&&g!=="AO2");
+  if(reveal){
+    $("#buildOut").innerHTML=`<div class="callout"><b>Solution:</b> <span class="mono">${esc(targetGroups.join(" "))}</span></div>`;
+    return;
+  }
+  const user=$("#buildInput").value.trim().toUpperCase().replace(/\s+/g," ").split(" ").filter(g=>g&&g!=="METAR"&&g!=="RMK"&&g!=="AO2");
+  if(!user.length){$("#buildOut").innerHTML=`<div class="callout warn">Type your coded report first.</div>`;return}
+  let html='<div class="panel"><div class="p-title">Group-by-Group Check</div><table class="decode-table"><thead><tr><th>Expected</th><th>Yours</th><th>Result</th></tr></thead><tbody>';
+  let allOk=true;
+  const maxLen=Math.max(targetGroups.length,user.length);
+  for(let i=0;i<maxLen;i++){
+    const t=targetGroups[i]||"—",u=user[i]||"—";
+    // accept fraction visibility split across two tokens by rejoining upstream
+    const ok=t===u;
+    if(!ok)allOk=false;
+    html+=`<tr><td class="code">${esc(t)}</td><td class="code" style="color:${ok?"var(--ok)":"var(--bad)"}">${esc(u)}</td><td>${ok?"✓":"✗"}</td></tr>`;
+  }
+  html+="</tbody></table>";
+  if(allOk){
+    html+='<div class="callout ok mt"><b>Perfect build.</b> Every group encoded correctly, in sequence.</div>';
+    state.counters.builds++;if(state.counters.builds>=3)earnBadge("builder");
+    recordAnswer("metar",true,false);sfx.ok();
+  }else{
+    html+='<div class="callout warn mt">Mismatched groups are marked. Order matters: type, station, time, wind, visibility, weather, sky, temp/dew, altimeter.</div>';
+    recordAnswer("metar",false,false);sfx.bad();
+  }
+  html+="</div>";
+  $("#buildOut").innerHTML=html;
+  renderDashboard();
+}
+
+/* ---------- dynamic METAR question generator (also feeds quizzes) ---------- */
+function genMetarQuestion(){
+  const g=genMetar();const p=parseMetar(g.text);const d=g.data;
+  const kinds=[];
+  kinds.push(()=>{ // flight category
+    const cats=shuffle(["VFR","MVFR","IFR","LIFR"]);
+    const correct=p.cat;
+    const opts=[correct,...cats.filter(c=>c!==correct).slice(0,3)];
+    return {q:`Classify the flight category:\n${g.text}`,opts,a:0,
+      why:`Ceiling: ${p.ceiling==null?"none (no BKN/OVC layer)":p.ceiling.toLocaleString()+" ft"}; visibility ${p.vis} SM → ${correct}. The category takes the worse of ceiling or visibility.`,
+      dx:[null,"Re-check the boundaries: VFR >3,000/>5; MVFR 1,000–3,000 and/or 3–5; IFR 500–<1,000 and/or 1–<3; LIFR <500 and/or <1.","Same boundary check applies.","Same boundary check applies."]};
+  });
+  kinds.push(()=>{ // ceiling
+    const correct=p.ceiling==null?"No ceiling — no broken or overcast layer reported":p.ceiling.toLocaleString()+" ft AGL";
+    const pool=[ "No ceiling — no broken or overcast layer reported","400 ft AGL","700 ft AGL","1,200 ft AGL","2,000 ft AGL","2,500 ft AGL","3,000 ft AGL","5,500 ft AGL",(p.ceiling?((p.ceiling+500).toLocaleString()+" ft AGL"):"600 ft AGL"),(p.ceiling?((Math.max(p.ceiling-400,100)).toLocaleString()+" ft AGL"):"900 ft AGL")].filter(x=>x!==correct);
+    return {q:`What is the ceiling in this report?\n${g.text}`,opts:[correct,...shuffle([...new Set(pool)]).slice(0,3)],a:0,
+      why:"Ceiling is the lowest BKN or OVC layer (or VV). FEW and SCT layers never count.",
+      dx:[null,"Check for the lowest BKN/OVC — and remember heights are in hundreds of feet AGL.","Same rule: lowest BKN/OVC/VV only.","Same rule: lowest BKN/OVC/VV only."]};
+  });
+  if(!d.calm&&!d.vrb&&d.spd>0)kinds.push(()=>{ // wind
+    const correct=`From ${d.vrb?"a variable direction":d.dir+"° true"} at ${d.spd} kt${d.gust?", gusting "+d.gust+" kt":""}`;
+    const wrong1=`From ${d.vrb?"a variable direction":d.dir+"° magnetic"} at ${d.spd} kt${d.gust?", gusting "+d.gust+" kt":""}`;
+    const wrong2=`From ${d.vrb?"the north":pad(d.spd,3)+"° true"} at ${d.vrb?d.spd:(d.dir/10)} kt`;
+    const wrong3=`From ${d.vrb?"a variable direction":d.dir+"° true"} at ${d.gust?d.gust:d.spd+5} kt sustained`;
+    return {q:`Interpret the wind group in:\n${g.text}`,opts:[correct,wrong1,wrong2,wrong3],a:0,
+      why:"Coded METAR wind is referenced to TRUE north; first three digits are direction, next the speed in knots, G introduces gusts.",
+      dx:[null,"METAR body wind is TRUE, not magnetic — the classic trap (tower voice reports are magnetic).","Digits reversed — direction comes first.","Sustained speed is the value before G; the G value is the gust."]};
+  });
+  if(p.vis!=null)kinds.push(()=>{ // 107 minimums go/no-go on visibility
+    const legal=p.vis>=3;
+    const correct=legal?`Yes — visibility ${p.vis} SM meets the 3 SM minimum of §107.51(c)`:`No — visibility ${p.vis} SM is below the 3 SM minimum of §107.51(c)`;
+    const opts=[correct,
+      legal?`No — Part 107 requires 5 SM visibility`:`Yes — Part 107 has no visibility minimum`,
+      legal?`No — visibility ${p.vis} SM is below minimums`:`Yes — ${p.vis} SM exceeds the 1 SM minimum`,
+      `Only with a visual observer stationed downrange`];
+    return {q:`Based only on reported visibility, is this flight legal under §107.51?\n${g.text}`,opts,a:0,
+      why:`§107.51(c) requires minimum flight visibility of 3 statute miles from the control station. This report shows ${p.vis} SM.`,
+      dx:[null,"The Part 107 minimum is 3 SM, not 5 — and never zero.","Compare the reported value against 3 SM again.","A VO cannot substitute for the visibility minimum."]};
+  });
+  let built,guard=0;
+  do{built=pick(kinds)();guard++}while(new Set(built.opts).size<built.opts.length&&guard<8);
+  return {id:"dyn-"+Math.random().toString(36).slice(2,8),topic:"metar",sub:"Live report",diff:2,t:40,ref:"14 CFR §107.51 / AWH Ch. 24",dynamic:true,...built};
+}
+
+/* ---------- Timed Decode ---------- */
+let timedRun=null;
+function startTimed(){
+  timedRun={i:0,right:0,total:8,timer:null};
+  $("#timedStartBtn").disabled=true;
+  nextTimed();
+}
+function nextTimed(){
+  if(!timedRun)return;
+  if(timedRun.i>=timedRun.total){finishTimed();return}
+  const q=genMetarQuestion();
+  const order=shuffle(q.opts.map((_,ix)=>ix));
+  timedRun.q=q;timedRun.order=order;timedRun.left=20;timedRun.answered=false;
+  $("#timedClock").hidden=false;$("#timedClock").textContent=timedRun.left;$("#timedClock").classList.remove("low");
+  const [head,...rest]=q.q.split("\n");
+  $("#timedArea").innerHTML=`
+    <div class="panel glow">
+      <div class="q-meta"><span class="chip violet">Report ${timedRun.i+1} / ${timedRun.total}</span><span class="chip">20 seconds</span></div>
+      <p class="q-text">${esc(head)}</p>
+      ${rest.length?`<div class="metar-strip" style="cursor:default">${esc(rest.join(" "))}</div>`:""}
+      <div id="timedOpts">${order.map((oi,k)=>`<button class="opt" data-oi="${oi}"><span class="key">${"ABCD"[k]}</span><span>${esc(q.opts[oi])}</span></button>`).join("")}</div>
+      <div id="timedFb"></div>
+    </div>`;
+  $$("#timedOpts .opt").forEach(b=>b.addEventListener("click",()=>answerTimed(+b.dataset.oi,b)));
+  clearInterval(timedRun.timer);
+  timedRun.timer=setInterval(()=>{
+    timedRun.left--;
+    $("#timedClock").textContent=timedRun.left;
+    if(timedRun.left<=5)$("#timedClock").classList.add("low");
+    if(timedRun.left<=0)answerTimed(-1,null);
+  },1000);
+}
+function answerTimed(oi,btn){
+  if(!timedRun||timedRun.answered)return;
+  timedRun.answered=true;clearInterval(timedRun.timer);
+  const q=timedRun.q,ok=oi===q.a;
+  if(ok)timedRun.right++;
+  recordAnswer("metar",ok,true);
+  $$("#timedOpts .opt").forEach(b=>{
+    b.disabled=true;
+    if(+b.dataset.oi===q.a)b.classList.add("correct");
+    else if(b===btn)b.classList.add("wrong");
+  });
+  $("#timedFb").innerHTML=`<div class="explain"><div class="callout ${ok?"ok":"bad"}"><b>${ok?"Correct.":oi<0?"Time expired.":"Incorrect."}</b> ${esc(q.why)}</div><span class="faa-ref">${esc(q.ref)}</span></div>
+    <div class="btn-row mt"><button class="btn primary" id="timedNext">${timedRun.i+1>=timedRun.total?"See Results":"Next Report"}</button></div>`;
+  ok?sfx.ok():sfx.bad();
+  $("#timedNext").addEventListener("click",()=>{timedRun.i++;nextTimed()});
+  renderDashboard();
+}
+function finishTimed(){
+  const pct=Math.round(timedRun.right/timedRun.total*100);
+  state.sessions.push({date:Date.now(),pct,topic:"metar"});saveState();
+  if(pct===100)earnBadge("perfect");
+  earnBadge("first");
+  $("#timedClock").hidden=true;$("#timedStartBtn").disabled=false;
+  $("#timedArea").innerHTML=`<div class="panel glow result-hero">
+    <div class="r-pct">${pct}%</div>
+    <p class="lede" style="margin:8px auto 0">${timedRun.right} of ${timedRun.total} under time pressure. ${pct>=80?"Decode speed is checkride-grade.":"Re-run the drill — every report is freshly generated."}</p>
+    <div class="btn-row mt" style="justify-content:center"><button class="btn primary" onclick="startTimed()">Run Again — New Reports</button></div>
+  </div>`;
+  timedRun=null;renderDashboard();
+}
+
+/* ---------- Scenario mode ---------- */
+const MISSIONS=[
+  {task:"Roof inspection of a two-story commercial building",alt:"150 ft AGL",people:"crew only, site cordoned"},
+  {task:"Real-estate photography over a suburban property",alt:"120 ft AGL",people:"residential neighbors nearby"},
+  {task:"Cinematic sunrise establishing shots over farmland",alt:"350 ft AGL",people:"sparsely populated"},
+  {task:"Bridge-deck survey along a river corridor",alt:"200 ft AGL",people:"closed to traffic"},
+  {task:"Golf-course marketing flyover",alt:"250 ft AGL",people:"players present on course"},
+  {task:"Cell-tower antenna inspection",alt:"420 ft AGL beside the structure",people:"tower crew on site"}
+];
+let scen=null;
+function startScenario(){
+  const g=genMetar();const p=parseMetar(g.text);const d=g.data;const m=pick(MISSIONS);
+  // verdict logic
+  const hardStops=[],cautions=[];
+  if(p.wx.some(w=>/TS/.test(w)))hardStops.push("thunderstorm reported");
+  if(p.wx.some(w=>/FZ/.test(w)))hardStops.push("freezing precipitation/fog");
+  if(p.vis<3)hardStops.push(`visibility ${p.vis} SM below §107.51(c) minimum`);
+  if(p.ceiling!=null&&p.ceiling<600)hardStops.push(`ceiling ${p.ceiling} ft leaves no legal altitude 500 ft below cloud`);
+  if(d.gust&&d.gust>=25)hardStops.push(`gusts ${d.gust} kt beyond typical sUAS limits`);
+  if(p.ceiling!=null&&p.ceiling<1200)cautions.push(`ceiling ${p.ceiling} ft caps operations at ${p.ceiling-500} ft AGL (§107.51(d))`);
+  if(d.gust&&d.gust-d.spd>=8)cautions.push(`gust factor ${d.gust-d.spd} kt — control and battery margin degraded`);
+  if(d.spread<=2)cautions.push(`temp–dew point spread ${d.spread} °C — fog may form or thicken`);
+  if(d.spd>=15)cautions.push(`sustained wind ${d.spd} kt near many aircraft limits`);
+  const verdict=hardStops.length?"UNSAFE / NOT LEGAL":cautions.length?"MARGINAL":"ACCEPTABLE";
+  const reasons={
+    "UNSAFE / NOT LEGAL":hardStops.length?`Hard stop: ${hardStops[0]}.`:"",
+    "MARGINAL":cautions.length?`Flyable but degraded: ${cautions[0]}.`:"",
+    "ACCEPTABLE":"Report meets §107.51 minimums with workable margins for this tasking."
+  };
+  const correctReason=reasons[verdict];
+  const wrongReasons=shuffle([
+    "Any daylight operation is automatically legal under Part 107.",
+    "Wind never matters below 400 ft AGL.",
+    "The altimeter setting is too low to launch.",
+    "Visibility minimums apply only to manned aircraft.",
+    "A SCT layer constitutes a ceiling, grounding the flight.",
+    "Category boundaries: this report is LIFR, so flight is prohibited by the flight category itself."
+  ]).slice(0,3);
+  scen={g,p,m,verdict,correctReason,step:1};
+  const vOrder=shuffle(["ACCEPTABLE","MARGINAL","UNSAFE / NOT LEGAL"]);
+  $("#scenArea").innerHTML=`
+    <div class="panel glow">
+      <div class="p-title">Mission Tasking</div>
+      <p class="q-text"><b>${esc(m.task)}</b> — planned altitude ${esc(m.alt)}; persons: ${esc(m.people)}. Current weather at the operating area:</p>
+      <div class="metar-strip" style="cursor:default">${esc(g.text)}</div>
+      <p style="margin-bottom:10px"><b>Step 1 — your go/no-go verdict:</b></p>
+      <div id="scenVerdict">${vOrder.map((v,k)=>`<button class="opt" data-v="${esc(v)}"><span class="key">${"ABC"[k]}</span><span>${esc(v)}</span></button>`).join("")}</div>
+      <div id="scenStep2"></div><div id="scenFb"></div>
+    </div>`;
+  $$("#scenVerdict .opt").forEach(b=>b.addEventListener("click",()=>{
+    if(scen.step!==1)return;scen.step=2;scen.pickedV=b.dataset.v;
+    $$("#scenVerdict .opt").forEach(x=>{x.disabled=true;if(x.dataset.v===scen.verdict)x.classList.add("correct");else if(x===b&&b.dataset.v!==scen.verdict)x.classList.add("wrong")});
+    const rOrder=shuffle([scen.correctReason,...wrongReasons]);
+    $("#scenStep2").innerHTML=`<p style="margin:16px 0 10px"><b>Step 2 — the primary justification:</b></p>
+      <div id="scenReason">${rOrder.map((r,k)=>`<button class="opt" data-ok="${r===scen.correctReason?1:0}"><span class="key">${"ABCD"[k]}</span><span>${esc(r)}</span></button>`).join("")}</div>`;
+    $$("#scenReason .opt").forEach(rb=>rb.addEventListener("click",()=>{
+      if(scen.step!==2)return;scen.step=3;
+      const vOk=scen.pickedV===scen.verdict, rOk=rb.dataset.ok==="1";
+      $$("#scenReason .opt").forEach(x=>{x.disabled=true;if(x.dataset.ok==="1")x.classList.add("correct");else if(x===rb&&!rOk)x.classList.add("wrong")});
+      recordAnswer("metar",vOk&&rOk,false);
+      const all=[...hardStops.map(h=>"⛔ "+h),...cautions.map(c=>"⚠ "+c)];
+      $("#scenFb").innerHTML=`<div class="explain">
+        <div class="callout ${vOk&&rOk?"ok":vOk||rOk?"warn":"bad"}"><b>${vOk&&rOk?"Full marks — verdict and reasoning both correct.":vOk?"Right verdict, wrong reasoning — that costs points on the checkride and in the field.":"Verdict incorrect."}</b>
+        Correct call: <b>${esc(scen.verdict)}</b>. ${esc(scen.correctReason)}</div>
+        ${all.length?`<div class="callout"><b>Full factor list:</b><ul style="margin:6px 0 0 18px">${all.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:""}
+        <span class="faa-ref">14 CFR §107.51 / §107.49</span>
+        <div class="btn-row mt"><button class="btn primary" onclick="startScenario()">New Mission — New Weather</button></div>
+      </div>`;
+      (vOk&&rOk)?sfx.ok():sfx.bad();
+      renderDashboard();
+    }));
+  }));
+}
+
+/* ================================================================
+   SECTIONAL CHART LAB — original "Knight Sector" training graphic
+   ================================================================ */
+/* geo mapping: x 0..1000 = 121°30'W..121°00'W ; y 0..700 = 36°30'N..36°00'N */
+const geo={x2lonMin:x=>30-x*0.03, y2latMin:y=>30-y*(30/700),
+  fmt(x,y){const lm=Math.round(this.x2lonMin(x)),am=Math.round(this.y2latMin(y));
+    return `36°${pad(am)}′N, 121°${pad(lm)}′W`}};
+
+const FEATURES=[
+ {id:"vio",x:300,y:250,name:"VIOLETT INTL (Class C, towered)",
+  info:"Towered airport (blue symbol) inside solid magenta Class C rings. Data block: CT 118.3★ — the star means the tower is part-time. Field elevation 87 ft MSL, longest runway 7,100 ft, lighted. sUAS: ATC authorization (LAANC) required within the Class C surface area.",
+  cls:"C",surface:"Class C",auth:true,evidence:"Solid magenta circles centered on the airport; blue (towered) airport symbol; CT frequency with a star (part-time tower)."},
+ {id:"oak",x:720,y:190,name:"OAKCREST RGNL (Class D, towered)",
+  info:"Towered airport inside a dashed blue circle — Class D. The boxed [26] gives the ceiling: 2,600 ft MSL. sUAS: ATC authorization required within the D surface area.",
+  cls:"D",surface:"Class D",auth:true,evidence:"Dashed blue boundary; boxed ceiling figure [26] = 2,600 ft MSL; blue airport symbol."},
+ {id:"mst",x:620,y:520,name:"MOONSTONE FIELD (non-towered)",
+  info:"Magenta airport symbol — no control tower. Data block: MOONSTONE (MST) 449 L 32 — field elevation 449 ft MSL, lighted, 3,200-ft runway, CTAF 122.9Ⓒ. Surrounded by a magenta vignette: Class E begins at 700 ft AGL; below that it is Class G. sUAS: no authorization needed below 400 ft, but monitor the CTAF.",
+  cls:"G",surface:"Class G (E begins at 700 ft AGL)",auth:false,evidence:"Magenta (non-towered) airport symbol; fuzzy magenta vignette lowering the Class E floor to 700 ft AGL; Ⓒ CTAF marker."},
+ {id:"res",x:220,y:560,name:"R-4407 Restricted Area",
+  info:"Blue-hatched boundary labeled R-4407. Invisible hazards — often artillery or aerial gunnery. Check status (NOTAMs / controlling agency); entry when active requires permission.",
+  cls:"R",surface:"Restricted Area R-4407",auth:true,evidence:"Blue inward-hatched boundary with the R-number label."},
+ {id:"moa",x:880,y:430,name:"ULTRAVIOLET MOA",
+  info:"Magenta-hatched boundary — Military Operations Area. Part 107 flight is not prohibited, but expect high-speed, low-altitude military traffic. Exercise extreme vigilance; the underlying airspace class still governs authorizations.",
+  cls:"MOA",surface:"MOA over Class G/E",auth:false,evidence:"Magenta inward-hatched boundary with the MOA name label."},
+ {id:"obs",x:480,y:380,name:"Lighted obstacle 1449 (400)",
+  info:"Obstruction symbol with light rays: top at 1,449 ft MSL, 400 ft AGL. §107.51(b) permits flying up to 400 ft above its top within a 400-ft radius for inspection work.",
+  cls:"OBS",surface:"Class G below E-1200",auth:false,evidence:"Obstacle symbol with illumination rays; bold MSL figure with (AGL) in parentheses."},
+ {id:"grp",x:180,y:170,name:"Group obstacle 2049 (310)",
+  info:"Double-obstacle symbol: multiple structures; the figures give the highest — 2,049 ft MSL, 310 ft AGL.",
+  cls:"OBS",surface:"Class G below E-1200",auth:false,evidence:"Twin obstacle symbol with a single elevation pair for the tallest structure."},
+ {id:"par",x:790,y:150,name:"Parachute jumping area",
+  info:"Parachute symbol near Oakcrest Rgnl — jump operations. Canopies descend through sUAS altitudes; check NOTAMs and monitor CTAF for jump calls.",
+  cls:"HAZ",surface:"—",auth:false,evidence:"Parachute symbol adjacent to the airport."},
+ {id:"sea",x:900,y:640,name:"Knight Lake Seaplane Base",
+  info:"Anchor symbol on Knight Lake — a seaplane base. Expect floatplane traffic at very low altitude over the water.",
+  cls:"SPB",surface:"Class G",auth:false,evidence:"Anchor symbol placed on the depicted water feature."},
+ {id:"iso",x:560,y:120,name:"Isogonic line 13°E",
+  info:"Dashed magenta line of equal magnetic variation: magnetic north lies 13° east of true north here. Used to convert true chart directions to magnetic.",
+  cls:"NAV",surface:"—",auth:false,evidence:"Long dashed magenta line labeled 13°E crossing the chart."},
+ {id:"awy",x:520,y:620,name:"Victor Airway V-77",
+  info:"Blue corridor labeled V-77 — a low-altitude airway based on VOR radials, from 1,200 ft AGL up to 18,000 ft MSL. Expect enroute traffic along it; it does not itself restrict sUAS below.",
+  cls:"NAV",surface:"—",auth:false,evidence:"Light blue band with the V-77 identifier."},
+ {id:"mef",x:130,y:350,name:"Maximum Elevation Figure 2³",
+  info:"MEF for this quadrangle: 2,300 ft MSL clears the highest known terrain or obstacle (with allowances), rounded up. It is MSL, and it is a ceiling of features — not an airspace floor.",
+  cls:"NAV",surface:"—",auth:false,evidence:"Large screened numeral 2 with superscript 3 in the quadrangle."}
+];
+
+let vb={x:0,y:0,w:1000,h:700};
+function applyVB(){const s=$("#chartSvg");if(s)s.setAttribute("viewBox",`${vb.x} ${vb.y} ${vb.w} ${vb.h}`)}
+function zoom(f){
+  const cx=vb.x+vb.w/2,cy=vb.y+vb.h/2;
+  vb.w=Math.min(Math.max(vb.w*f,220),1000);vb.h=vb.w*0.7;
+  vb.x=Math.min(Math.max(cx-vb.w/2,0),1000-vb.w);vb.y=Math.min(Math.max(cy-vb.h/2,0),700-vb.h);
+  applyVB();
+}
+function buildChart(){
+  const wrap=$("#chartWrap");
+  const grat=[];
+  for(let m=5;m<30;m+=5){const gx=(30-m)/0.03; grat.push(`<line x1="${gx}" y1="0" x2="${gx}" y2="700" stroke="#2a3a2f" stroke-width="${m%15===0?1.6:0.7}"/>`)}
+  for(let m=5;m<30;m+=5){const gy=(30-m)*(700/30);grat.push(`<line x1="0" y1="${gy}" x2="1000" y2="${gy}" stroke="#2a3a2f" stroke-width="${m%15===0?1.6:0.7}"/>`)}
+  const ticks=[];
+  for(let m=0;m<=30;m+=5){const gx=(30-m)/0.03;ticks.push(`<text x="${Math.min(Math.max(gx,14),970)}" y="16" fill="#7a8a7f" font-size="11" font-family="monospace">121°${pad(m)}′W</text>`)}
+  for(let m=0;m<=30;m+=5){const gy=(30-m)*(700/30);ticks.push(`<text x="6" y="${Math.min(Math.max(gy+4,26),694)}" fill="#7a8a7f" font-size="11" font-family="monospace">36°${pad(m)}′N</text>`)}
+  const svg=`
+  <svg id="chartSvg" viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg" aria-label="Knight Sector training chart">
+    <defs>
+      <pattern id="hatchB" width="7" height="7" patternTransform="rotate(45)" patternUnits="userSpaceOnUse"><line x1="0" y1="0" x2="0" y2="7" stroke="#4d7fb5" stroke-width="2"/></pattern>
+      <pattern id="hatchM" width="7" height="7" patternTransform="rotate(45)" patternUnits="userSpaceOnUse"><line x1="0" y1="0" x2="0" y2="7" stroke="#b05a9c" stroke-width="2"/></pattern>
+      <radialGradient id="vig"><stop offset="55%" stop-color="#b05a9c" stop-opacity="0"/><stop offset="78%" stop-color="#b05a9c" stop-opacity=".38"/><stop offset="100%" stop-color="#b05a9c" stop-opacity="0"/></radialGradient>
+    </defs>
+    <rect width="1000" height="700" fill="#e9e4cf"/>
+    <rect width="1000" height="700" fill="#d8dfc2" opacity=".5"/>
+    <path d="M0 470 Q 180 430 320 470 T 640 500 T 1000 460 L1000 700 L0 700 Z" fill="#cdd8b2" opacity=".8"/>
+    <path d="M60 60 Q 240 20 420 70 T 820 50 L1000 70 L1000 0 L0 0 Z" fill="#d9cba6" opacity=".7"/>
+    <ellipse cx="905" cy="645" rx="72" ry="34" fill="#a9c6e8"/>
+    <text x="905" y="688" text-anchor="middle" fill="#4d7fb5" font-size="11" font-style="italic">Knight Lake</text>
+    ${grat.join("")}${ticks.join("")}
+
+    <!-- Class E-700 vignette around Moonstone -->
+    <circle cx="620" cy="520" r="120" fill="url(#vig)"/>
+
+    <!-- Class C rings (Violett Intl) -->
+    <circle cx="300" cy="250" r="105" fill="none" stroke="#c2338f" stroke-width="4" opacity=".9"/>
+    <circle cx="300" cy="250" r="60" fill="none" stroke="#c2338f" stroke-width="4" opacity=".9"/>
+    <text x="300" y="132" text-anchor="middle" fill="#c2338f" font-size="12" font-family="monospace">40/SFC</text>
+    <text x="392" y="330" fill="#c2338f" font-size="12" font-family="monospace">40/17</text>
+
+    <!-- Class D (Oakcrest) -->
+    <circle cx="720" cy="190" r="62" fill="none" stroke="#3a67a8" stroke-width="3.4" stroke-dasharray="10 7"/>
+    <rect x="756" y="122" width="30" height="20" fill="none" stroke="#3a67a8" stroke-width="2"/>
+    <text x="771" y="137" text-anchor="middle" fill="#3a67a8" font-size="13" font-family="monospace">26</text>
+
+    <!-- Restricted area -->
+    <polygon points="120,480 320,470 340,610 140,650" fill="url(#hatchB)" fill-opacity=".35" stroke="#4d7fb5" stroke-width="3.4"/>
+    <text x="228" y="560" text-anchor="middle" fill="#3a67a8" font-size="15" font-family="monospace" font-weight="bold">R-4407</text>
+
+    <!-- MOA -->
+    <polygon points="800,300 1000,320 1000,560 780,540" fill="url(#hatchM)" fill-opacity=".3" stroke="#b05a9c" stroke-width="3"/>
+    <text x="893" y="345" text-anchor="middle" fill="#b05a9c" font-size="13" font-family="monospace" font-weight="bold">ULTRAVIOLET MOA</text>
+
+    <!-- Victor airway -->
+    <line x1="60" y1="690" x2="980" y2="560" stroke="#8fb3d9" stroke-width="14" opacity=".45"/>
+    <text x="500" y="612" fill="#3a67a8" font-size="13" font-family="monospace" transform="rotate(-8 500 612)">V-77</text>
+
+    <!-- Isogonic -->
+    <line x1="380" y1="0" x2="740" y2="700" stroke="#c2338f" stroke-width="1.6" stroke-dasharray="14 9"/>
+    <text x="573" y="118" fill="#c2338f" font-size="13" font-family="monospace" transform="rotate(63 573 118)">13°E</text>
+
+    <!-- MEF -->
+    <text x="118" y="362" fill="#6b7a86" font-size="42" font-family="serif" opacity=".75">2<tspan font-size="24" dy="-14">3</tspan></text>
+    <text x="560" y="300" fill="#6b7a86" font-size="42" font-family="serif" opacity=".75">1<tspan font-size="24" dy="-14">4</tspan></text>
+
+    <!-- Airports -->
+    <g id="f-vio"><circle cx="300" cy="250" r="11" fill="none" stroke="#3a67a8" stroke-width="3"/><line x1="289" y1="250" x2="311" y2="250" stroke="#3a67a8" stroke-width="3"/><circle cx="300" cy="250" r="2.6" fill="#3a67a8"/>
+      <text x="300" y="228" text-anchor="middle" fill="#3a67a8" font-size="12.5" font-family="monospace" font-weight="bold">VIOLETT INTL (VIO)</text>
+      <text x="300" y="296" text-anchor="middle" fill="#3a67a8" font-size="11" font-family="monospace">CT 118.3★ ATIS 124.7</text>
+      <text x="300" y="310" text-anchor="middle" fill="#3a67a8" font-size="11" font-family="monospace">87 L 71 122.95</text></g>
+    <g id="f-oak"><circle cx="720" cy="190" r="10" fill="none" stroke="#3a67a8" stroke-width="3"/><line x1="710" y1="190" x2="730" y2="190" stroke="#3a67a8" stroke-width="3"/>
+      <text x="720" y="167" text-anchor="middle" fill="#3a67a8" font-size="12" font-family="monospace" font-weight="bold">OAKCREST RGNL</text>
+      <text x="720" y="222" text-anchor="middle" fill="#3a67a8" font-size="10.5" font-family="monospace">CT 120.5 ⋆L 46</text></g>
+    <g id="f-mst"><circle cx="620" cy="520" r="10" fill="none" stroke="#c2338f" stroke-width="3"/><line x1="610" y1="520" x2="630" y2="520" stroke="#c2338f" stroke-width="3"/>
+      <text x="620" y="497" text-anchor="middle" fill="#c2338f" font-size="12" font-family="monospace" font-weight="bold">MOONSTONE (MST)</text>
+      <text x="620" y="551" text-anchor="middle" fill="#c2338f" font-size="10.5" font-family="monospace">449 L 32 122.9 Ⓒ</text></g>
+
+    <!-- Obstacles -->
+    <g id="f-obs"><path d="M480 380 l-7 20 h14 Z" fill="#3a3a3a"/><line x1="470" y1="370" x2="476" y2="378" stroke="#3a3a3a" stroke-width="2"/><line x1="490" y1="370" x2="484" y2="378" stroke="#3a3a3a" stroke-width="2"/><line x1="480" y1="366" x2="480" y2="374" stroke="#3a3a3a" stroke-width="2"/>
+      <text x="497" y="392" fill="#3a3a3a" font-size="12" font-family="monospace" font-weight="bold">1449</text><text x="497" y="406" fill="#3a3a3a" font-size="11" font-family="monospace">(400)</text></g>
+    <g id="f-grp"><path d="M174 170 l-6 18 h12 Z" fill="#3a3a3a"/><path d="M188 170 l-6 18 h12 Z" fill="#3a3a3a"/>
+      <text x="202" y="180" fill="#3a3a3a" font-size="12" font-family="monospace" font-weight="bold">2049</text><text x="202" y="194" fill="#3a3a3a" font-size="11" font-family="monospace">(310)</text></g>
+
+    <!-- Parachute -->
+    <g id="f-par"><path d="M790 142 a11 11 0 0 1 22 0 l-4 0 -3 12 h-8 l-3 -12 Z" fill="none" stroke="#3a67a8" stroke-width="2.2"/></g>
+    <!-- Seaplane anchor -->
+    <g id="f-sea"><line x1="900" y1="630" x2="900" y2="652" stroke="#3a67a8" stroke-width="3"/><circle cx="900" cy="627" r="4" fill="none" stroke="#3a67a8" stroke-width="2.6"/><path d="M888 646 q12 12 24 0" fill="none" stroke="#3a67a8" stroke-width="3"/></g>
+    <g id="overlay"></g>
+  </svg>`;
+  wrap.insertAdjacentHTML("beforeend",svg);
+  applyVB();
+  const s=$("#chartSvg");
+  // click-to-identify (nearest feature within radius)
+  let drag=null,moved=false;
+  s.addEventListener("pointerdown",e=>{drag={x:e.clientX,y:e.clientY,vx:vb.x,vy:vb.y};moved=false;s.setPointerCapture(e.pointerId)});
+  s.addEventListener("pointermove",e=>{
+    if(!drag)return;
+    const dx=e.clientX-drag.x,dy=e.clientY-drag.y;
+    if(Math.abs(dx)+Math.abs(dy)>4)moved=true;
+    const scale=vb.w/s.clientWidth;
+    vb.x=Math.min(Math.max(drag.vx-dx*scale,0),1000-vb.w);
+    vb.y=Math.min(Math.max(drag.vy-dy*scale,0),700-vb.h);
+    applyVB();
+  });
+  s.addEventListener("pointerup",e=>{
+    if(drag&&!moved){
+      const r=s.getBoundingClientRect();
+      const px=vb.x+(e.clientX-r.left)/r.width*vb.w;
+      const py=vb.y+(e.clientY-r.top)/r.height*vb.h;
+      let best=null,bd=1e9;
+      for(const f of FEATURES){const d=(f.x-px)**2+(f.y-py)**2;if(d<bd){bd=d;best=f}}
+      if(best&&bd<90**2)showFeature(best,px,py);
+      else $("#mapInfo").innerHTML=`<div class="p-title">Feature Readout</div><p class="lede" style="margin:0">Position ${esc(geo.fmt(px,py))} — no charted feature within range. Underlying airspace here: Class G at the surface (E overlies at 700 or 1,200 ft AGL depending on the vignette).</p>`;
+    }
+    drag=null;
+  });
+  s.addEventListener("wheel",e=>{e.preventDefault();zoom(e.deltaY>0?1.15:0.87)},{passive:false});
+  $("#zoomIn").addEventListener("click",()=>zoom(0.75));
+  $("#zoomOut").addEventListener("click",()=>zoom(1.33));
+  $("#zoomReset").addEventListener("click",()=>{vb={x:0,y:0,w:1000,h:700};applyVB()});
+  document.addEventListener("keydown",e=>{
+    if($("#screen-chart").classList.contains("active")){
+      if(e.key==="+"||e.key==="=")zoom(0.8);
+      if(e.key==="-")zoom(1.25);
+    }
+  });
+}
+function showFeature(f,px,py){
+  sfx.nav();
+  markChart(f.x,f.y);
+  $("#mapInfo").innerHTML=`<div class="p-title">Feature Readout — ${esc(geo.fmt(f.x,f.y))}</div>
+    <p style="font-weight:700;color:var(--lavender);margin-bottom:6px">${esc(f.name)}</p>
+    <p style="font-size:14px">${esc(f.info)}</p>`;
+}
+function markChart(x,y){
+  $("#overlay").innerHTML=`<circle class="pulse-ring" cx="${x}" cy="${y}" r="34" fill="none" stroke="#7a2bbf" stroke-width="5"/>`;
+}
+function clearMark(){const o=$("#overlay");if(o)o.innerHTML=""}
+
+/* ---------- Symbol Explorer ---------- */
+const SYMBOLS=[
+ {n:"Towered airport",c:"Airports",icon:'<circle cx="30" cy="30" r="12" fill="none" stroke="#4d7fb5" stroke-width="3"/><line x1="18" y1="30" x2="42" y2="30" stroke="#4d7fb5" stroke-width="3"/>',meaning:"Blue airport symbol: an operating control tower exists.",consequence:"Almost always sits inside B/C/D airspace — expect LAANC authorization before flight.",trap:"Color, not shape, tells tower status."},
+ {n:"Non-towered airport",c:"Airports",icon:'<circle cx="30" cy="30" r="12" fill="none" stroke="#c2338f" stroke-width="3"/><line x1="18" y1="30" x2="42" y2="30" stroke="#c2338f" stroke-width="3"/>',meaning:"Magenta symbol: no control tower.",consequence:"Usually Class G/E — often no authorization needed, but monitor the CTAF for traffic.",trap:"Non-towered ≠ no traffic. Patterns can be busy."},
+ {n:"Class B",c:"Airspace",icon:'<circle cx="30" cy="30" r="20" fill="none" stroke="#4d7fb5" stroke-width="4"/><circle cx="30" cy="30" r="10" fill="none" stroke="#4d7fb5" stroke-width="4"/>',meaning:"Solid blue rings around major hubs; floors/ceilings as MSL fractions.",consequence:"ATC authorization mandatory; grid ceilings are often low.",trap:"Shelves — the surface ring is small, upper rings overhang."},
+ {n:"Class C",c:"Airspace",icon:'<circle cx="30" cy="30" r="20" fill="none" stroke="#c2338f" stroke-width="4"/><circle cx="30" cy="30" r="10" fill="none" stroke="#c2338f" stroke-width="4"/>',meaning:"Solid magenta rings; typically SFC–4,000 AGL core with a shelf.",consequence:"Authorization required in the surface area and shelf.",trap:"Confusing solid magenta (C) with the fuzzy magenta vignette (E-700)."},
+ {n:"Class D",c:"Airspace",icon:'<circle cx="30" cy="30" r="18" fill="none" stroke="#4d7fb5" stroke-width="3.4" stroke-dasharray="7 5"/>',meaning:"Dashed blue circle; boxed ceiling in hundreds of feet MSL.",consequence:"Authorization required; when a part-time tower closes, class may revert.",trap:"[26] is MSL, not AGL."},
+ {n:"Class E surface",c:"Airspace",icon:'<circle cx="30" cy="30" r="18" fill="none" stroke="#c2338f" stroke-width="3.4" stroke-dasharray="7 5"/>',meaning:"Dashed magenta: Class E begins at the surface.",consequence:"Surface E around an airport requires ATC authorization under §107.41.",trap:"Dashed magenta (surface E — authorization) vs vignette (E-700 — none below 700)."},
+ {n:"Class E at 700 ft",c:"Airspace",icon:'<circle cx="30" cy="30" r="16" fill="none" stroke="#c2338f" stroke-width="8" opacity=".4"/>',meaning:"Fuzzy magenta vignette: E floor drops to 700 ft AGL inside.",consequence:"Below 700 ft you are in Class G — normal sUAS ops need no authorization.",trap:"The most-missed distinction on the exam."},
+ {n:"Restricted area",c:"Special use",icon:'<rect x="12" y="14" width="36" height="32" fill="none" stroke="#4d7fb5" stroke-width="3"/><line x1="12" y1="14" x2="20" y2="22" stroke="#4d7fb5" stroke-width="2"/><line x1="20" y1="14" x2="28" y2="22" stroke="#4d7fb5" stroke-width="2"/><line x1="28" y1="14" x2="36" y2="22" stroke="#4d7fb5" stroke-width="2"/>',meaning:"Blue-hatched boundary, R-number. Invisible hazards (artillery, missiles).",consequence:"Check hot/cold status; permission required when active.",trap:"Restricted ≠ prohibited — but treat hot areas as walls."},
+ {n:"MOA",c:"Special use",icon:'<rect x="12" y="14" width="36" height="32" fill="none" stroke="#b05a9c" stroke-width="3"/><line x1="12" y1="14" x2="20" y2="22" stroke="#b05a9c" stroke-width="2"/><line x1="20" y1="14" x2="28" y2="22" stroke="#b05a9c" stroke-width="2"/>',meaning:"Magenta-hatched: military training airspace.",consequence:"Not prohibited to Part 107 — but fast jets may be at low level.",trap:"MOA status doesn't change the underlying airspace authorization rules."},
+ {n:"Obstacle",c:"Hazards",icon:'<path d="M30 16 l-8 26 h16 Z" fill="#555"/>',meaning:"Tower/structure. Bold number = MSL top; (parentheses) = AGL.",consequence:"§107.51(b): you may fly to 400 ft above its top within a 400-ft radius.",trap:"Reading the AGL value as MSL."},
+ {n:"Group obstacle",c:"Hazards",icon:'<path d="M24 18 l-7 24 h14 Z" fill="#555"/><path d="M38 18 l-7 24 h14 Z" fill="#555"/>',meaning:"Multiple close structures; elevation pair is for the tallest.",consequence:"Antenna farms — guy wires extend far beyond the symbols.",trap:"Guy wires are invisible on the chart and nearly invisible in the air."},
+ {n:"Parachute area",c:"Hazards",icon:'<path d="M20 26 a10 10 0 0 1 20 0 l-3 0 -3 12 h-8 l-3 -12 Z" fill="none" stroke="#4d7fb5" stroke-width="2.6"/>',meaning:"Parachute jumping activity.",consequence:"Jumpers descend through your altitude; monitor CTAF for jump calls.",trap:"Activity may be miles from the symbol's airport."},
+ {n:"MEF",c:"Navigation",icon:'<text x="18" y="42" fill="#6b7a86" font-size="30" font-family="serif">2<tspan font-size="17" dy="-11">3</tspan></text>',meaning:"Maximum Elevation Figure: highest feature per quadrangle, hundreds of feet MSL, rounded up.",consequence:"Instant terrain/obstacle awareness for route planning.",trap:"It is MSL and includes obstacles — not just terrain."},
+ {n:"Isogonic line",c:"Navigation",icon:'<line x1="14" y1="46" x2="46" y2="14" stroke="#c2338f" stroke-width="2" stroke-dasharray="6 4"/>',meaning:"Dashed magenta line of equal magnetic variation (e.g., 13°E).",consequence:"Convert true ↔ magnetic: East is least (subtract) going true→magnetic.",trap:"Chart directions are TRUE; compass and runway numbers are magnetic."},
+ {n:"Victor airway",c:"Navigation",icon:'<line x1="12" y1="40" x2="48" y2="20" stroke="#8fb3d9" stroke-width="8" opacity=".6"/>',meaning:"Blue corridor (V-##): low-altitude VOR airway, 1,200 AGL–18,000 MSL.",consequence:"Enroute traffic concentrates along it — heads-up near VORs.",trap:"The airway itself doesn't restrict sUAS below 400 ft."},
+ {n:"Seaplane base",c:"Airports",icon:'<line x1="30" y1="18" x2="30" y2="40" stroke="#4d7fb5" stroke-width="3"/><circle cx="30" cy="15" r="3.4" fill="none" stroke="#4d7fb5" stroke-width="2.4"/><path d="M19 34 q11 12 22 0" fill="none" stroke="#4d7fb5" stroke-width="3"/>',meaning:"Anchor symbol: seaplane landing area.",consequence:"Floatplanes operate at extremely low altitude over water.",trap:"Water ops have no pavement cues — traffic can appear anywhere on the lake."}
+];
+function renderSymbols(){
+  $("#symbolGrid").innerHTML=SYMBOLS.map((s,i)=>`
+    <button class="panel sym-card" data-i="${i}">
+      <div class="s-icon"><svg width="60" height="60" viewBox="0 0 60 60">${s.icon}</svg></div>
+      <div class="s-name">${esc(s.n)}</div><div class="s-cat">${esc(s.c)}</div>
+    </button>`).join("");
+  $$(".sym-card").forEach(c=>c.addEventListener("click",()=>{
+    const s=SYMBOLS[+c.dataset.i];sfx.nav();
+    $("#modalBox").innerHTML=`
+      <div class="p-title">${esc(s.n)} — ${esc(s.c)}</div>
+      <div class="s-icon" style="height:90px;margin-bottom:14px"><svg width="84" height="84" viewBox="0 0 60 60">${s.icon}</svg></div>
+      <dl class="field-detail">
+        <dt>Meaning</dt><dd>${esc(s.meaning)}</dd>
+        <dt>Remote-pilot consequence</dt><dd>${esc(s.consequence)}</dd>
+        <dt>Exam trap</dt><dd class="trap">⚠ ${esc(s.trap)}</dd>
+      </dl>
+      <div class="btn-row mt"><button class="btn" onclick="closeModal()">Close</button></div>`;
+    $("#modal").classList.add("open");
+  }));
+}
+function closeModal(){$("#modal").classList.remove("open")}
+$("#modal").addEventListener("click",e=>{if(e.target.id==="modal")closeModal()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
+
+/* ---------- Locate & Identify drill ---------- */
+let locRun=null;
+function startLocate(){
+  const pool=shuffle(FEATURES).slice(0,6);
+  locRun={targets:pool,i:0,right:0};
+  nextLocate();
+}
+function nextLocate(){
+  if(!locRun)return;
+  if(locRun.i>=locRun.targets.length){
+    const pct=Math.round(locRun.right/locRun.targets.length*100);
+    state.sessions.push({date:Date.now(),pct,topic:"charts"});saveState();
+    if(pct===100)earnBadge("perfect");earnBadge("first");
+    clearMark();
+    $("#locateArea").innerHTML=`<div class="panel glow result-hero"><div class="r-pct">${pct}%</div>
+      <p class="lede" style="margin:8px auto 0">${locRun.right} of ${locRun.targets.length} targets identified. Targets and options re-randomize every run.</p>
+      <div class="btn-row mt" style="justify-content:center"><button class="btn primary" onclick="startLocate()">Run Again</button></div></div>`;
+    locRun=null;renderDashboard();return;
+  }
+  const f=locRun.targets[locRun.i];
+  const wrong=shuffle(FEATURES.filter(x=>x.id!==f.id)).slice(0,3).map(x=>x.name);
+  const opts=shuffle([f.name,...wrong]);
+  markChart(f.x,f.y);
+  $("#locateArea").innerHTML=`
+    <div class="panel glow">
+      <div class="q-meta"><span class="chip violet">Target ${locRun.i+1} / ${locRun.targets.length}</span><span class="chip">${esc(geo.fmt(f.x,f.y))}</span></div>
+      <p class="q-text">A target is pulsing on the chart (switch to Chart View if you need the full picture — the mark persists). What is it?</p>
+      <div id="locOpts">${opts.map((o,k)=>`<button class="opt" data-ok="${o===f.name?1:0}"><span class="key">${"ABCD"[k]}</span><span>${esc(o)}</span></button>`).join("")}</div>
+      <div id="locFb"></div>
+    </div>`;
+  $$("#locOpts .opt").forEach(b=>b.addEventListener("click",()=>{
+    const ok=b.dataset.ok==="1";
+    if(ok)locRun.right++;
+    recordAnswer("charts",ok,false);
+    $$("#locOpts .opt").forEach(x=>{x.disabled=true;if(x.dataset.ok==="1")x.classList.add("correct");else if(x===b&&!ok)x.classList.add("wrong")});
+    $("#locFb").innerHTML=`<div class="explain"><div class="callout ${ok?"ok":"bad"}"><b>${ok?"Identified.":"Negative."}</b> ${esc(f.name)} — chart evidence: ${esc(f.evidence)}</div>
+      <div class="btn-row mt"><button class="btn primary" id="locNext">${locRun.i+1>=locRun.targets.length?"See Results":"Next Target"}</button></div></div>`;
+    ok?sfx.ok():sfx.bad();
+    $("#locNext").addEventListener("click",()=>{locRun.i++;nextLocate()});
+  }));
+}
+
+/* ---------- Airspace Detective ---------- */
+const CASES=[
+ {spot:"hovering at 200 ft AGL directly over VIOLETT INTL's ramp",f:"vio",
+  q1:{q:"What airspace are you in?",correct:"Class C — inside the surface ring",wrong:["Class D","Class G under an E-700 vignette","Class B"]},
+  q2:{q:"What does Part 107 require before this flight?",correct:"ATC authorization (LAANC or FAA DroneZone) per §107.41",wrong:["Nothing — flights below 400 ft are always authorization-free","A Certificate of Waiver for all Class C flight","Only a radio call to the tower"]}},
+ {spot:"photographing a barn at 150 ft AGL, 1 NM outside the MOONSTONE vignette edge",f:"mst",
+  q1:{q:"What airspace are you in at 150 ft AGL?",correct:"Class G (E overlies at 1,200 ft AGL outside the vignette)",wrong:["Class E from the surface","Class D","Class C shelf"]},
+  q2:{q:"Authorization required?",correct:"No — Class G requires no ATC authorization; monitor CTAF 122.9 for traffic",wrong:["Yes — LAANC is required near any airport","Yes — the vignette requires authorization within 4 NM","Only at night"]}},
+ {spot:"inspecting the lighted tower (1449 MSL) at 380 ft AGL",f:"obs",
+  q1:{q:"The surrounding airspace at your altitude is —",correct:"Class G, below the overlying Class E",wrong:["Class E surface area","Inside R-4407","Class D"]},
+  q2:{q:"Could you legally climb to 700 ft AGL beside this tower?",correct:"Yes — within a 400-ft radius of the structure, up to 400 ft above its top (§107.51(b))",wrong:["No — 400 ft AGL is an absolute ceiling","Only with a Class E waiver","Only if the tower owner files a NOTAM"]}},
+ {spot:"filming at 250 ft AGL inside the R-4407 boundary while it is active",f:"res",
+  q1:{q:"What have you flown into?",correct:"An active Restricted Area — hazardous and requiring permission",wrong:["A MOA — merely advisory","Class E surface — needs LAANC only","A warning area"]},
+  q2:{q:"The correct preflight action would have been —",correct:"Check the area's status via NOTAMs/controlling agency and obtain permission or stay out",wrong:["File a flight plan with ATC","Broadcast intentions on 121.5","Fly below 100 ft AGL, where restricted areas don't apply"]}},
+ {spot:"at 300 ft AGL inside the ULTRAVIOLET MOA boundary",f:"moa",
+  q1:{q:"Is this flight prohibited by the MOA itself?",correct:"No — MOAs don't prohibit Part 107 flight, but demand extreme vigilance for military traffic",wrong:["Yes — MOAs are closed to all civil aircraft","Yes — unless ATC clears you through","Only prohibited on weekends"]},
+  q2:{q:"What still governs whether you need authorization here?",correct:"The underlying airspace class (G/E here — none required below 400 ft)",wrong:["The MOA controlling agency","The nearest tower","Military NOTAMs override all airspace rules"]}},
+ {spot:"launching at the edge of OAKCREST RGNL's dashed blue ring at 100 ft AGL",f:"oak",
+  q1:{q:"Inside the dashed blue line at the surface you are in —",correct:"Class D airspace, surface to 2,600 ft MSL ([26])",wrong:["Class D, surface to 2,600 ft AGL","Class E at 700 ft","Class C outer shelf"]},
+  q2:{q:"Part 107 requirement?",correct:"ATC authorization before operating in the Class D surface area (§107.41)",wrong:["Two-way radio contact with the tower is sufficient","None below the [26] ceiling","A visual observer replaces the authorization"]}}
+];
+let detRun=null;
+function startDetective(){
+  detRun={c:pick(CASES),step:1,score:0};
+  const c=detRun.c,f=FEATURES.find(x=>x.id===c.f);
+  markChart(f.x,f.y);
+  const o1=shuffle([c.q1.correct,...c.q1.wrong]);
+  $("#detectiveArea").innerHTML=`
+    <div class="panel glow">
+      <div class="p-title">Case File</div>
+      <p class="q-text">You are <b>${esc(c.spot)}</b> (position marked on the chart).</p>
+      <p style="margin-bottom:8px"><b>${esc(c.q1.q)}</b></p>
+      <div id="detQ1">${o1.map((o,k)=>`<button class="opt" data-ok="${o===c.q1.correct?1:0}"><span class="key">${"ABCD"[k]}</span><span>${esc(o)}</span></button>`).join("")}</div>
+      <div id="detQ2"></div><div id="detFb"></div>
+    </div>`;
+  $$("#detQ1 .opt").forEach(b=>b.addEventListener("click",()=>{
+    if(detRun.step!==1)return;detRun.step=2;
+    const ok=b.dataset.ok==="1";if(ok)detRun.score++;
+    recordAnswer("airspace",ok,false);ok?sfx.ok():sfx.bad();
+    $$("#detQ1 .opt").forEach(x=>{x.disabled=true;if(x.dataset.ok==="1")x.classList.add("correct");else if(x===b&&!ok)x.classList.add("wrong")});
+    const o2=shuffle([detRun.c.q2.correct,...detRun.c.q2.wrong]);
+    $("#detQ2").innerHTML=`<p style="margin:16px 0 8px"><b>${esc(detRun.c.q2.q)}</b></p>
+      <div id="detQ2o">${o2.map((o,k)=>`<button class="opt" data-ok="${o===detRun.c.q2.correct?1:0}"><span class="key">${"ABCD"[k]}</span><span>${esc(o)}</span></button>`).join("")}</div>`;
+    $$("#detQ2o .opt").forEach(b2=>b2.addEventListener("click",()=>{
+      if(detRun.step!==2)return;detRun.step=3;
+      const ok2=b2.dataset.ok==="1";if(ok2)detRun.score++;
+      recordAnswer("airspace",ok2,false);ok2?sfx.ok():sfx.bad();
+      $$("#detQ2o .opt").forEach(x=>{x.disabled=true;if(x.dataset.ok==="1")x.classList.add("correct");else if(x===b2&&!ok2)x.classList.add("wrong")});
+      const f2=FEATURES.find(x=>x.id===detRun.c.f);
+      $("#detFb").innerHTML=`<div class="explain">
+        <div class="callout ${detRun.score===2?"ok":detRun.score===1?"warn":"bad"}"><b>Case closed — ${detRun.score}/2.</b></div>
+        <div class="callout"><b>Chart evidence:</b> ${esc(f2.evidence)}</div>
+        <span class="faa-ref">14 CFR §107.41 / FAA Chart User's Guide</span>
+        <div class="btn-row mt"><button class="btn primary" onclick="startDetective()">Open Another Case</button></div></div>`;
+      renderDashboard();
+    }));
+  }));
+}
+
+/* ---------- Coordinate Challenge ---------- */
+let coordRun=null;
+function startCoords(){
+  coordRun={targets:shuffle(FEATURES.filter(f=>["vio","oak","mst","obs","res","sea","grp"].includes(f.id))).slice(0,5),i:0,right:0};
+  nextCoord();
+}
+function nextCoord(){
+  if(!coordRun)return;
+  if(coordRun.i>=coordRun.targets.length){
+    const pct=Math.round(coordRun.right/coordRun.targets.length*100);
+    state.sessions.push({date:Date.now(),pct,topic:"charts"});saveState();
+    if(pct===100)earnBadge("perfect");
+    clearMark();
+    $("#coordArea").innerHTML=`<div class="panel glow result-hero"><div class="r-pct">${pct}%</div>
+      <p class="lede" style="margin:8px auto 0">${coordRun.right} of ${coordRun.targets.length} fixes plotted.</p>
+      <div class="btn-row mt" style="justify-content:center"><button class="btn primary" onclick="startCoords()">Run Again</button></div></div>`;
+    coordRun=null;renderDashboard();return;
+  }
+  const f=coordRun.targets[coordRun.i];
+  const correct=geo.fmt(f.x,f.y);
+  const latM=Math.round(geo.y2latMin(f.y)),lonM=Math.round(geo.x2lonMin(f.x));
+  const distractors=new Set();
+  while(distractors.size<3){
+    const dl=latM+pick([-6,-5,5,6,-8,8]),dn=lonM+pick([-6,-5,5,6,-8,8]);
+    if(dl<0||dl>30||dn<0||dn>30)continue;
+    const s=`36°${pad(dl)}′N, 121°${pad(dn)}′W`;
+    if(s!==correct)distractors.add(s);
+  }
+  // include a lat/lon swap trap sometimes
+  const opts=shuffle([correct,...distractors]);
+  markChart(f.x,f.y);
+  $("#coordArea").innerHTML=`
+    <div class="panel glow">
+      <div class="q-meta"><span class="chip violet">Fix ${coordRun.i+1} / ${coordRun.targets.length}</span></div>
+      <p class="q-text">The marked feature is <b>${esc(f.name)}</b>. Read its position off the graticule (ticks every 5′):</p>
+      <div id="coOpts">${opts.map((o,k)=>`<button class="opt" data-ok="${o===correct?1:0}"><span class="key">${"ABCD"[k]}</span><span class="mono">${esc(o)}</span></button>`).join("")}</div>
+      <div id="coFb"></div>
+    </div>`;
+  $$("#coOpts .opt").forEach(b=>b.addEventListener("click",()=>{
+    const ok=b.dataset.ok==="1";
+    if(ok)coordRun.right++;
+    recordAnswer("charts",ok,false);
+    $$("#coOpts .opt").forEach(x=>{x.disabled=true;if(x.dataset.ok==="1")x.classList.add("correct");else if(x===b&&!ok)x.classList.add("wrong")});
+    $("#coFb").innerHTML=`<div class="explain"><div class="callout ${ok?"ok":"bad"}"><b>${ok?"Fix confirmed.":"Position error."}</b> ${esc(f.name)} plots at <span class="mono">${esc(correct)}</span>. Latitude increases northward (up), longitude increases westward (left) — the classic reversal trap.</div>
+      <div class="btn-row mt"><button class="btn primary" id="coNext">${coordRun.i+1>=coordRun.targets.length?"See Results":"Next Fix"}</button></div></div>`;
+    ok?sfx.ok():sfx.bad();
+    $("#coNext").addEventListener("click",()=>{coordRun.i++;nextCoord()});
+  }));
+}
+
+/* ================================================================
+   ADAPTIVE QUIZ ENGINE — fresh sample + shuffled options every run
+   ================================================================ */
+function topicWeight(t){
+  const m=state.mastery[t];
+  const base=1-(m.seen===0?0:m.ema);      // weaker topic → heavier
+  const unseen=m.seen===0?0.5:0;          // never-touched topics get a boost
+  return 0.25+base+unseen;
+}
+function sampleQuestions(n,topicFilter){
+  // weighted sampling WITHOUT replacement from the static bank,
+  // plus freshly generated METAR items so no two sorties match.
+  let pool=BANK.filter(q=>!topicFilter||topicFilter.includes(q.topic));
+  const weighted=pool.map(q=>({q,w:topicWeight(q.topic)*(0.8+Math.random()*0.4)}));
+  weighted.sort((a,b)=>b.w-a.w);
+  const chosen=shuffle(weighted.slice(0,Math.min(n*2,weighted.length))).slice(0,n).map(x=>x.q);
+  // swap in dynamic METAR questions for variety when the topic allows
+  const dynSlots=(!topicFilter||topicFilter.includes("metar"))?Math.min(rnd(1,3),chosen.length):0;
+  for(let k=0;k<dynSlots;k++)chosen[rnd(0,chosen.length-1)]=genMetarQuestion();
+  return shuffle(chosen);
+}
+let quiz=null;
+function startQuiz(kind){
+  let qs;
+  if(kind==="review"){
+    const due=dueReviews();
+    if(!due.length){toast("Review Queue","Nothing due — the spaced-repetition scheduler is clear.");return}
+    qs=shuffle(due.map(r=>BANK.find(q=>q.id===r.qid)).filter(Boolean)).slice(0,10);
+    if(!qs.length){state.reviews=state.reviews.filter(r=>BANK.find(q=>q.id===r.qid));saveState();toast("Review Queue","Queue cleared of expired items.");return}
+  }else if(kind==="focus"){
+    qs=sampleQuestions(10,["metar","charts","airspace"]);
+  }else{
+    qs=sampleQuestions(10,null);
+  }
+  quiz={qs,i:0,right:0,kind,results:[]};
+  $("#quizSetup").hidden=true;$("#quizArea").hidden=false;
+  renderQuizQ();
+}
+function renderQuizQ(){
+  const q=quiz.qs[quiz.i];
+  const order=shuffle(q.opts.map((_,ix)=>ix));   // options re-shuffled every render
+  quiz.order=order;quiz.t0=Date.now();
+  const [head,...rest]=q.q.split("\n");
+  const track=quiz.qs.map((_,ix)=>{
+    const r=quiz.results[ix];
+    return `<i class="${ix===quiz.i?"cur":r===true?"done":r===false?"miss":""}"></i>`;
+  }).join("");
+  $("#quizArea").innerHTML=`
+    <div class="progress-track">${track}</div>
+    <div class="panel glow">
+      <div class="q-meta">
+        <span class="chip violet">${esc(TOPICS[q.topic])}</span>
+        <span class="chip">${esc(q.sub)}</span>
+        <span class="chip">Difficulty ${"▮".repeat(q.diff)}${"▯".repeat(3-q.diff)}</span>
+        ${q.dynamic?'<span class="chip" style="border-color:var(--ultraviolet);color:var(--ultraviolet)">Generated live</span>':""}
+        <span class="chip" style="margin-left:auto">Q ${quiz.i+1} / ${quiz.qs.length}</span>
+      </div>
+      <p class="q-text">${esc(head)}</p>
+      ${rest.length?`<div class="metar-strip" style="cursor:default">${esc(rest.join(" "))}</div>`:""}
+      <div id="quizOpts">${order.map((oi,k)=>`<button class="opt" data-oi="${oi}"><span class="key">${"ABCD"[k]}</span><span>${esc(q.opts[oi])}</span></button>`).join("")}</div>
+      <div id="quizFb"></div>
+    </div>`;
+  $$("#quizOpts .opt").forEach(b=>b.addEventListener("click",()=>answerQuiz(+b.dataset.oi,b)));
+}
+function answerQuiz(oi,btn){
+  const q=quiz.qs[quiz.i];
+  if(quiz.results[quiz.i]!==undefined)return;
+  const ok=oi===q.a;
+  const fast=(Date.now()-quiz.t0)/1000<(q.t||35);
+  quiz.results[quiz.i]=ok;if(ok)quiz.right++;
+  recordAnswer(q.topic,ok,fast);
+  if(!q.dynamic)scheduleReview(q.id,!ok);
+  $$("#quizOpts .opt").forEach(b=>{
+    b.disabled=true;
+    if(+b.dataset.oi===q.a)b.classList.add("correct");
+    else if(b===btn)b.classList.add("wrong");
+  });
+  const dxHtml=(q.dx||[]).map((d,ix)=>d&&ix!==q.a?`<p class="distract"><b>${esc(q.opts[ix].slice(0,52))}${q.opts[ix].length>52?"…":""}</b> — ${esc(d)}</p>`:"").join("");
+  $("#quizFb").innerHTML=`<div class="explain">
+    <div class="callout ${ok?"ok":"bad"} why"><b>${ok?"Correct.":"Incorrect."}</b> ${esc(q.why)}</div>
+    ${!ok&&dxHtml?`<div class="mt">${dxHtml}</div>`:""}
+    <span class="faa-ref">${esc(q.ref)}</span>
+    <div class="btn-row mt">
+      <button class="btn primary" id="quizNext">${quiz.i+1>=quiz.qs.length?"Debrief":"Next Question"}</button>
+      <button class="btn ghost" id="quizAbort">End Sortie</button>
+    </div></div>`;
+  ok?sfx.ok():sfx.bad();
+  $("#quizNext").addEventListener("click",()=>{quiz.i++;quiz.i>=quiz.qs.length?finishQuiz():renderQuizQ()});
+  $("#quizAbort").addEventListener("click",finishQuiz);
+  renderDashboard();
+}
+function finishQuiz(){
+  const done=quiz.results.filter(r=>r!==undefined).length;
+  const pct=done?Math.round(quiz.right/done*100):0;
+  if(done>0){state.sessions.push({date:Date.now(),pct,topic:quiz.kind});saveState()}
+  earnBadge("first");
+  if(pct===100&&done>=5)earnBadge("perfect");
+  const weak=Object.keys(TOPICS).map(t=>({t,p:masteryPct(t),seen:state.mastery[t].seen})).filter(x=>x.seen>0).sort((a,b)=>a.p-b.p).slice(0,2);
+  $("#quizArea").innerHTML=`<div class="panel glow result-hero">
+      <div class="r-pct">${pct}%</div>
+      <p class="lede" style="margin:8px auto 0">${quiz.right} correct of ${done} answered.
+      ${weak.length?`Weakest domains right now: <b>${weak.map(w=>TOPICS[w.t]).join("</b> and <b>")}</b> — the next sortie will weight toward them automatically.`:""}</p>
+      <div class="btn-row mt" style="justify-content:center">
+        <button class="btn primary" id="quizAgain">New Sortie — Fresh Questions</button>
+        <button class="btn ghost" id="quizBack">Setup</button>
+      </div></div>`;
+  const kind=quiz.kind;quiz=null;
+  $("#quizAgain").addEventListener("click",()=>startQuiz(kind==="review"?"std":kind));
+  $("#quizBack").addEventListener("click",()=>{$("#quizArea").hidden=true;$("#quizSetup").hidden=false;renderDashboard()});
+  renderDashboard();
+}
+
+/* ================================================================
+   MOCK EXAM — 60 questions / 120:00, blueprint-weighted fresh sample
+   ================================================================ */
+const EXAM_BLUEPRINT=[["regulations",11],["airspace",8],["weather",7],["metar",8],["charts",8],["loading",5],["operations",7],["adm",4],["emergency",2]];
+const EXAM_DURATION=120*60;
+const EXAM_LOW_TIME=10*60;
+let exam=null;
+function buildExamSet(){
+  let set=[];
+  for(const [t,n] of EXAM_BLUEPRINT){
+    const pool=shuffle(BANK.filter(q=>q.topic===t));
+    set.push(...pool.slice(0,n));
+  }
+  // Replace one static METAR item with a freshly generated, internally
+  // consistent report so every full exam contains at least one new decode.
+  const metarSlots=set.map((q,ix)=>q.topic==="metar"?ix:-1).filter(ix=>ix>=0);
+  set[pick(metarSlots)]=genMetarQuestion();
+  return shuffle(set).map(q=>({q,order:shuffle(q.opts.map((_,ix)=>ix)),pick:null,flag:false}));
+}
+function startExam(){
+  exam={items:buildExamSet(),i:0,left:EXAM_DURATION,timer:null};
+  $("#examSetup").hidden=true;$("#examResults").hidden=true;$("#examArea").hidden=false;
+  exam.timer=setInterval(()=>{
+    exam.left--;
+    const c=$("#examClock");
+    if(c){c.textContent=pad(Math.floor(exam.left/60))+":"+pad(exam.left%60);if(exam.left<=EXAM_LOW_TIME)c.classList.add("low")}
+    if(exam.left<=0)submitExam();
+  },1000);
+  renderExamQ();
+}
+function renderExamQ(){
+  const it=exam.items[exam.i],q=it.q;
+  const [head,...rest]=q.q.split("\n");
+  $("#examArea").innerHTML=`
+    <div class="exam-grid">
+      <div class="panel glow">
+        <div class="q-meta">
+          <span class="chip violet">Question ${exam.i+1} / ${exam.items.length}</span>
+          <span class="chip">${esc(TOPICS[q.topic])}</span>
+          <span class="timer-big ${exam.left<=EXAM_LOW_TIME?"low":""}" id="examClock" style="margin-left:auto">${pad(Math.floor(exam.left/60))}:${pad(exam.left%60)}</span>
+        </div>
+        <p class="q-text">${esc(head)}</p>
+        ${rest.length?`<div class="metar-strip" style="cursor:default">${esc(rest.join(" "))}</div>`:""}
+        <div id="examOpts">${it.order.map((oi,k)=>`<button class="opt ${it.pick===oi?"sel":""}" data-oi="${oi}"><span class="key">${"ABCD"[k]}</span><span>${esc(q.opts[oi])}</span></button>`).join("")}</div>
+        <div class="btn-row mt">
+          <button class="btn ghost" id="examPrev" ${exam.i===0?"disabled":""}>◀ Previous</button>
+          <button class="btn ghost" id="examFlag">${it.flag?"Unflag":"Flag for Review"}</button>
+          <button class="btn" id="examNext" ${exam.i===exam.items.length-1?"disabled":""}>Next ▶</button>
+          <button class="btn primary" id="examSubmit" style="margin-left:auto">Submit Exam</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="p-title">Question Map</div>
+        <div class="qnav">${exam.items.map((x,ix)=>`<button data-ix="${ix}" class="${ix===exam.i?"cur ":""}${x.pick!==null?"answered ":""}${x.flag?"flagged":""}">${ix+1}</button>`).join("")}</div>
+        <p class="small-note mt">Violet = answered · Amber = flagged. No feedback until submission.</p>
+      </div>
+    </div>`;
+  $$("#examOpts .opt").forEach(b=>b.addEventListener("click",()=>{it.pick=+b.dataset.oi;sfx.nav();renderExamQ()}));
+  $("#examPrev").addEventListener("click",()=>{exam.i--;renderExamQ()});
+  $("#examNext").addEventListener("click",()=>{exam.i++;renderExamQ()});
+  $("#examFlag").addEventListener("click",()=>{it.flag=!it.flag;renderExamQ()});
+  $("#examSubmit").addEventListener("click",()=>{
+    const un=exam.items.filter(x=>x.pick===null).length;
+    if(un>0&&exam.left>0){
+      if(!confirm(un+" question(s) unanswered. Submit anyway?"))return;
+    }
+    submitExam();
+  });
+  $$(".qnav button").forEach(b=>b.addEventListener("click",()=>{exam.i=+b.dataset.ix;renderExamQ()}));
+}
+function submitExam(){
+  clearInterval(exam.timer);
+  let right=0;const byDomain={};
+  exam.items.forEach(it=>{
+    const ok=it.pick===it.q.a;
+    if(ok)right++;
+    const t=it.q.topic;
+    byDomain[t]=byDomain[t]||{r:0,n:0};byDomain[t].n++;if(ok)byDomain[t].r++;
+    recordAnswer(t,ok,false);
+    if(!ok&&!it.q.dynamic)scheduleReview(it.q.id,true);
+  });
+  const pct=Math.round(right/exam.items.length*100);
+  const pass=pct>=70;
+  state.mockHistory.push({date:Date.now(),pct});
+  state.sessions.push({date:Date.now(),pct,topic:"mock"});
+  saveState();
+  if(pct>=80)earnBadge("mockpass");
+  const weakest=Object.entries(byDomain).map(([t,v])=>({t,p:Math.round(v.r/v.n*100)})).sort((a,b)=>a.p-b.p);
+  $("#examArea").hidden=true;$("#examResults").hidden=false;
+  $("#examResults").innerHTML=`
+    <div class="panel glow result-hero">
+      <div class="r-pct">${pct}%</div>
+      <p class="lede" style="margin:8px auto 0"><b style="color:${pass?"var(--ok)":"var(--bad)"}">${pass?"PASS":"BELOW STANDARD"}</b> — ${right} of ${exam.items.length} correct (passing standard 70%). Missed items were added to your spaced-repetition queue.</p>
+    </div>
+    <div class="panel mt">
+      <div class="p-title">Score by Knowledge Area</div>
+      ${Object.entries(byDomain).map(([t,v])=>{
+        const p=Math.round(v.r/v.n*100);
+        return `<div class="domain-row"><span class="d-name">${esc(TOPICS[t])}</span><div class="bar"><i style="width:${p}%;${p<70?"background:linear-gradient(90deg,#7a2020,var(--bad))":""}"></i></div><span class="d-pct">${p}%</span></div>`;
+      }).join("")}
+      <hr class="div">
+      <div class="p-title">Generated Study Plan</div>
+      <ol style="margin-left:20px;font-size:14px">
+        ${weakest.slice(0,3).map(w=>`<li style="margin-bottom:6px"><b>${esc(TOPICS[w.t])}</b> (${w.p}%) — ${w.t==="metar"?"run the METAR Lab: Anatomy, then Timed Decode":w.t==="charts"?"work the Sectional Lab: Symbol Explorer, then Airspace Detective":w.t==="airspace"?"drill Airspace Detective cases and re-read the E-700 vs surface-E distinction":"run a Focus/Standard sortie — the adaptive engine will weight this domain automatically"}.</li>`).join("")}
+        <li>Clear the review queue, then re-attempt the mock — a completely fresh question set is sampled every time.</li>
+      </ol>
+      <div class="btn-row mt">
+        <button class="btn primary" onclick="startExam()">New Mock — Fresh Set</button>
+        <button class="btn ghost" onclick="document.getElementById('examResults').hidden=true;document.getElementById('examSetup').hidden=false;renderDashboard()">Exit</button>
+      </div>
+    </div>`;
+  exam=null;renderDashboard();
+}
+
+/* ================================================================
+   DASHBOARD / PROGRESS / REFERENCE / SETTINGS / ROUTING
+   ================================================================ */
+function renderRankChip(){
+  const r=currentRank(),n=nextRank();
+  $("#sideRank").textContent=r.name;
+  const span=n?(n.xp-r.xp):1, into=n?(state.xp-r.xp):1;
+  $("#sideXpBar").style.width=(n?Math.min(into/span*100,100):100)+"%";
+  $("#sideXp").textContent=state.xp+" XP"+(n?" · "+(n.xp-state.xp)+" to "+n.name:" · MAX RANK");
+}
+function renderDashboard(){
+  renderRankChip();
+  // readiness = weighted mastery (metar & charts count double) discounted for coverage
+  const ws={metar:2,charts:2,airspace:1.5};
+  let num=0,den=0,covered=0;
+  for(const t of Object.keys(TOPICS)){
+    const w=ws[t]||1;const m=state.mastery[t];
+    num+=w*(m.seen?m.ema:0);den+=w;if(m.seen>0)covered++;
+  }
+  const coverage=covered/Object.keys(TOPICS).length;
+  const readiness=Math.round((num/den)*(0.5+0.5*coverage)*100);
+  $("#readinessNum").textContent=readiness+"%";
+  $("#gaugeArc").style.strokeDashoffset=477.5*(1-readiness/100);
+  $("#readinessNote").textContent=readiness>=80?"Checkride-ready trajectory. Maintain the streak.":readiness>=50?"Solid core — close the weak domains below.":covered===0?"Complete drills to calibrate.":"Calibrating — keep flying sorties across all domains.";
+  $("#masteryList").innerHTML=Object.entries(TOPICS).map(([t,name])=>{
+    const p=masteryPct(t),seen=state.mastery[t].seen;
+    return `<div class="m-item"><div class="m-head"><span class="m-name">${esc(name)}</span><span class="m-pct">${seen?p+"%":"—"}</span></div><div class="bar"><i style="width:${seen?p:0}%"></i></div></div>`;
+  }).join("");
+  $("#statStreak").textContent=state.streakDays+" day"+(state.streakDays===1?"":"s");
+  $("#statAnswered").textContent=state.answered;
+  $("#statAccuracy").textContent=state.answered?Math.round(state.correct/state.answered*100)+"%":"—";
+  $("#statMock").textContent=state.mockHistory.length?state.mockHistory[state.mockHistory.length-1].pct+"%":"—";
+  const due=dueReviews().length;
+  $("#statReviews").textContent=due;
+  $("#reviewPill").hidden=due===0;$("#reviewPill").textContent=due;
+  $("#quizReviewCount").textContent=due;
+  // recommended mission
+  const ranked=Object.keys(TOPICS).map(t=>({t,p:masteryPct(t),seen:state.mastery[t].seen})).sort((a,b)=>(a.seen===0?-1:a.p)-(b.seen===0?-1:b.p));
+  const weakest=ranked[0];
+  let mtxt,mgoto="quiz";
+  if(due>=5){mtxt=`<b>${due} reviews due.</b> Clear the spaced-repetition queue before it compounds.`;}
+  else if(weakest.seen===0){mtxt=`<b>${TOPICS[weakest.t]}</b> is uncharted. Fly a standard sortie to open the domain.`;}
+  else if(weakest.t==="metar"&&weakest.p<70){mtxt=`<b>METAR mastery ${weakest.p}%.</b> Recommend the Timed Decode drill — fresh reports every run.`;mgoto="metar";}
+  else if(weakest.t==="charts"&&weakest.p<70){mtxt=`<b>Chart mastery ${weakest.p}%.</b> Recommend Locate &amp; Identify in the Sectional Lab.`;mgoto="chart";}
+  else if(weakest.p<70){mtxt=`<b>${TOPICS[weakest.t]} at ${weakest.p}%.</b> The adaptive engine will weight it heavily — launch a sortie.`;}
+  else{mtxt=`All domains above 70%. Fly a <b>mock exam</b> to pressure-test the whole system.`;mgoto="exam";}
+  $("#missionText").innerHTML=mtxt;
+  $("#missionBtn").dataset.goto=mgoto;
+  // daily missions
+  const today=new Date().toISOString().slice(0,10);
+  if(state.daily.date!==today){
+    state.daily={date:today,items:[
+      {txt:"Decode one live report in the METAR Lab",done:false,key:"decode"},
+      {txt:"Complete a 10-question adaptive sortie",done:false,key:"sortie"},
+      {txt:"Close one Airspace Detective case",done:false,key:"case"}
+    ]};saveState();
+  }
+  $("#dailyMissions").innerHTML=state.daily.items.map(it=>`<div class="stat"><span class="s-label">${it.done?"✓ ":""}${esc(it.txt)}</span><span class="s-val" style="color:${it.done?"var(--ok)":"var(--text-faint)"}">${it.done?"DONE":"+25 XP"}</span></div>`).join("");
+  // trend chart
+  const last=state.sessions.slice(-10);
+  const svg=$("#trendChart");
+  if(!last.length){svg.innerHTML='<text x="170" y="64" text-anchor="middle" fill="#5e5e6a" font-size="12">No sessions yet</text>';}
+  else{
+    const pts=last.map((s,i)=>{
+      const x=20+(last.length===1?150:i*(300/(last.length-1)));
+      const y=105-s.pct*0.9;
+      return {x,y,pct:s.pct};
+    });
+    svg.innerHTML=`
+      <line x1="20" y1="105" x2="320" y2="105" stroke="#26262f"/>
+      <line x1="20" y1="42" x2="320" y2="42" stroke="#26262f" stroke-dasharray="4 4"/>
+      <text x="324" y="46" fill="#5e5e6a" font-size="9">70%</text>
+      <polyline points="${pts.map(p=>p.x+","+p.y).join(" ")}" fill="none" stroke="url(#gaugeGrad)" stroke-width="2.5" stroke-linejoin="round"/>
+      ${pts.map(p=>`<circle cx="${p.x}" cy="${p.y}" r="3.4" fill="#9d5cff"/>`).join("")}`;
+  }
+  const weakNamed=ranked.filter(x=>x.seen>0&&x.p<70).slice(0,3);
+  $("#weakTopicNote").innerHTML=weakNamed.length?("Adaptive weighting is currently boosting: "+weakNamed.map(w=>"<b>"+TOPICS[w.t]+"</b> ("+w.p+"%)").join(", ")+"."):(state.answered?"No domains currently below 70% — excellent spread.":"Weak-topic recommendations appear here after your first session.");
+}
+function dailyDone(key){
+  const it=(state.daily.items||[]).find(x=>x.key===key);
+  if(it&&!it.done){it.done=true;addXP(25);saveState();toast("Daily Mission","Complete — +25 XP");}
+}
+
+/* ---------- progress screen ---------- */
+function renderProgress(){
+  const r=currentRank();
+  $("#rankLadder").innerHTML=RANKS.map(k=>{
+    const passed=state.xp>=k.xp&&k.name!==r.name;
+    const cur=k.name===r.name;
+    return `<div class="rung ${state.xp>=k.xp?(cur?"current":"passed"):""}"><span class="r-dot"></span><span class="r-name">${esc(k.name)}</span><span class="r-xp">${k.xp.toLocaleString()} XP</span></div>`;
+  }).join("");
+  $("#badgeList").innerHTML=BADGES.map(b=>`
+    <div class="badge ${state.badges[b.id]?"earned":""}">
+      <div class="b-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c9b8e8" stroke-width="1.8"><path d="M12 2l2.6 5.6 6.1.7-4.5 4.2 1.2 6-5.4-3-5.4 3 1.2-6L3.3 8.3l6.1-.7z"/></svg></div>
+      <div><div class="b-name">${esc(b.name)}</div><div class="b-desc">${esc(b.desc)}</div></div>
+    </div>`).join("");
+  const acc=state.answered?Math.round(state.correct/state.answered*100):0;
+  const bestMock=state.mockHistory.length?Math.max(...state.mockHistory.map(m=>m.pct)):null;
+  $("#analyticsA").innerHTML=`
+    <div class="stat"><span class="s-label">Total XP</span><span class="s-val">${state.xp.toLocaleString()}</span></div>
+    <div class="stat"><span class="s-label">Questions answered</span><span class="s-val">${state.answered}</span></div>
+    <div class="stat"><span class="s-label">Lifetime accuracy</span><span class="s-val">${state.answered?acc+"%":"—"}</span></div>`;
+  $("#analyticsB").innerHTML=`
+    <div class="stat"><span class="s-label">Mock exams flown</span><span class="s-val">${state.mockHistory.length}</span></div>
+    <div class="stat"><span class="s-label">Best mock score</span><span class="s-val">${bestMock!=null?bestMock+"%":"—"}</span></div>
+    <div class="stat"><span class="s-label">Sessions logged</span><span class="s-val">${state.sessions.length}</span></div>`;
+  $("#analyticsC").innerHTML=`
+    <div class="stat"><span class="s-label">METAR correct</span><span class="s-val">${state.counters.metarRight}</span></div>
+    <div class="stat"><span class="s-label">Chart correct</span><span class="s-val">${state.counters.chartRight}</span></div>
+    <div class="stat"><span class="s-label">Reports decoded</span><span class="s-val">${state.counters.decodes}</span></div>`;
+}
+
+/* ---------- reference library ---------- */
+const REFS=[
+ ...BANK.map(q=>({t:TOPICS[q.topic]+" — "+q.sub,b:q.why+" ["+q.ref+"]"})),
+ {t:"Flight categories",b:"VFR: ceiling >3,000 ft AND vis >5 SM. MVFR: 1,000–3,000 and/or 3–5 SM. IFR: 500–<1,000 and/or 1–<3 SM. LIFR: <500 ft and/or <1 SM. Category takes the worse of the two."},
+ {t:"§107.51 operating limits",b:"Groundspeed ≤87 kt (100 mph); altitude ≤400 ft AGL or within 400 ft of a structure up to 400 ft above it; minimum visibility 3 SM from the control station; cloud clearance 500 ft below and 2,000 ft horizontal."},
+ {t:"Sky cover oktas",b:"FEW 1–2/8 · SCT 3–4/8 · BKN 5–7/8 · OVC 8/8. Ceiling = lowest BKN/OVC or VV. Heights are in hundreds of feet AGL."},
+ {t:"Authoritative sources",b:"14 CFR Part 107 · Remote Pilot – Small UAS ACS (FAA-S-ACS-10) · AIM · FAA Aeronautical Chart User's Guide · Aviation Weather Handbook (FAA-H-8083-28) · Sample exam figures: FAA-CT-8080-2H."}
+];
+function renderRefs(filter){
+  const f=(filter||"").toLowerCase();
+  const items=REFS.filter(r=>!f||(r.t+" "+r.b).toLowerCase().includes(f));
+  $("#refList").innerHTML=items.length?items.slice(0,80).map(r=>`<div class="ref-item"><div class="r-title">${esc(r.t)}</div><div class="r-body">${esc(r.b)}</div></div>`).join(""):'<p class="lede">No entries match. Try a broader term — e.g., "ceiling", "Class D", "gust".</p>';
+}
+
+/* ---------- settings ---------- */
+function applySettings(){
+  document.body.classList.toggle("reduced-motion",state.settings.reducedMotion);
+  document.body.classList.toggle("high-contrast",state.settings.highContrast);
+  $$(".toggle").forEach(t=>t.setAttribute("aria-checked",String(!!state.settings[t.dataset.setting])));
+}
+$$(".toggle").forEach(t=>t.addEventListener("click",()=>{
+  const k=t.dataset.setting;
+  state.settings[k]=!state.settings[k];
+  saveState();applySettings();sfx.nav();
+}));
+$("#resetBtn").addEventListener("click",()=>{
+  if(confirm("Reset ALL progress? XP, mastery, badges, streaks, and review queues will be erased."))
+    if(confirm("Confirm final: erase everything?")){
+      localStorage.removeItem("evo7state");loadState();applySettings();
+      renderDashboard();renderProgress();toast("Systems","All progress reset.");
+    }
+});
+
+/* ---------- navigation ---------- */
+function goto(screen){
+  $$(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.screen===screen));
+  $$(".screen").forEach(s=>s.classList.toggle("active",s.id==="screen-"+screen));
+  sfx.nav();
+  if(screen==="dashboard")renderDashboard();
+  if(screen==="progress")renderProgress();
+  window.scrollTo({top:0});
+}
+$$(".nav-btn").forEach(b=>b.addEventListener("click",()=>goto(b.dataset.screen)));
+document.addEventListener("click",e=>{
+  const g=e.target.closest("[data-goto]");
+  if(g)goto(g.dataset.goto);
+});
+
+/* METAR tab routing */
+$$("#metarTabs .tab").forEach(t=>t.addEventListener("click",()=>{
+  $$("#metarTabs .tab").forEach(x=>x.classList.toggle("active",x===t));
+  $$(".mtab").forEach(m=>m.hidden=m.id!=="mtab-"+t.dataset.mtab);
+  sfx.nav();
+}));
+/* chart tab routing */
+$$("#chartTabs .tab").forEach(t=>t.addEventListener("click",()=>{
+  $$("#chartTabs .tab").forEach(x=>x.classList.toggle("active",x===t));
+  $$(".ctab").forEach(c=>c.hidden=c.id!=="ctab-"+t.dataset.ctab);
+  sfx.nav();
+}));
+
+/* wire the labs */
+$("#newMetarBtn").addEventListener("click",()=>{renderAnatomy();sfx.nav()});
+$("#decodeBtn").addEventListener("click",()=>{runDecoder();dailyDone("decode")});
+$("#decodeSampleBtn").addEventListener("click",()=>{$("#decoderInput").value=genMetar().text;runDecoder();dailyDone("decode")});
+$("#decoderInput").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();runDecoder();dailyDone("decode")}});
+$("#buildCheckBtn").addEventListener("click",()=>checkBuild(false));
+$("#buildNewBtn").addEventListener("click",newBuild);
+$("#buildRevealBtn").addEventListener("click",()=>checkBuild(true));
+$("#timedStartBtn").addEventListener("click",startTimed);
+$("#scenStartBtn").addEventListener("click",startScenario);
+$("#locateStartBtn").addEventListener("click",startLocate);
+$("#detectiveStartBtn").addEventListener("click",()=>{startDetective();dailyDone("case")});
+$("#coordStartBtn").addEventListener("click",startCoords);
+$("#quizStd").addEventListener("click",()=>{startQuiz("std");});
+$("#quizFocus").addEventListener("click",()=>startQuiz("focus"));
+$("#quizReview").addEventListener("click",()=>startQuiz("review"));
+$("#examStartBtn").addEventListener("click",startExam);
+$("#refSearch").addEventListener("input",e=>renderRefs(e.target.value));
+
+/* daily sortie hook: mark sortie mission when quiz finishes ≥10 answered */
+const _finishQuiz=finishQuiz;
+finishQuiz=function(){
+  if(quiz&&quiz.results.filter(r=>r!==undefined).length>=10)dailyDone("sortie");
+  _finishQuiz();
+};
+
+/* ---------- boot ---------- */
+function init(){
+  loadState();
+  applySettings();
+  renderAnatomy();
+  newBuild();
+  buildChart();
+  renderSymbols();
+  renderRefs("");
+  renderDashboard();
+  renderProgress();
+  const last=state.mockHistory[state.mockHistory.length-1];
+  if(last)$("#examLast").innerHTML=`<span class="chip">Last mock: ${last.pct}% — ${new Date(last.date).toLocaleDateString()}</span>`;
+  const hr=new Date().getHours();
+  $("#dashGreeting").textContent=(hr<12?"Morning":hr<17?"Afternoon":"Evening")+" Operations";
+  $("#launchBtn").addEventListener("click",()=>{
+    $("#launch").classList.add("gone");
+    setTimeout(()=>$("#launch").remove(),600);
+    sfx.badge();
+  });
+}
+init();
+</script>
+</body>
+</html>
